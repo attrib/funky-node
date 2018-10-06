@@ -45,6 +45,10 @@ class App extends Component {
         page = <Container>Coming soon.</Container>
         title = "Statistics"
         break;
+      case "#results":
+        page = <Container>Coming soon.</Container>
+        title = "Statistics"
+        break;
       case "#games":
         page = <Container>Coming soon.</Container>
         title = "Games"
@@ -62,13 +66,16 @@ class App extends Component {
           <NavbarToggler onClick={this.toggle} />
           <Collapse isOpen={this.state.isOpen} navbar>
             <Nav className="ml-auto" navbar>
-              <NavItem>
+              <NavItem active={this.state.page === "#add-result"}>
                 <NavLink href="#add-result" onClick={this.changePage}>Add result</NavLink>
               </NavItem>
-              <NavItem>
+              <NavItem active={this.state.page === "#stats"}>
                 <NavLink href="#stats" onClick={this.changePage}>Stats</NavLink>
               </NavItem>
-              <NavItem>
+              <NavItem active={this.state.page === "#results"}>
+                <NavLink href="#results" onClick={this.changePage}>Last results</NavLink>
+              </NavItem>
+              <NavItem active={this.state.page === "#games"}>
                 <NavLink href="#games" onClick={this.changePage}>Games</NavLink>
               </NavItem>
             </Nav>

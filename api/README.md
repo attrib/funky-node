@@ -1,3 +1,3 @@
 # Sub project for the API of funky-clan.de
 
-node? kotlin? php?
+Based on https://github.com/brianalois/node_rest_api_mongo

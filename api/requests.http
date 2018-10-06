@@ -1,0 +1,119 @@
+# For a quick start check out our HTTP Requests collection (Tools|HTTP Client|Open HTTP Requests Collection).
+#
+# Following HTTP Request Live Templates are available:
+# * 'gtrp' and 'gtr' create a GET request with or without query parameters;
+# * 'ptr' and 'ptrp' create a POST request with a simple or parameter-like body;
+# * 'mptr' and 'fptr' create a POST request to submit a form with a text or file field (multipart/form-data);
+
+GET {{host}}/v1
+Accept: application/json
+Content-Type: application/json
+
+###
+POST {{host}}/v1/user/login
+Accept: application/json
+Content-Type: application/json
+
+{
+  "name": "attrib",
+  "password": "test"
+}
+
+> {% client.global.set("auth_token", response.body.token); %}
+
+###
+GET {{host}}/v1/user
+Accept: application/json
+Content-Type: application/json
+
+###
+POST {{host}}/v1/user
+Accept: application/json
+Content-Type: application/json
+
+{
+  "email": "test4@attrib.org",
+  "nickname": "flep",
+  "password":  "test"
+}
+
+###
+GET {{host}}/v1/user/5bb934b6754f192a5789c9d5
+Accept: application/json
+Content-Type: application/json
+
+###
+PUT {{host}}/v1/user/5bb934b6754f192a5789c9d5
+Accept: application/json
+Content-Type: application/json
+Authorization: {{auth_token}}
+
+{
+  "roles": "ADMIN"
+}
+
+###
+GET {{host}}/v1/game
+Accept: application/json
+Content-Type: application/json
+
+###
+POST {{host}}/v1/game
+Accept: application/json
+Content-Type: application/json
+Authorization: {{auth_token}}
+
+{
+  "name": "Tichu",
+  "er":  "test"
+}
+
+###
+GET {{host}}/v1/game/5bb944f3540a662bc263fad8
+Accept: application/json
+Content-Type: application/json
+
+###
+GET {{host}}/v1/result
+Accept: application/json
+Content-Type: application/json
+
+###
+POST {{host}}/v1/result
+Accept: application/json
+Content-Type: application/json
+Authorization: {{auth_token}}
+
+{
+  "game": "5bb944f3540a662bc263fad8",
+  "date": 1538868972750,
+  "location": "TBS",
+  "results": [
+    {
+      "team": {
+        "users": [
+          "5bb934b6754f192a5789c9d5",
+          "5bb9475d73e7ed2be04b2453"
+        ]
+      },
+      "score": 90
+    },
+    {
+      "team": {
+        "name": "pafl",
+        "users": [
+          "5bb947a373e7ed2be04b2454",
+          "5bb947b373e7ed2be04b2455"
+        ]
+      },
+      "score": 1110
+    }
+
+  ]
+}
+
+###
+
+#
+#   "token": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNWJiOTM0YjY3NTRmMTkyYTU3ODljOWQ1IiwiaWF0IjoxNTM4ODY0MzEwLCJleHAiOjE1Mzg4NzQzMTB9.Zj2aKpo1pabqHOeT0teAzL71nuejkOCIfgkhMxdQgbg",
+#  5bb934b6754f192a5789c9d5
