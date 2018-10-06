@@ -34,7 +34,7 @@ class Home extends Component {
             <p>
               Wie immer alles im Aufbau mit Bugs und neuem Design ;)<br/>Wer helfen wir kann das immer gern tun. Egal ob Design Vorschläge, Bug Reports, Feature Requests oder gar am Code mitschrauben will. Meldet euch einfach bei mir.
             </p>
-            <p>Sourcecode findet ihr auf <a href="https://github.org/attrib/funky-node">github</a>.</p>
+            <p>Sourcecode findet ihr auf <a href="https://github.com/attrib/funky-node">github</a>.</p>
           </Col>
         </Row>
       </Container>
