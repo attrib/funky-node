@@ -9,6 +9,8 @@ import {
   NavLink,
   Container
 } from 'reactstrap';
+import {extendObservable} from "mobx"
+import {observer} from 'mobx-react'
 import Home from './page/Home'
 
 class App extends Component {
@@ -17,26 +19,22 @@ class App extends Component {
 
     this.toggle = this.toggle.bind(this);
     this.changePage = this.changePage.bind(this)
-    this.state = {
+    extendObservable(this, {
       page: window.location.hash,
       isOpen: false
-    };
+    })
   }
   toggle() {
-    this.setState({
-      isOpen: !this.state.isOpen
-    });
+    this.isOpen = !this.state.isOpen;
   }
   changePage(ev) {
     ev.preventDefault()
     window.history.pushState(this.state, document.title, ev.target.href);
-    this.setState({
-      page: new URL(ev.target.href).hash
-    });
+    this.page = new URL(ev.target.href).hash
   }
   render() {
     let page, title;
-    switch (this.state.page) {
+    switch (this.page) {
       case "#add-result":
         page = <Container>Coming soon.</Container>
         title = "Add game result"
@@ -64,18 +62,18 @@ class App extends Component {
         <Navbar color="inverse" light expand="md">
           <NavbarBrand href="#home" onClick={this.changePage}>funky-clan</NavbarBrand>
           <NavbarToggler onClick={this.toggle} />
-          <Collapse isOpen={this.state.isOpen} navbar>
+          <Collapse isOpen={this.isOpen} navbar>
             <Nav className="ml-auto" navbar>
-              <NavItem active={this.state.page === "#add-result"}>
+              <NavItem active={this.page === "#add-result"}>
                 <NavLink href="#add-result" onClick={this.changePage}>Add result</NavLink>
               </NavItem>
-              <NavItem active={this.state.page === "#stats"}>
+              <NavItem active={this.page === "#stats"}>
                 <NavLink href="#stats" onClick={this.changePage}>Stats</NavLink>
               </NavItem>
-              <NavItem active={this.state.page === "#results"}>
+              <NavItem active={this.page === "#results"}>
                 <NavLink href="#results" onClick={this.changePage}>Last results</NavLink>
               </NavItem>
-              <NavItem active={this.state.page === "#games"}>
+              <NavItem active={this.page === "#games"}>
                 <NavLink href="#games" onClick={this.changePage}>Games</NavLink>
               </NavItem>
             </Nav>
@@ -87,4 +85,4 @@ class App extends Component {
   }
 }
 
-export default App;
+export default observer(App);

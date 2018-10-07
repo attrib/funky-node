@@ -10,7 +10,6 @@ You will find some information on how to perform common tasks [here](https://git
 
 ## todos
 
-* integrate mobx
 * create game
 * create player
 * create result
