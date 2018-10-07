@@ -95,7 +95,7 @@ const update = async function (req, res) {
 
     return ReE(res, err)
   }
-  return ReS(res, {message: 'Updated User: ' + user.email})
+  return ReS(res, {message: 'Updated User.js: ' + user.email})
 }
 module.exports.update = update
 
@@ -117,12 +117,12 @@ const remove = async function (req, res) {
   [err, user] = await to(user.destroy())
   if (err) return ReE(res, 'error occured trying to delete user')
 
-  return ReS(res, {message: 'Deleted User'}, 204)
+  return ReS(res, {message: 'Deleted User.js'}, 204)
 }
 module.exports.remove = remove
 
 /**
- * Login user.
+ * Profile user.
  *
  * @param req
  * @param res

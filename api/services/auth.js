@@ -27,15 +27,15 @@ module.exports.createUser = createUser
 const authUser = async function (userInfo) {//returns token
   let err, user
 
-  if (!userInfo.name) TE('Please enter a nickname or email to login')
+  if (!userInfo.nickname) TE('Please enter a nickname or email to login')
   if (!userInfo.password) TE('Please enter a password to login')
 
-  if (validator.isEmail(userInfo.name)) {
-    [err, user] = await to(User.findOne({email: userInfo.name}))
+  if (validator.isEmail(userInfo.nickname)) {
+    [err, user] = await to(User.findOne({email: userInfo.nickname}))
     if (err) TE(err.message)
 
   } else {
-    [err, user] = await to(User.findOne({nickname: userInfo.name}))
+    [err, user] = await to(User.findOne({nickname: userInfo.nickname}))
     if (err) TE(err.message)
   }
 

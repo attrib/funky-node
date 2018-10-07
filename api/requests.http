@@ -15,7 +15,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "name": "attrib",
+  "nickname": "attrib",
   "password": "test"
 }
 

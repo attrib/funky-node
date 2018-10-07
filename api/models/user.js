@@ -50,7 +50,7 @@ let UserSchema = mongoose.Schema({
 UserSchema.virtual('results', {
   ref: 'Result',
   localField: '_id',
-  foreignField: 'users.user',
+  foreignField: 'results.team.users',
   justOne: false,
 })
 
@@ -86,7 +86,7 @@ UserSchema.methods.comparePassword = async function (pw) {
 
 UserSchema.methods.Results = async function () {
   let err, results;
-  [err, results] = await to(Result.find({'users.user': this._id}))
+  [err, results] = await to(Result.find({'results.team.users': this._id}))
   if (err) TE('err getting companies')
   return results
 }

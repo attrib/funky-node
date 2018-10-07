@@ -12,27 +12,41 @@ import {
 import {extendObservable} from "mobx"
 import {observer} from 'mobx-react'
 import Home from './page/Home'
-import Login from './page/Login'
+import Profile from './page/Profile'
 
 class App extends Component {
   constructor(props) {
     super(props);
 
     this.toggle = this.toggle.bind(this);
+    this.handleChangePage = this.handleChangePage.bind(this)
     this.changePage = this.changePage.bind(this)
+    this.changeUser = this.changeUser.bind(this)
     extendObservable(this, {
       page: window.location.hash,
-      isOpen: false
+      isOpen: false,
+      user: null,
     })
   }
+
   toggle() {
     this.isOpen = !this.isOpen;
   }
-  changePage(ev) {
+
+  handleChangePage(ev) {
     ev.preventDefault()
-    window.history.pushState(this.state, document.title, ev.target.href);
-    this.page = new URL(ev.target.href).hash
+    this.changePage(new URL(ev.target.href).hash)
   }
+
+  changePage(newPage) {
+    window.history.pushState(this.state, document.title, newPage);
+    this.page = newPage
+  }
+
+  changeUser(user) {
+    this.user = user
+  }
+
   render() {
     let page, title;
     switch (this.page) {
@@ -52,9 +66,9 @@ class App extends Component {
         page = <Container>Coming soon.</Container>
         title = "Games"
         break;
-      case "#login":
-        page = <Login/>
-        title = "Login"
+      case "#profile":
+        page = <Profile user={this.user} changePage={this.changePage} changeUser={this.changeUser}/>
+        title = "Profile"
         break;
       default:
         page = <Home/>
@@ -65,24 +79,24 @@ class App extends Component {
     return (
       <div>
         <Navbar color="inverse" light expand="md">
-          <NavbarBrand href="#home" onClick={this.changePage}>funky-clan</NavbarBrand>
+          <NavbarBrand href="#home" onClick={this.handleChangePage}>funky-clan</NavbarBrand>
           <NavbarToggler onClick={this.toggle} />
           <Collapse isOpen={this.isOpen} navbar>
             <Nav className="ml-auto" navbar>
               <NavItem active={this.page === "#add-result"}>
-                <NavLink href="#add-result" onClick={this.changePage}>Add result</NavLink>
+                <NavLink href="#add-result" onClick={this.handleChangePage}>Add result</NavLink>
               </NavItem>
               <NavItem active={this.page === "#stats"}>
-                <NavLink href="#stats" onClick={this.changePage}>Stats</NavLink>
+                <NavLink href="#stats" onClick={this.handleChangePage}>Stats</NavLink>
               </NavItem>
               <NavItem active={this.page === "#results"}>
-                <NavLink href="#results" onClick={this.changePage}>Last results</NavLink>
+                <NavLink href="#results" onClick={this.handleChangePage}>Last results</NavLink>
               </NavItem>
               <NavItem active={this.page === "#games"}>
-                <NavLink href="#games" onClick={this.changePage}>Games</NavLink>
+                <NavLink href="#games" onClick={this.handleChangePage}>Games</NavLink>
               </NavItem>
-              <NavItem active={this.page === "#login"}>
-                <NavLink href="#login" onClick={this.changePage}>Login</NavLink>
+              <NavItem active={this.page === "#profile"}>
+                <NavLink href="#profile" onClick={this.handleChangePage}>{ this.user ? "Profile" : "Login"}</NavLink>
               </NavItem>
             </Nav>
           </Collapse>
