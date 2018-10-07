@@ -12,6 +12,7 @@ import {
 import {extendObservable} from "mobx"
 import {observer} from 'mobx-react'
 import Home from './page/Home'
+import Login from './page/Login'
 
 class App extends Component {
   constructor(props) {
@@ -25,7 +26,7 @@ class App extends Component {
     })
   }
   toggle() {
-    this.isOpen = !this.state.isOpen;
+    this.isOpen = !this.isOpen;
   }
   changePage(ev) {
     ev.preventDefault()
@@ -45,11 +46,15 @@ class App extends Component {
         break;
       case "#results":
         page = <Container>Coming soon.</Container>
-        title = "Statistics"
+        title = "Results"
         break;
       case "#games":
         page = <Container>Coming soon.</Container>
         title = "Games"
+        break;
+      case "#login":
+        page = <Login/>
+        title = "Login"
         break;
       default:
         page = <Home/>
@@ -75,6 +80,9 @@ class App extends Component {
               </NavItem>
               <NavItem active={this.page === "#games"}>
                 <NavLink href="#games" onClick={this.changePage}>Games</NavLink>
+              </NavItem>
+              <NavItem active={this.page === "#login"}>
+                <NavLink href="#login" onClick={this.changePage}>Login</NavLink>
               </NavItem>
             </Nav>
           </Collapse>
