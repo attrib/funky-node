@@ -1,22 +1,24 @@
 {
   "name": "funky-node",
-  "version": "0.1.0",
+  "homepage": "https://funky-clan.de/",
+  "version": "0.2.0",
   "private": true,
   "dependencies": {
-    "bootstrap": "^4.1.3",
-    "mobx": "^5.5.0",
-    "mobx-react": "^5.2.8",
-    "react": "^16.5.2",
-    "react-dom": "^16.5.2",
+    "bootstrap": "^4.3.1",
+    "firebase": "^6.0.4",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-router-dom": "^5.0.0",
     "react-scripts": "2.0.4",
-    "reactstrap": "^6.5.0"
+    "reactstrap": "^6.5.0",
+    "recompose": "^0.30.0"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "deploy": "npm run build && rsync -az build/ funky-clan.de:~/funky-clan/frontend && rsync -az api/ funky-clan.de:~/funky-clan/api"
+    "deploy": "npm run build && rsync -az build/ funky-clan.de:~/funky-clan/frontend"
   },
   "eslintConfig": {
     "extends": "react-app"
