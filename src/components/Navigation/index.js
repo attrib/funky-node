@@ -1,13 +1,13 @@
-import React, {Component} from "react";
+import React, { Component } from 'react'
 import { NavLink as RRNavLink } from 'react-router-dom'
 
-import SignOutButton from '../SignOut';
+import SignOutButton from '../SignOut'
 import * as ROUTES from '../../constants/routes'
-import * as ROLES from '../../constants/roles';
+import * as ROLES from '../../constants/roles'
 import { Collapse, Nav, Navbar, NavbarBrand, NavbarToggler, NavItem, NavLink } from 'reactstrap'
-import { AuthUserContext } from '../Session';
+import { AuthUserContext } from '../Session'
 
-const NavigationAuth = ({ authUser }) => (
+const NavigationAuth = ({authUser}) => (
   <>
     <NavLink tag={RRNavLink} exact to={ROUTES.GAMES} activeClassName="active">Games</NavLink>
     <NavItem>
@@ -22,7 +22,7 @@ const NavigationAuth = ({ authUser }) => (
       </NavItem>
     )}
     <NavItem>
-      <SignOutButton />
+      <SignOutButton/>
     </NavItem>
   </>
 )
@@ -35,7 +35,6 @@ const NavigationNonAuth = () => (
     </NavItem>
   </>
 )
-
 
 export class Navigation extends Component {
   constructor (props) {
@@ -57,14 +56,14 @@ export class Navigation extends Component {
     return (
       <Navbar color="inverse" light expand="md">
         <NavbarBrand href={ROUTES.LANDING}>funky-clan</NavbarBrand>
-        <NavbarToggler onClick={this.toggle} />
+        <NavbarToggler onClick={this.toggle}/>
         <Collapse isOpen={this.state.isOpen} navbar>
           <Nav className="ml-auto" navbar>
             <AuthUserContext.Consumer>
               {authUser =>
                 authUser ? (
-                  <NavigationAuth authUser={authUser} />
-                  ) : <NavigationNonAuth />
+                  <NavigationAuth authUser={authUser}/>
+                ) : <NavigationNonAuth/>
               }
             </AuthUserContext.Consumer>
           </Nav>

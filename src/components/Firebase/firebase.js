@@ -1,7 +1,6 @@
-import app from 'firebase/app';
-import 'firebase/auth';
-import 'firebase/firestore';
-
+import app from 'firebase/app'
+import 'firebase/auth'
+import 'firebase/firestore'
 
 const config = {
   apiKey: process.env.REACT_APP_API_KEY,
@@ -11,36 +10,36 @@ const config = {
   storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
   messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
   appId: process.env.REACT_APP_ID
-};
+}
 
 class Firebase {
-  constructor() {
-    app.initializeApp(config);
+  constructor () {
+    app.initializeApp(config)
 
-    this.emailAuthProvider = app.auth.EmailAuthProvider;
-    this.auth = app.auth();
-    this.db = app.firestore();
+    this.emailAuthProvider = app.auth.EmailAuthProvider
+    this.auth = app.auth()
+    this.db = app.firestore()
 
-    this.googleProvider = new app.auth.GoogleAuthProvider();
+    this.googleProvider = new app.auth.GoogleAuthProvider()
   }
 
   // *** Auth API ***
 
   doCreateUserWithEmailAndPassword = (email, password) =>
-    this.auth.createUserWithEmailAndPassword(email, password);
+    this.auth.createUserWithEmailAndPassword(email, password)
 
   doSignInWithEmailAndPassword = (email, password) =>
-    this.auth.signInWithEmailAndPassword(email, password);
+    this.auth.signInWithEmailAndPassword(email, password)
 
-  doSignOut = () => this.auth.signOut();
+  doSignOut = () => this.auth.signOut()
 
-  doPasswordReset = email => this.auth.sendPasswordResetEmail(email);
+  doPasswordReset = email => this.auth.sendPasswordResetEmail(email)
 
   doPasswordUpdate = password =>
-    this.auth.currentUser.updatePassword(password);
+    this.auth.currentUser.updatePassword(password)
 
   doSignInWithGoogle = () =>
-    this.auth.signInWithPopup(this.googleProvider);
+    this.auth.signInWithPopup(this.googleProvider)
 
   // *** Merge Auth and DB User API *** //
   onAuthUserListener = (next, fallback) =>
@@ -49,45 +48,44 @@ class Firebase {
         this.user(authUser.uid).get()
           .then(doc => {
             if (!doc.exists) {
-              fallback();
+              fallback()
             }
-            const dbUser = doc.data();
+            const dbUser = doc.data()
             // default empty roles
             if (!dbUser.roles) {
-              dbUser.roles = {};
+              dbUser.roles = {}
             }
             // merge auth and db user
             authUser = {
               uid: authUser.uid,
               email: authUser.email,
               ...dbUser,
-            };
-            next(authUser);
+            }
+            next(authUser)
           })
           .catch(error => {
-            console.log('Error getting user document: ', error);
-            fallback();
+            console.log('Error getting user document: ', error)
+            fallback()
           })
       } else {
-        fallback();
+        fallback()
       }
-    });
+    })
 
   // *** User API ***
-  user = uid => this.db.collection('users').doc(uid);
+  user = uid => this.db.collection('users').doc(uid)
 
-  users = () => this.db.collection('users').get();
+  users = () => this.db.collection('users').get()
 
   /**
    * News API
    */
-  news = () => this.db.collection('News').get();
+  news = () => this.db.collection('News').get()
 
   /**
    * Game API
    */
-  games = () => this.db.collection('games').get();
-
+  games = () => this.db.collection('games').get()
 }
 
-export default Firebase;
+export default Firebase

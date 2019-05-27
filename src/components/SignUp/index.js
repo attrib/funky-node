@@ -1,24 +1,24 @@
-import React, { Component } from 'react';
-import { Link, withRouter } from 'react-router-dom';
-import { compose } from 'recompose';
+import React, { Component } from 'react'
+import { Link, withRouter } from 'react-router-dom'
+import { compose } from 'recompose'
 
-import { withFirebase } from '../Firebase';
-import * as ROUTES from '../../constants/routes';
+import { withFirebase } from '../Firebase'
+import * as ROUTES from '../../constants/routes'
 
-const ERROR_CODE_ACCOUNT_EXISTS = 'auth/email-already-in-use';
+const ERROR_CODE_ACCOUNT_EXISTS = 'auth/email-already-in-use'
 const ERROR_MSG_ACCOUNT_EXISTS = `
 An account with this E-Mail address already exists.
 Try to login with this account instead. If you think the
 account is already used from one of the social logins, try
 to sign-in with one of them. Afterward, associate your accounts
-on your personal account page.`;
+on your personal account page.`
 
 const SignUpPage = () => (
   <div>
     <h1>SignUp</h1>
-    <SignUpForm />
+    <SignUpForm/>
   </div>
-);
+)
 
 const INITIAL_STATE = {
   username: '',
@@ -26,17 +26,17 @@ const INITIAL_STATE = {
   passwordOne: '',
   passwordTwo: '',
   error: null,
-};
+}
 
 class SignUpFormBase extends Component {
-  constructor(props) {
-    super(props);
+  constructor (props) {
+    super(props)
 
-    this.state = { ...INITIAL_STATE };
+    this.state = {...INITIAL_STATE}
   }
 
   onSubmit = event => {
-    const { username, email, passwordOne } = this.state;
+    const {username, email, passwordOne} = this.state
     this.props.firebase
       .doCreateUserWithEmailAndPassword(email, passwordOne)
       .then(authUser => {
@@ -47,44 +47,44 @@ class SignUpFormBase extends Component {
             username,
             email,
             roles: {}
-          });
+          })
       })
       .then(authUser => {
-        this.setState({ ...INITIAL_STATE });
-        this.props.history.push(ROUTES.HOME);
+        this.setState({...INITIAL_STATE})
+        this.props.history.push(ROUTES.HOME)
       })
       .catch(error => {
         if (error.code === ERROR_CODE_ACCOUNT_EXISTS) {
-          error.message = ERROR_MSG_ACCOUNT_EXISTS;
+          error.message = ERROR_MSG_ACCOUNT_EXISTS
         }
-        this.setState({ error });
-      });
+        this.setState({error})
+      })
 
-    event.preventDefault();
+    event.preventDefault()
   }
 
   onChange = event => {
-    this.setState({ [event.target.name]: event.target.value });
-  };
+    this.setState({[event.target.name]: event.target.value})
+  }
 
   onChangeCheckbox = event => {
-    this.setState({ [event.target.name]: event.target.checked });
-  };
+    this.setState({[event.target.name]: event.target.checked})
+  }
 
-  render() {
+  render () {
     const {
       username,
       email,
       passwordOne,
       passwordTwo,
       error,
-    } = this.state;
+    } = this.state
 
     const isInvalid =
       passwordOne !== passwordTwo ||
       passwordOne === '' ||
       email === '' ||
-      username === '';
+      username === ''
 
     return (
       <form onSubmit={this.onSubmit}>
@@ -122,7 +122,7 @@ class SignUpFormBase extends Component {
 
         {error && <p>{error.message}</p>}
       </form>
-    );
+    )
   }
 }
 
@@ -130,13 +130,13 @@ const SignUpLink = () => (
   <p>
     Don't have an account? <Link to={ROUTES.SIGN_UP}>Sign Up</Link>
   </p>
-);
+)
 
 const SignUpForm = compose(
   withRouter,
   withFirebase,
-)(SignUpFormBase);
+)(SignUpFormBase)
 
-export default SignUpPage;
+export default SignUpPage
 
-export { SignUpForm, SignUpLink };
+export { SignUpForm, SignUpLink }

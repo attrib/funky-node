@@ -1,24 +1,24 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 import { Col, Container, Jumbotron, Row } from 'reactstrap'
 import { withFirebase } from '../Firebase'
-import './Landing.css';
+import './Landing.css'
 
 class LandingPage extends Component {
-  constructor(props) {
-    super(props);
+  constructor (props) {
+    super(props)
 
     this.state = {
       loading: false,
       news: [],
-    };
+    }
   }
 
-  componentDidMount() {
-    this.setState({ loading: true });
+  componentDidMount () {
+    this.setState({loading: true})
 
     this.props.firebase.news()
       .then(snapshot => {
-        let news = [];
+        let news = []
         snapshot.forEach(document => {
           news.push({
             ...document.data(),
@@ -29,13 +29,13 @@ class LandingPage extends Component {
         this.setState({
           news: news,
           loading: false,
-        });
+        })
       })
-      .catch(error => console.log(error));
+      .catch(error => console.log(error))
   }
 
-  render() {
-    const { news, loading } = this.state;
+  render () {
+    const {news, loading} = this.state
 
     return (
       <div>
@@ -51,23 +51,28 @@ class LandingPage extends Component {
         </Jumbotron>
         <Container>
           {loading && <div>Loading ...</div>}
-          <NewsList news={news} />
+          <NewsList news={news}/>
         </Container>
       </div>
     )
   }
 }
 
-const NewsList = ({ news }) => (
+const NewsList = ({news}) => (
   news.map(news => (
     <Row className="news">
       <Col className="news-entry" key={news.id}>
         <h2>{news.Title}</h2>
-        <div className="date">{new Intl.DateTimeFormat('de-DE', {year: 'numeric', month: 'long', day: '2-digit'}).format(news.Date.toDate())}</div>
-        <div dangerouslySetInnerHTML={{__html: news.Content}} />
+        <div className="date">{new Intl.DateTimeFormat('de-DE', {
+          year: 'numeric',
+          month: 'long',
+          day: '2-digit'
+        }).format(news.Date.toDate())}</div>
+        <div dangerouslySetInnerHTML={{__html: news.Content}}/>
       </Col>
     </Row>
-  ))
-);
+    )
+  )
+)
 
-export default withFirebase(LandingPage);
+export default withFirebase(LandingPage)

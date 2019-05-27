@@ -1,39 +1,39 @@
-import React, { Component } from 'react';
-import { compose } from 'recompose';
-import { Switch, Route, Link } from 'react-router-dom';
+import React, { Component } from 'react'
+import { compose } from 'recompose'
+import { Link, Route, Switch } from 'react-router-dom'
 
-import { withFirebase } from '../Firebase';
-import { withAuthorization } from '../Session';
-import * as ROLES from '../../constants/roles';
-import * as ROUTES from '../../constants/routes';
+import { withFirebase } from '../Firebase'
+import { withAuthorization } from '../Session'
+import * as ROLES from '../../constants/roles'
+import * as ROUTES from '../../constants/routes'
 
 const AdminPage = () => (
   <div>
     <h1>Admin</h1>
     <p>The Admin Page is accessible by every signed in admin user.</p>
     <Switch>
-      <Route exact path={ROUTES.ADMIN_DETAILS} component={UserItem} />
-      <Route exact path={ROUTES.ADMIN} component={UserList} />
+      <Route exact path={ROUTES.ADMIN_DETAILS} component={UserItem}/>
+      <Route exact path={ROUTES.ADMIN} component={UserList}/>
     </Switch>
   </div>
-);
+)
 
 class UserListBase extends Component {
-  constructor(props) {
-    super(props);
+  constructor (props) {
+    super(props)
 
     this.state = {
       loading: false,
       users: [],
-    };
+    }
   }
 
-  componentDidMount() {
-    this.setState({ loading: true });
+  componentDidMount () {
+    this.setState({loading: true})
 
     this.props.firebase.users()
       .then(snapshot => {
-        let usersList = [];
+        let usersList = []
         snapshot.forEach(document => {
           usersList.push({
             ...document.data(),
@@ -44,13 +44,13 @@ class UserListBase extends Component {
         this.setState({
           users: usersList,
           loading: false,
-        });
+        })
       })
-      .catch(error => console.log(error));
+      .catch(error => console.log(error))
   }
 
-  render() {
-    const { users, loading } = this.state;
+  render () {
+    const {users, loading} = this.state
 
     return (
       <div>
@@ -68,13 +68,13 @@ class UserListBase extends Component {
         </span>
               <span>
           <strong>Roles: </strong>
-          <Roles roles={user.roles} />
+          <Roles roles={user.roles}/>
         </span>
-          <span>
+              <span>
 <Link
   to={{
     pathname: `${ROUTES.ADMIN}/${user.uid}`,
-    state: { user },
+    state: {user},
   }}
 >
   Details
@@ -84,26 +84,27 @@ class UserListBase extends Component {
           ))}
         </ul>
       </div>
-    );
+    )
   }
 }
 
-const UserList = withFirebase(UserListBase);
+const UserList = withFirebase(UserListBase)
 
 class UserItemBase extends Component {
-  constructor(props) {
-    super(props);
+  constructor (props) {
+    super(props)
     this.state = {
       loading: false,
       user: null,
-    };
+    }
   }
-  componentDidMount() {
+
+  componentDidMount () {
     if (this.state.user) {
-      return;
+      return
     }
 
-    this.setState({ loading: true });
+    this.setState({loading: true})
     this.props.firebase
       .user(this.props.match.params.id)
       .get()
@@ -114,17 +115,16 @@ class UserItemBase extends Component {
             ...doc.data(),
           },
           loading: false,
-        });
-      });
+        })
+      })
   }
 
   onSendPasswordResetEmail = () => {
-    this.props.firebase.doPasswordReset(this.state.user.email);
-  };
+    this.props.firebase.doPasswordReset(this.state.user.email)
+  }
 
-
-  render() {
-    const { user, loading } = this.state;
+  render () {
+    const {user, loading} = this.state
     return (
       <div>
         <h2>User ({this.props.match.params.id})</h2>
@@ -134,10 +134,10 @@ class UserItemBase extends Component {
             <span>
             <strong>ID:</strong> {user.uid}
             </span>
-                        <span>
+            <span>
             <strong>E-Mail:</strong> {user.email}
             </span>
-                        <span>
+            <span>
             <strong>Username:</strong> {user.username}
             </span>
             <span>
@@ -151,24 +151,24 @@ class UserItemBase extends Component {
           </div>
         )}
       </div>
-    );
+    )
   }
 }
 
-const UserItem = withFirebase(UserItemBase);
+const UserItem = withFirebase(UserItemBase)
 
-const Roles = ({ roles }) => (
+const Roles = ({roles}) => (
   <ul>
     {Object.keys(roles).map(role => (
       <li key={role}>{role}</li>
     ))}
   </ul>
-);
+)
 
 const condition = authUser =>
-  authUser && !!authUser.roles[ROLES.ADMIN];
+  authUser && !!authUser.roles[ROLES.ADMIN]
 
 export default compose(
   withAuthorization(condition),
   withFirebase,
-)(AdminPage);
+)(AdminPage)
