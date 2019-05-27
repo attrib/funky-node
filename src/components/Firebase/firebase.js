@@ -17,8 +17,11 @@ class Firebase {
   constructor() {
     app.initializeApp(config);
 
+    this.emailAuthProvider = app.auth.EmailAuthProvider;
     this.auth = app.auth();
     this.db = app.firestore();
+
+    this.googleProvider = new app.auth.GoogleAuthProvider();
   }
 
   // *** Auth API ***
@@ -36,6 +39,8 @@ class Firebase {
   doPasswordUpdate = password =>
     this.auth.currentUser.updatePassword(password);
 
+  doSignInWithGoogle = () =>
+    this.auth.signInWithPopup(this.googleProvider);
 
   // *** Merge Auth and DB User API *** //
   onAuthUserListener = (next, fallback) =>
