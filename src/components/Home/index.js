@@ -1,14 +1,41 @@
-import React from 'react';
+import React, {Component} from 'react';
 
-import { withAuthorization } from '../Session';
+import {AuthUserContext, withAuthorization} from '../Session';
+import {Col, Container, Jumbotron, Row} from "reactstrap";
+import { compose } from 'recompose';
 
-const HomePage = () => (
-  <div>
-    <h1>Home Page</h1>
-    <p>The Home Page is accessible by every signed in user.</p>
-  </div>
-);
+class HomePage extends Component {
+  render() {
+    return (<AuthUserContext.Consumer>
+      {authUser =>
+        <div>
+          <Jumbotron>
+            <Container>
+              <Row>
+                <Col>
+                  <h1>Welcome {authUser.username}</h1>
+                </Col>
+              </Row>
+            </Container>
+          </Jumbotron>
+          <Container>
+            <Row>
+              <Col>
+                <h2>Current Ranking</h2>
+              </Col>
+              <Col>
+                <h2>Your latest results</h2>
+              </Col>
+            </Row>
+          </Container>
+        </div>
+      }
+    </AuthUserContext.Consumer>)
+  }
+}
 
 const condition = authUser => !!authUser;
 
-export default withAuthorization(condition)(HomePage);
+export default compose(
+  withAuthorization(condition),
+)(HomePage);

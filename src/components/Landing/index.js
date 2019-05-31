@@ -59,15 +59,15 @@ class LandingPage extends Component {
 }
 
 const NewsList = ({ news }) => (
-  <Row className="news">
-    {news.map(news => (
+  news.map(news => (
+    <Row className="news">
       <Col className="news-entry" key={news.id}>
         <h2>{news.Title}</h2>
         <div className="date">{new Intl.DateTimeFormat('de-DE', {year: 'numeric', month: 'long', day: '2-digit'}).format(news.Date.toDate())}</div>
         <div dangerouslySetInnerHTML={{__html: news.Content}} />
       </Col>
-    ))}
-  </Row>
+    </Row>
+  ))
 );
 
 export default withFirebase(LandingPage);
