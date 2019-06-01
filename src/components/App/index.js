@@ -15,6 +15,7 @@ import AdminPage from '../Admin';
 
 import * as ROUTES from '../../constants/routes';
 import { withAuthentication } from '../Session';
+import Game from "../Game";
 
 
 const App = () => (
@@ -29,6 +30,7 @@ const App = () => (
             <Route path={ROUTES.HOME} component={HomePage}/>
             <Route path={ROUTES.ACCOUNT} component={AccountPage}/>
             <Route path={ROUTES.ADMIN} component={AdminPage}/>
+            <Route path={ROUTES.GAMES} component={Game}/>
           </div>
         </Router>
 );
