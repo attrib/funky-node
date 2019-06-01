@@ -60,17 +60,17 @@ class LandingPage extends Component {
 
 const NewsList = ({news}) => (
   news.map(news => (
-    <Row className="news">
-      <Col className="news-entry" key={news.id}>
-        <h2>{news.Title}</h2>
-        <div className="date">{new Intl.DateTimeFormat('de-DE', {
-          year: 'numeric',
-          month: 'long',
-          day: '2-digit'
-        }).format(news.Date.toDate())}</div>
-        <div dangerouslySetInnerHTML={{__html: news.Content}}/>
-      </Col>
-    </Row>
+      <Row className="news">
+        <Col className="news-entry" key={news.id}>
+          <h2>{news.Title}</h2>
+          <div className="date">{new Intl.DateTimeFormat('de-DE', {
+            year: 'numeric',
+            month: 'long',
+            day: '2-digit'
+          }).format(news.Date.toDate())}</div>
+          <div dangerouslySetInnerHTML={{__html: news.Content}}/>
+        </Col>
+      </Row>
     )
   )
 )

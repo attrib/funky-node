@@ -1,10 +1,10 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 
-import {AuthUserContext, withAuthorization} from '../Session'
-import {Col, Container, Jumbotron, Row} from "reactstrap"
+import { AuthUserContext, withAuthorization } from '../Session'
+import { Col, Container, Jumbotron, Row } from 'reactstrap'
 
 class HomePage extends Component {
-  render() {
+  render () {
     return (
       <AuthUserContext.Consumer>
         {authUser =>

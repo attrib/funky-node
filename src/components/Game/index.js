@@ -1,42 +1,42 @@
-import React, { Component } from 'react';
-import GameList from './GameList';
-import {Col, Container, Row} from "reactstrap";
-import {withFirebase} from "../Firebase";
+import React, { Component } from 'react'
+import GameList from './GameList'
+import { Col, Container, Row } from 'reactstrap'
+import { withFirebase } from '../Firebase'
 
 class Game extends Component {
 
-  constructor(props) {
-    super(props);
+  constructor (props) {
+    super(props)
 
     this.state = {
       loading: false,
       games: [],
-    };
+    }
   }
 
-  componentDidMount() {
-    this.setState({ loading: true });
+  componentDidMount () {
+    this.setState({loading: true})
 
     this.props.firebase.games()
       .then(snapshot => {
-        let games = [];
+        let games = []
         snapshot.forEach(document => {
           games.push({
             ...document.data(),
             id: document.id,
           })
-        });
+        })
 
         this.setState({
           games: games,
           loading: false,
-        });
+        })
       })
-      .catch(error => console.log(error));
+      .catch(error => console.log(error))
   }
 
-  render() {
-    const { games, loading } = this.state;
+  render () {
+    const {games, loading} = this.state
 
     return (
       <div>
@@ -53,5 +53,4 @@ class Game extends Component {
   }
 }
 
-
-export default withFirebase(Game);
+export default withFirebase(Game)

@@ -1,10 +1,9 @@
-import React, { Component } from 'react';
-import {Col, Row} from "reactstrap";
-
+import React, { Component } from 'react'
+import { Col, Row } from 'reactstrap'
 
 class GameList extends Component {
 
-  render() {
+  render () {
     return (
       <Row className="games">
         {
@@ -21,4 +20,4 @@ class GameList extends Component {
 
 }
 
-export default GameList;
+export default GameList
