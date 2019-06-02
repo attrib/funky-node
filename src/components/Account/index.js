@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 
-import { PasswordForgetForm } from '../PasswordForget'
-import PasswordChangeForm from '../PasswordChange'
+import { PasswordForgetForm } from './PasswordForget'
+import PasswordChangeForm from './PasswordChange'
 import { AuthUserContext, withAuthorization } from '../Session'
 import { withFirebase } from '../Firebase'
 
