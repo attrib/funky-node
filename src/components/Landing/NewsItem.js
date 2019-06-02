@@ -3,6 +3,9 @@ import { Row, Col, Button, Form, Input, FormGroup, Alert } from 'reactstrap'
 import { withFirebase } from '../Firebase'
 import AuthUserContext from '../Session/context'
 import MarkdownIt from 'markdown-it'
+import * as ROUTES from '../../constants/routes'
+import { withRouter } from 'react-router-dom'
+import { compose } from 'recompose'
 const md = new MarkdownIt()
 
 class NewsItem extends Component {
@@ -35,7 +38,7 @@ class NewsItem extends Component {
 
   onDelete = () => {
     this.props.firebase.newsItem(this.state.id).delete()
-      .then(() => console.log("test"))
+      .then(() => this.props.history.push(`${ROUTES.LANDING}`))
       .catch((error) => this.setState({error: error.message}))
   }
 
@@ -118,4 +121,7 @@ class NewsItem extends Component {
 
 }
 
-export default withFirebase(NewsItem)
+export default compose(
+  withFirebase,
+  withRouter
+)(NewsItem)

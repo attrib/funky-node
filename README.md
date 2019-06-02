@@ -10,9 +10,7 @@ You will find some information on how to perform common tasks [here](https://git
 
 ## todos
 
-* create game
 * create player
 * create result
-* login
 * show stats
 * import old data (2014)

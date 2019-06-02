@@ -90,9 +90,13 @@ class Firebase {
   newsAdd = (item) => this.db.collection('News').add(item)
 
   /**
-   * Game API
+   * Games API
    */
   games = () => this.db.collection('games').get()
+
+  game = (id) => this.db.collection('games').doc(id)
+
+  gameAdd = (item) => this.db.collection('games').add(item)
 }
 
 export default Firebase

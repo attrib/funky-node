@@ -1,9 +1,11 @@
 import React, { Component } from 'react'
 import GameList from './GameList'
-import { Col, Container, Row } from 'reactstrap'
+import { Container } from 'reactstrap'
 import { withFirebase } from '../Firebase'
+import { withRouter } from 'react-router-dom'
+import { compose } from 'recompose'
 
-class Game extends Component {
+class Games extends Component {
 
   constructor (props) {
     super(props)
@@ -41,16 +43,15 @@ class Game extends Component {
     return (
       <div>
         <Container>
-          <Row>
-            <Col>
-              {loading && <div>Loading ...</div>}
-              <GameList games={games}/>
-            </Col>
-          </Row>
+          {loading && <div>Loading ...</div>}
+          <GameList games={games}/>
         </Container>
       </div>
     )
   }
 }
 
-export default withFirebase(Game)
+export default compose(
+  withFirebase,
+  withRouter
+)(Games)
