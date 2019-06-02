@@ -19,9 +19,12 @@ class Firebase {
     this.emailAuthProvider = app.auth.EmailAuthProvider
     this.auth = app.auth()
     this.db = app.firestore()
+    this.Timestamp = app.firestore.Timestamp
 
     this.googleProvider = new app.auth.GoogleAuthProvider()
   }
+
+  getCurrentDate = () => this.Timestamp.now()
 
   // *** Auth API ***
 
@@ -80,7 +83,11 @@ class Firebase {
   /**
    * News API
    */
-  news = () => this.db.collection('News').get()
+  news = () => this.db.collection('News').orderBy('Date', 'desc').get()
+
+  newsItem = (id) => this.db.collection('News').doc(id)
+
+  newsAdd = (item) => this.db.collection('News').add(item)
 
   /**
    * Game API

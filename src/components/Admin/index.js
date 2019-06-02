@@ -71,13 +71,13 @@ class UserListBase extends Component {
           <Roles roles={user.roles}/>
         </span>
               <span>
-<Link
-  to={{
-    pathname: `${ROUTES.ADMIN}/${user.uid}`,
-    state: {user},
-  }}
->
-  Details
+            <Link
+              to={{
+                pathname: `${ROUTES.ADMIN}/${user.uid}`,
+                state: {user},
+              }}
+            >
+              Details
             </Link>
           </span>
             </li>

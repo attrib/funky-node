@@ -31,6 +31,8 @@ const NavigationNonAuth = () => (
   <>
     <NavItem>
       <NavLink tag={RRNavLink} exact to={ROUTES.GAMES} activeClassName="active">Games</NavLink>
+    </NavItem>
+    <NavItem>
       <NavLink tag={RRNavLink} exact to={ROUTES.SIGN_IN} activeClassName="active">Sign In</NavLink>
     </NavItem>
   </>
