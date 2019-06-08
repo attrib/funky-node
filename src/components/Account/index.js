@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 
-import { PasswordForgetForm } from './PasswordForget'
 import PasswordChangeForm from './PasswordChange'
 import { AuthUserContext, withAuthorization } from '../Session'
 import { withFirebase } from '../Firebase'
+import { Button, Container, Form, FormGroup, Input, Row } from 'reactstrap'
 
 const SIGN_IN_METHODS = [
   {
@@ -28,10 +28,11 @@ const AccountPage = () => (
   <AuthUserContext.Consumer>
     {authUser => (
       <div>
-        <h1>Account: {authUser.username}</h1>
-        <PasswordForgetForm/>
-        <PasswordChangeForm/>
-        <LoginManagement authUser={authUser}/>
+        <Container>
+          <h1>{authUser.username}</h1>
+          <PasswordChangeForm/>
+          <LoginManagement authUser={authUser}/>
+        </Container>
       </div>
     )}
   </AuthUserContext.Consumer>
@@ -78,7 +79,7 @@ class LoginManagementBase extends Component {
       password,
     )
     this.props.firebase.auth.currentUser
-      .linkAndRetrieveDataWithCredential(credential)
+      .linkWithCredential(credential)
       .then(this.fetchSignInMethods)
       .catch(error => this.setState({error}))
   }
@@ -88,8 +89,8 @@ class LoginManagementBase extends Component {
 
     return (
       <div>
-        Sign In Methods:
-        <ul>
+        Sign In Methods
+        <>
           {SIGN_IN_METHODS.map(signInMethod => {
             const onlyOneLeft = activeSignInMethods.length === 1
             const isEnabled = activeSignInMethods.includes(
@@ -97,7 +98,7 @@ class LoginManagementBase extends Component {
             )
 
             return (
-              <li key={signInMethod.id}>
+              <Row key={signInMethod.id} sm={3} md={3}>
                 {signInMethod.id === 'password' ? (
                   <DefaultLoginToggle
                     onlyOneLeft={onlyOneLeft}
@@ -116,10 +117,10 @@ class LoginManagementBase extends Component {
                   />
                 )}
 
-              </li>
+              </Row>
             )
           })}
-        </ul>
+        </>
         {error && error.message}
       </div>
     )
@@ -152,33 +153,38 @@ class DefaultLoginToggle extends Component {
     const isInvalid =
       passwordOne !== passwordTwo || passwordOne === ''
     return isEnabled ? (
-      <button
+      <Button
         type="button"
         onClick={() => onUnlink(signInMethod.id)}
         disabled={onlyOneLeft}
+        className="col-sm-12 col-md-3"
       >
         Deactivate {signInMethod.id}
-      </button>
+      </Button>
     ) : (
-      <form onSubmit={this.onSubmit}>
-        <input
-          name="passwordOne"
-          value={passwordOne}
-          onChange={this.onChange}
-          type="password"
-          placeholder="New Password"
-        />
-        <input
-          name="passwordTwo"
-          value={passwordTwo}
-          onChange={this.onChange}
-          type="password"
-          placeholder="Confirm New Password"
-        />
-        <button disabled={isInvalid} type="submit">
+      <Form onSubmit={this.onSubmit}>
+        <FormGroup>
+          <Input
+            name="passwordOne"
+            value={passwordOne}
+            onChange={this.onChange}
+            type="password"
+            placeholder="New Password"
+          />
+        </FormGroup>
+        <FormGroup>
+          <Input
+            name="passwordTwo"
+            value={passwordTwo}
+            onChange={this.onChange}
+            type="password"
+            placeholder="Confirm New Password"
+          />
+        </FormGroup>
+        <Button disabled={isInvalid} type="submit">
           Link {signInMethod.id}
-        </button>
-      </form>
+        </Button>
+      </Form>
     )
   }
 }
@@ -191,20 +197,22 @@ const SocialLoginToggle = ({
                              onUnlink,
                            }) =>
   isEnabled ? (
-    <button
+    <Button
       type="button"
       onClick={() => onUnlink(signInMethod.id)}
       disabled={onlyOneLeft}
+      className="col-sm-12 col-md-3"
     >
       Deactivate {signInMethod.id}
-    </button>
+    </Button>
   ) : (
-    <button
+    <Button
       type="button"
       onClick={() => onLink(signInMethod.provider)}
+      className="col-sm-12 col-md-3"
     >
       Link {signInMethod.id}
-    </button>
+    </Button>
   )
 
 const LoginManagement = withFirebase(LoginManagementBase)
