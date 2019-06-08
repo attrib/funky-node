@@ -4,6 +4,7 @@ import { Container } from 'reactstrap'
 import { withFirebase } from '../Firebase'
 import { withRouter } from 'react-router-dom'
 import { compose } from 'recompose'
+import './games.scss'
 
 class Games extends Component {
 

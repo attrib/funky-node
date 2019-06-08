@@ -1,0 +1,11 @@
+.games {
+  .card {
+    height: 200px;
+  }
+  .card-body {
+    overflow: hidden;
+  }
+  > div {
+    margin-bottom: 10px;
+  }
+}
