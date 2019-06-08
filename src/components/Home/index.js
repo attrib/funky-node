@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-
 import { AuthUserContext, withAuthorization } from '../Session'
 import { Col, Container, Jumbotron, Row } from 'reactstrap'
 
@@ -19,14 +18,7 @@ class HomePage extends Component {
               </Container>
             </Jumbotron>
             <Container>
-              <Row>
-                <Col>
-                  <h2>Current Ranking</h2>
-                </Col>
-                <Col>
-                  <h2>Your latest results</h2>
-                </Col>
-              </Row>
+              <h2>Your latest results</h2>
             </Container>
           </div>
         }

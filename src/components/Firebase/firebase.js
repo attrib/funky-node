@@ -97,6 +97,12 @@ class Firebase {
   game = (id) => this.db.collection('games').doc(id)
 
   gameAdd = (item) => this.db.collection('games').add(item)
+
+  /**
+   * Players API
+   */
+
+  player = uid => this.db.collection('players').where('userID', '==', uid).get()
 }
 
 export default Firebase

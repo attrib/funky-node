@@ -1,11 +1,13 @@
 import React, { Component } from 'react'
-import { Alert, Button, Col, Container, Form, FormGroup, Input, Row } from 'reactstrap'
+import { Alert, Button, ButtonGroup, Col, Container, Form, FormGroup, Input, Row } from 'reactstrap'
 import MarkdownIt from 'markdown-it'
 import AuthUserContext from '../Session/context'
 import { withFirebase } from '../Firebase'
 import * as ROUTES from '../../constants/routes'
+import * as ROLES from '../../constants/roles'
 import { withRouter } from 'react-router-dom'
 import { compose } from 'recompose'
+import RecentResults from './RecentResults'
 
 const md = new MarkdownIt()
 
@@ -31,6 +33,8 @@ class Game extends Component {
       edit: edit,
       game: game,
       error: null,
+      recentResults: [],
+      scores: [],
     }
   }
 
@@ -49,6 +53,48 @@ class Game extends Component {
             ...doc.data(),
           },
           loading: false,
+        })
+      })
+    this.props.firebase
+      .game(this.props.match.params.id)
+      .collection('results')
+      .get()
+      .then(snapshot => {
+        let results = [], players = {}
+        snapshot.forEach(document => {
+          let data = document.data();
+          data.scores = data.scores.map((score) => {
+            score.players = score.players.map((player) => {
+              if (!(player.id in players)) {
+                players[player.id] = player.get()
+              }
+              return player.id
+            })
+            return score
+          })
+          results.push({
+            ...data,
+            id: document.id,
+          })
+        })
+
+        return Promise.all(Object.values(players)).then((snapshots) => {
+          let players = {}
+          snapshots.forEach((snapshot) => players[snapshot.id] = snapshot.data())
+          return results.map((result) => {
+            result.scores.map((score) => {
+              score.players = score.players.map((player) => {
+                return players[player]
+              })
+              return score
+            })
+            return result
+          })
+        })
+      })
+      .then((results) => {
+        this.setState({
+          recentResults: results,
         })
       })
   }
@@ -107,7 +153,7 @@ class Game extends Component {
   }
 
   render () {
-    const {game, loading, edit, error} = this.state
+    const {game, loading, edit, error, recentResults} = this.state
     return (
       <AuthUserContext.Consumer>
         {authUser => (
@@ -121,7 +167,10 @@ class Game extends Component {
                   {!edit && (
                     <>
                       <p dangerouslySetInnerHTML={{__html: game.description}}/>
-                      {authUser && authUser.uid === game.authorID && <Button onClick={this.onEditToggle}>Edit</Button>}
+                      <ButtonGroup>
+                        {authUser && authUser.roles[ROLES.APPROVED] && <Button onClick={this.onEditToggle}>Add Result</Button>}
+                        {authUser && authUser.uid === game.authorID && <Button onClick={this.onEditToggle}>Edit</Button>}
+                      </ButtonGroup>
                     </>
                   )}
                   {edit && <p dangerouslySetInnerHTML={{__html: md.render(game.description_markdown)}}/>}
@@ -147,10 +196,11 @@ class Game extends Component {
                   {game.id && (
                     <Row>
                       <Col>
-                        <h2>Results</h2>
+                        <h2>Ranking</h2>
                       </Col>
                       <Col>
                         <h2>Recent Results</h2>
+                        { recentResults && <RecentResults results={recentResults} />}
                       </Col>
                     </Row>
                   )}
