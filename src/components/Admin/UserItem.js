@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { withFirebase } from '../Firebase'
+import { Button, Col, Row } from 'reactstrap'
 
 class UserItem extends Component {
   constructor (props) {
@@ -38,28 +39,32 @@ class UserItem extends Component {
     const {user, loading} = this.state
     return (
       <div>
-        <h2>User ({this.props.match.params.id})</h2>
+        <h2>User</h2>
         {loading && <div>Loading ...</div>}
         {user && (
-          <div>
-            <span>
-            <strong>ID:</strong> {user.uid}
-            </span>
-            <span>
-            <strong>E-Mail:</strong> {user.email}
-            </span>
-            <span>
-            <strong>Username:</strong> {user.username}
-            </span>
-            <span>
-            <button
-              type="button"
-              onClick={this.onSendPasswordResetEmail}
-            >
-            Send Password Reset
-            </button>
-            </span>
-          </div>
+          <>
+            <Row>
+              <Col><strong>ID:</strong></Col>
+              <Col>{user.uid}</Col>
+            </Row>
+            <Row>
+              <Col><strong>E-Mail:</strong></Col>
+              <Col>{user.email}</Col>
+            </Row>
+            <Row>
+              <Col><strong>Username:</strong></Col>
+              <Col>{user.username}</Col>
+            </Row>
+            <Row>
+              <Button
+                type="button"
+                onClick={this.onSendPasswordResetEmail}
+                className="col-sm-12 col-md-3 offset-md-9"
+              >
+              Send Password Reset
+              </Button>
+            </Row>
+          </>
         )}
       </div>
     )

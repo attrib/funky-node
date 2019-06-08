@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import * as ROUTES from '../../constants/routes'
 import React, { Component } from 'react'
 import { withFirebase } from '../Firebase'
+import { Table } from 'reactstrap'
 
 class UserList extends Component {
   constructor (props) {
@@ -42,32 +43,35 @@ class UserList extends Component {
         <h2>Users</h2>
         {loading && <div>Loading ...</div>}
 
-        <ul>
+        <Table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Username</th>
+              <th>Roles</th>
+              <th>Operations</th>
+            </tr>
+          </thead>
+          <tbody>
           {users.map(user => (
-            <li key={user.uid}>
-        <span>
-          <strong>ID:</strong> {user.uid}
-        </span>
-              <span>
-          <strong>Username:</strong> {user.username}
-        </span>
-              <span>
-          <strong>Roles: </strong>
-          <Roles roles={user.roles}/>
-        </span>
-              <span>
-            <Link
-              to={{
-                pathname: `${ROUTES.ADMIN}/${user.uid}`,
-                state: {user},
-              }}
-            >
-              Details
-            </Link>
-          </span>
-            </li>
+            <tr key={user.uid}>
+              <td>{user.uid}</td>
+              <td>{user.username}</td>
+              <td><Roles roles={user.roles}/></td>
+              <td>
+                <Link
+                  to={{
+                    pathname: `${ROUTES.ADMIN}/${user.uid}`,
+                    state: {user},
+                  }}
+                >
+                  Details
+                </Link>
+              </td>
+            </tr>
           ))}
-        </ul>
+          </tbody>
+        </Table>
       </div>
     )
   }
