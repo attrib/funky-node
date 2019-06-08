@@ -5,6 +5,7 @@ class RecentResults extends Component {
 
   render() {
     const { results } = this.props
+    if (results.length === 0) return (<p>No results yet</p>)
     return (
       <Table>
         <thead>

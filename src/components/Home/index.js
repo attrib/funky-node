@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { AuthUserContext, withAuthorization } from '../Session'
 import { Col, Container, Jumbotron, Row } from 'reactstrap'
+import UserRecentResults from './UserRecentResults'
 
 class HomePage extends Component {
   render () {
@@ -18,7 +19,8 @@ class HomePage extends Component {
               </Container>
             </Jumbotron>
             <Container>
-              <h2>Your latest results</h2>
+              <h2>Your recent results</h2>
+              <UserRecentResults user={authUser}/>
             </Container>
           </div>
         }

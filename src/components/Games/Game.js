@@ -60,42 +60,20 @@ class Game extends Component {
       .collection('results')
       .get()
       .then(snapshot => {
-        let results = [], players = {}
+        let results = []
         snapshot.forEach(document => {
           let data = document.data();
-          data.scores = data.scores.map((score) => {
-            score.players = score.players.map((player) => {
-              if (!(player.id in players)) {
-                players[player.id] = player.get()
-              }
-              return player.id
-            })
-            return score
-          })
           results.push({
             ...data,
             id: document.id,
           })
         })
-
-        return Promise.all(Object.values(players)).then((snapshots) => {
-          let players = {}
-          snapshots.forEach((snapshot) => players[snapshot.id] = snapshot.data())
-          return results.map((result) => {
-            result.scores.map((score) => {
-              score.players = score.players.map((player) => {
-                return players[player]
-              })
-              return score
+        this.props.firebase.resultsResolvePlayers(results)
+          .then((results) => {
+            this.setState({
+              recentResults: results,
             })
-            return result
           })
-        })
-      })
-      .then((results) => {
-        this.setState({
-          recentResults: results,
-        })
       })
   }
 

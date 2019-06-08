@@ -98,6 +98,33 @@ class Firebase {
 
   gameAdd = (item) => this.db.collection('games').add(item)
 
+  resultsResolvePlayers = (results) => {
+    let players = {}
+    results.forEach((result) => {
+      result.scores.forEach((score) => {
+        score.players.forEach((player) => {
+          if (!(player.id in players)) {
+            players[player.id] = player.get()
+          }
+        })
+      })
+    })
+    return Promise.all(Object.values(players))
+      .then((snapshots) => {
+        let players = {}
+        snapshots.forEach((snapshot) => players[snapshot.id] = snapshot.data())
+        return results.map((result) => {
+          result.scores.map((score) => {
+            score.players = score.players.map((player) => {
+              return players[player.id]
+            })
+            return score
+          })
+          return result
+        })
+      })
+  }
+
   /**
    * Players API
    */
