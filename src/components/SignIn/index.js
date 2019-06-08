@@ -1,16 +1,13 @@
 import React  from 'react'
-import SignInGoogle from './SignInGoogle'
 import SignInEmail from './SignInEmail'
-import SignUpLink from '../SignUp/SignUpLink'
-import { PasswordForgetLink } from '../Account/PasswordForget'
+import { Container } from 'reactstrap'
 
 const SignInPage = () => (
   <div>
-    <h1>SignIn</h1>
-    <SignInEmail/>
-    <SignInGoogle/>
-    <PasswordForgetLink/>
-    <SignUpLink/>
+      <Container>
+        <h1>Login</h1>
+        <SignInEmail/>
+      </Container>
   </div>
 )
 

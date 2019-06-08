@@ -3,6 +3,7 @@ import React, { Component } from 'react'
 import { compose } from 'recompose'
 import { withFirebase } from '../Firebase'
 import { withRouter } from 'react-router-dom'
+import { Button, Form, Input, Alert, FormGroup } from 'reactstrap'
 
 const INITIAL_STATE = {
   username: '',
@@ -79,41 +80,48 @@ class SignUpForm extends Component {
       username === ''
 
     return (
-      <form onSubmit={this.onSubmit}>
-        <input
-          name="username"
-          value={username}
-          onChange={this.onChange}
-          type="text"
-          placeholder="Full Name"
-        />
-        <input
-          name="email"
-          value={email}
-          onChange={this.onChange}
-          type="text"
-          placeholder="Email Address"
-        />
-        <input
-          name="passwordOne"
-          value={passwordOne}
-          onChange={this.onChange}
-          type="password"
-          placeholder="Password"
-        />
-        <input
-          name="passwordTwo"
-          value={passwordTwo}
-          onChange={this.onChange}
-          type="password"
-          placeholder="Confirm Password"
-        />
-        <button disabled={isInvalid} type="submit">
+      <Form onSubmit={this.onSubmit}>
+        {error && <Alert>{error.message}</Alert>}
+        <FormGroup>
+          <Input
+            name="username"
+            value={username}
+            onChange={this.onChange}
+            type="text"
+            placeholder="Full Name"
+          />
+        </FormGroup>
+        <FormGroup>
+          <Input
+            name="email"
+            value={email}
+            onChange={this.onChange}
+            type="text"
+            placeholder="Email Address"
+          />
+        </FormGroup>
+        <FormGroup>
+          <Input
+            name="passwordOne"
+            value={passwordOne}
+            onChange={this.onChange}
+            type="password"
+            placeholder="Password"
+          />
+        </FormGroup>
+        <FormGroup>
+          <Input
+            name="passwordTwo"
+            value={passwordTwo}
+            onChange={this.onChange}
+            type="password"
+            placeholder="Confirm Password"
+          />
+        </FormGroup>
+        <Button disabled={isInvalid} type="submit" className="col-sm-12 col-md-3 offset-md-9">
           Sign Up
-        </button>
-
-        {error && <p>{error.message}</p>}
-      </form>
+        </Button>
+      </Form>
     )
   }
 }

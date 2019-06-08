@@ -3,6 +3,10 @@ import React, { Component } from 'react'
 import { compose } from 'recompose'
 import { withFirebase } from '../Firebase'
 import { withRouter } from 'react-router-dom'
+import { Form, Input, Button, FormGroup, Alert, Col, Row } from 'reactstrap'
+import SignInGoogle from './SignInGoogle'
+import { PasswordForgetLink } from '../Account/PasswordForget'
+import SignUpLink from '../SignUp/SignUpLink'
 
 const INITIAL_STATE = {
   email: '',
@@ -44,27 +48,37 @@ class SignInEmail extends Component {
     const isInvalid = password === '' || email === ''
 
     return (
-      <form onSubmit={this.onSubmit}>
-        <input
-          name="email"
-          value={email}
-          onChange={this.onChange}
-          type="text"
-          placeholder="Email Address"
-        />
-        <input
-          name="password"
-          value={password}
-          onChange={this.onChange}
-          type="password"
-          placeholder="Password"
-        />
-        <button disabled={isInvalid} type="submit">
-          Sign In
-        </button>
-
-        {error && <p>{error.message}</p>}
-      </form>
+      <Form onSubmit={this.onSubmit} className="login">
+        {error && <Alert>{error.message}</Alert>}
+        <FormGroup>
+          <Input
+            name="email"
+            value={email}
+            onChange={this.onChange}
+            type="text"
+            placeholder="Email Address"
+          />
+        </FormGroup>
+        <FormGroup>
+        <Input
+            name="password"
+            value={password}
+            onChange={this.onChange}
+            type="password"
+            placeholder="Password"
+          />
+          <PasswordForgetLink/>
+        </FormGroup>
+        <Row>
+          <Button disabled={isInvalid} type="submit" className="col-sm-12 col-md-3 offset-md-3">
+            Sign In
+          </Button>
+          <SignInGoogle/>
+          <Col sm="12" md={{ size: 6, offset: 3 }}>
+            <SignUpLink/>
+          </Col>
+        </Row>
+      </Form>
     )
   }
 }
