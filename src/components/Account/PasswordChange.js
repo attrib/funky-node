@@ -43,7 +43,7 @@ class PasswordChangeForm extends Component {
 
     return (
       <Form onSubmit={this.onSubmit}>
-        <p>Change Password</p>
+        <h2>Change Password</h2>
         {error && <Alert>{error.message}</Alert>}
         <FormGroup>
            <Input

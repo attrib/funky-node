@@ -102,7 +102,40 @@ class Firebase {
    * Players API
    */
 
-  player = uid => this.db.collection('players').where('userID', '==', uid).get()
+  playerByUID = uid => this.db.collection('players').where('userID', '==', uid).get()
+
+  player = id => this.db.collection('players').doc(id)
+
+  playerSearch = value => this.db.collection('players')
+    .where('userID', '==', '')
+    .orderBy('nick').limit(5)
+    .startAt(value).endAt(value + '\uf8ff').get()
+
+  playerByName = name => this.db.collection('players').where('nick', '==', name).get()
+    .then((snapshots) => {
+      if (snapshots.size === 0) {
+        return this.db.collection('players').add({
+          nick: name,
+          userID: ''
+        }).then((snapshot) => {
+          return {
+            id: snapshot.id,
+            nick: name,
+            userID: ''
+          }
+        })
+      }
+      else {
+        let player = []
+        snapshots.forEach((snapshot) => {
+          player.push({
+            ...snapshot.data(),
+            id: snapshot.id
+          })
+        })
+        return player.shift()
+      }
+    })
 }
 
 export default Firebase
