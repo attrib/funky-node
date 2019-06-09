@@ -11,7 +11,6 @@ class UserRecentResults extends Component {
     this.state = {
       loading: false,
       results: null,
-      playerIds: [],
     }
   }
 
@@ -20,24 +19,9 @@ class UserRecentResults extends Component {
       return
     }
     this.setState({loading: true})
-    let playerIds = []
-    this.props.firebase.playerByUID(this.props.user.uid)
-      .then((snapshots) => {
-        snapshots.forEach((snapshot) => {
-          playerIds.push(snapshot.id)
-        })
-        this.setState({playerIds})
-        return this.props.firebase.games()
-      })
-      .then((snapshots) => {
-        let promises = []
-        snapshots.forEach((snapshot) => {
-          playerIds.forEach((playerId) => {
-            promises.push(snapshot.ref.collection('results').where('playerIDs', 'array-contains', playerId).get())
-          })
-        })
-        return Promise.all(promises)
-      })
+    let promises = [];
+    Object.keys(this.props.user.players).forEach((playerID) => promises.push(this.props.firebase.resultsByPlayerId(playerID)))
+    Promise.all(promises)
       .then((snapshotsList) => {
         const results = []
         snapshotsList.forEach((snapshots) => {
@@ -48,21 +32,22 @@ class UserRecentResults extends Component {
             })
           })
         })
-        this.props.firebase.resultsResolvePlayers(results)
-          .then((results) => {
-            this.setState({
-              results,
-              loading: false
-            })
-          })
+        return this.props.firebase.resultsResolvePlayers(results)
+      })
+      .then((results) => {
+        this.setState({
+          results,
+          loading: false
+        })
       })
   }
 
   render() {
-    const { results, loading, playerIds } = this.state
+    const { results, loading } = this.state
+    const { user } = this.props
     if (loading) return (<p>loading</p>)
     else if (results && results.length > 0) return (<RecentResults results={results}/>)
-    else if (playerIds.length > 0) return (<p>No game results found. Play something!</p>)
+    else if (Object.keys(user.players).length > 0) return (<p>No game results found. Play something!</p>)
     else return (<p>No user linked to account</p>)
   }
 

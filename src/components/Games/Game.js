@@ -56,9 +56,7 @@ class Game extends Component {
         })
       })
     this.props.firebase
-      .game(this.props.match.params.id)
-      .collection('results')
-      .get()
+      .resultsByGameId(this.props.match.params.id)
       .then(snapshot => {
         let results = []
         snapshot.forEach(document => {
@@ -68,12 +66,12 @@ class Game extends Component {
             id: document.id,
           })
         })
-        this.props.firebase.resultsResolvePlayers(results)
-          .then((results) => {
-            this.setState({
-              recentResults: results,
-            })
-          })
+        return this.props.firebase.resultsResolvePlayers(results)
+      })
+      .then((results) => {
+        this.setState({
+          recentResults: results,
+        })
       })
   }
 

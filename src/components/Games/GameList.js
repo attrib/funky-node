@@ -22,8 +22,8 @@ class GameList extends Component {
         <Row className="games">
           {
             this.props.games.map(game => (
-              <Col md={3} sm={6}>
-                <Card key={game.id} onClick={() => this.openGameDetails(game.id)}>
+              <Col md={3} sm={6} key={game.id}>
+                <Card onClick={() => this.openGameDetails(game.id)}>
                   {game.image && <CardImg src={game.image} alt={game.name} />}
                   <CardBody>
                     <CardTitle>{game.name}</CardTitle>

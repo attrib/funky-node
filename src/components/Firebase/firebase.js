@@ -15,7 +15,7 @@ const config = {
 class Firebase {
   constructor () {
     app.initializeApp(config)
-
+    app.firestore().enablePersistence()
     this.emailAuthProvider = app.auth.EmailAuthProvider
     this.auth = app.auth()
     this.db = app.firestore()
@@ -45,8 +45,9 @@ class Firebase {
     this.auth.signInWithPopup(this.googleProvider)
 
   // *** Merge Auth and DB User API *** //
-  onAuthUserListener = (next, fallback) =>
-    this.auth.onAuthStateChanged(authUser => {
+  onAuthUserListener = (next, fallback) => {
+    let userObject = {}
+    return this.auth.onAuthStateChanged(authUser => {
       if (authUser) {
         this.user(authUser.uid).get()
           .then(doc => {
@@ -59,12 +60,23 @@ class Firebase {
               dbUser.roles = {}
             }
             // merge auth and db user
-            authUser = {
+            userObject = {
               uid: authUser.uid,
               email: authUser.email,
               ...dbUser,
             }
-            next(authUser)
+            return this.playerByUID(authUser.uid)
+          })
+          .then((snapshots) => {
+            let players = {}
+            snapshots.forEach((snapshot) => {
+              players[snapshot.id] = {
+                ...snapshot.data(),
+                id: snapshot.id
+              }
+            })
+            userObject.players = players
+            next(userObject)
           })
           .catch(error => {
             console.log('Error getting user document: ', error)
@@ -74,6 +86,7 @@ class Firebase {
         fallback()
       }
     })
+  }
 
   // *** User API ***
   user = uid => this.db.collection('users').doc(uid)
@@ -97,6 +110,18 @@ class Firebase {
   game = (id) => this.db.collection('games').doc(id)
 
   gameAdd = (item) => this.db.collection('games').add(item)
+
+  /**
+   * Result API
+   */
+
+  resultsCollection = () => this.db.collection('results').orderBy('date', 'desc')
+
+  results = () => this.resultsCollection().get()
+
+  resultsByGameId = (gameID) => this.resultsCollection().where('gameID', '==', gameID).get()
+
+  resultsByPlayerId = (playerID) => this.resultsCollection().where('playerIDs', 'array-contains', playerID).get()
 
   resultsResolvePlayers = (results) => {
     let players = {}

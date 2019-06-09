@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { compose } from 'recompose'
 import { withFirebase } from '../Firebase'
 import { withRouter } from 'react-router-dom'
-import { Alert, Button, Form } from 'reactstrap'
+import { Alert, Button } from 'reactstrap'
 
 const ERROR_CODE_ACCOUNT_EXISTS =
   'auth/account-exists-with-different-credential'
@@ -43,10 +43,10 @@ class SignInGoogle extends Component {
   render () {
     const {error} = this.state
     return (
-      <Form onSubmit={this.onSubmit} className="col-sm-12 col-md-3">
-        <Button type="submit" className="col-12">Sign In with Google</Button>
+      <>
+        <Button onSubmit={this.onSubmit} type="submit" className="col-sm-12 col-md-3">Sign In with Google</Button>
         {error && <Alert>{error.message}</Alert>}
-      </Form>
+      </>
     )
   }
 }

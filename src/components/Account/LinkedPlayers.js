@@ -11,32 +11,21 @@ class LinkedPlayers extends Component {
 
     this.state = {
       loading: false,
-      players: null,
+      players: Object.values(this.props.user.players),
       linkPlayer: '',
       suggestions: [],
     }
   }
 
   componentDidMount () {
-    if (this.state.players) {
-      return
-    }
-    this.setState({loading: true})
-
-    this.props.firebase.playerByUID(this.props.user.uid)
-      .then((snapshots) => {
-        const players = []
-        snapshots.forEach((snapshot) => {
-          players.push({
-            ...snapshot.data(),
-            id: snapshot.id
-          })
-        })
-        this.setState({
-          players,
-          loading: false,
-        })
-      })
+    // if (this.state.players) {
+    //   return
+    // }
+    // console.log(this.props.user)
+    // this.setState({
+    //   players: Object.values(this.props.user.players),
+    //   loading: false,
+    // })
   }
 
   onChange = (event, { newValue }) => {
