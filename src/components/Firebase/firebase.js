@@ -126,6 +126,9 @@ class Firebase {
   resultsResolvePlayers = (results) => {
     let players = {}
     results.forEach((result) => {
+      if (!(result.gameID in players)) {
+        players[result.gameID] = this.game(result.gameID).get()
+      }
       result.scores.forEach((score) => {
         score.players.forEach((player) => {
           if (!(player.id in players)) {
@@ -145,6 +148,7 @@ class Firebase {
             })
             return score
           })
+          result.game = players[result.gameID]
           return result
         })
       })

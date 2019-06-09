@@ -7,7 +7,7 @@ import * as ROUTES from '../../constants/routes'
 import * as ROLES from '../../constants/roles'
 import { withRouter } from 'react-router-dom'
 import { compose } from 'recompose'
-import RecentResults from './RecentResults'
+import RecentResults from '../Results/RecentResults'
 
 const md = new MarkdownIt()
 

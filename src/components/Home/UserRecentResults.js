@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { compose } from 'recompose'
 import { withFirebase } from '../Firebase'
-import RecentResults from '../Games/RecentResults'
+import RecentResults from '../Results/RecentResults'
 
 class UserRecentResults extends Component {
 
@@ -46,7 +46,7 @@ class UserRecentResults extends Component {
     const { results, loading } = this.state
     const { user } = this.props
     if (loading) return (<p>loading</p>)
-    else if (results && results.length > 0) return (<RecentResults results={results}/>)
+    else if (results && results.length > 0) return (<RecentResults showGames results={results}/>)
     else if (Object.keys(user.players).length > 0) return (<p>No game results found. Play something!</p>)
     else return (<p>No user linked to account</p>)
   }

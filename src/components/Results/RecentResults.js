@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 import { Table } from 'reactstrap'
+import { Link } from 'react-router-dom'
+import * as ROUTES from '../../constants/routes'
 
 class RecentResults extends Component {
 
@@ -11,8 +13,10 @@ class RecentResults extends Component {
         <thead>
           <tr>
             <th>Date</th>
+            { this.props.showGames && <th>Game</th> }
             <th>Winner</th>
             <th>Scores</th>
+            { this.props.showNotes && <th>Notes</th> }
           </tr>
         </thead>
         <tbody>
@@ -25,8 +29,10 @@ class RecentResults extends Component {
               hour: 'numeric',
               minute: 'numeric'
             }).format(result.date.toDate()) }</td>
+            { this.props.showGames && <td><Link to={`${ROUTES.GAMES}/${result.gameID}`}>{result.game.name}</Link></td> }
             <td><Winner result={result} /></td>
             <td><Score result={result}/></td>
+            { this.props.showNotes && <td>{result.notes}</td> }
           </tr>
         ))}
         </tbody>

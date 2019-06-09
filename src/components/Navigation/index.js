@@ -9,7 +9,12 @@ import { AuthUserContext } from '../Session'
 
 const NavigationAuth = ({authUser}) => (
   <>
-    <NavLink tag={RRNavLink} exact to={ROUTES.GAMES} activeClassName="active">Games</NavLink>
+    <NavItem>
+      <NavLink tag={RRNavLink} to={ROUTES.GAMES} activeClassName="active">Games</NavLink>
+    </NavItem>
+    <NavItem>
+      <NavLink tag={RRNavLink} to={ROUTES.RESULTS} activeClassName="active">Results</NavLink>
+    </NavItem>
     <NavItem>
       <NavLink tag={RRNavLink} exact to={ROUTES.HOME} activeClassName="active">Home</NavLink>
     </NavItem>
@@ -30,7 +35,10 @@ const NavigationAuth = ({authUser}) => (
 const NavigationNonAuth = () => (
   <>
     <NavItem>
-      <NavLink tag={RRNavLink} exact to={ROUTES.GAMES} activeClassName="active">Games</NavLink>
+      <NavLink tag={RRNavLink} to={ROUTES.GAMES} activeClassName="active">Games</NavLink>
+    </NavItem>
+    <NavItem>
+      <NavLink tag={RRNavLink} to={ROUTES.RESULTS} activeClassName="active">Results</NavLink>
     </NavItem>
     <NavItem>
       <NavLink tag={RRNavLink} exact to={ROUTES.SIGN_IN} activeClassName="active">Sign In</NavLink>
