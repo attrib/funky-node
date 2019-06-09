@@ -73,6 +73,7 @@ class NewsItem extends Component {
 
   render() {
     const { Title, Date, Content, Markdown, edit, error, authorID } = this.state;
+    let rows = Markdown.split('\n').length + 2
     return (
       <AuthUserContext.Consumer>
         {authUser => (
@@ -101,7 +102,7 @@ class NewsItem extends Component {
                         <Input type="text" value={Title} onChange={this.onChange} name="Title" placeholder="Title"/>
                       </FormGroup>
                       <FormGroup>
-                        <Input type="textarea" value={Markdown} onChange={this.onChange} name="Markdown" placeholder="Markdown"/>
+                        <Input type="textarea" value={Markdown} onChange={this.onChange} name="Markdown" placeholder="Markdown" rows={rows}/>
                       </FormGroup>
                       { error && <Alert color="danger">{error}</Alert>}
                       <FormGroup>

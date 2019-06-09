@@ -12,9 +12,14 @@ import AdminPage from '../Admin'
 import Games from '../Games'
 import Game from '../Games/Game'
 import Results from '../Results'
-
+import Result from '../Results/Result'
 import * as ROUTES from '../../constants/routes'
 import { withAuthentication } from '../Session'
+import Moment from 'moment'
+import momentLocalizer from 'react-widgets-moment';
+
+Moment.locale('de')
+momentLocalizer()
 
 const App = () => (
   <Router>
@@ -32,7 +37,7 @@ const App = () => (
       <Route exact path={ROUTES.GAMES} component={Games}/>
       <Route path={ROUTES.GAME} component={Game}/>
       <Route exact path={ROUTES.RESULTS} component={Results}/>
-      <Route path={ROUTES.RESULT} component={Game}/>
+      <Route path={ROUTES.RESULT} component={Result}/>
     </div>
   </Router>
 )

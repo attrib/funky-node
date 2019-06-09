@@ -22,13 +22,16 @@ class RecentResults extends Component {
         <tbody>
         { results.map(result => (
           <tr key={result.id}>
-            <td>{ new Intl.DateTimeFormat('de-DE', {
+            <td><Link to={{
+              pathname: `${ROUTES.RESULTS}/${result.id}`,
+              state: {result}
+            }}>{ new Intl.DateTimeFormat('de-DE', {
               year: 'numeric',
               month: 'long',
               day: '2-digit',
               hour: 'numeric',
               minute: 'numeric'
-            }).format(result.date.toDate()) }</td>
+            }).format(result.date.toDate()) }</Link></td>
             { this.props.showGames && <td><Link to={`${ROUTES.GAMES}/${result.gameID}`}>{result.game.name}</Link></td> }
             <td><Winner result={result} /></td>
             <td><Score result={result}/></td>
@@ -71,3 +74,4 @@ const Score = ({result}) => {
 
 
 export default RecentResults
+export { Winner, Score }

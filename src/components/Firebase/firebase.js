@@ -123,6 +123,8 @@ class Firebase {
 
   resultsByPlayerId = (playerID) => this.resultsCollection().where('playerIDs', 'array-contains', playerID).get()
 
+  result = (id) => this.db.collection('results').doc(id)
+
   resultsResolvePlayers = (results) => {
     let players = {}
     results.forEach((result) => {
