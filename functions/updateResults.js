@@ -4,6 +4,7 @@ exports.updateResults = function (data) {
   // This is crucial to prevent infinite loops.
   if (!data || data.playerIDs) return null;
 
+  const origData = JSON.parse(JSON.stringify(data));
   const countPlayers = data.scores.reduce((acc, value) => acc + value.players.length, 0);
   let minScore = data.scores.reduce((acc, value) => (acc.score > value.score) ? value : acc);
   let normalizedScore = data.scores;
@@ -35,7 +36,7 @@ exports.updateResults = function (data) {
     score.players.forEach((player) => {
       playerIDs.push(player.id)
     })
-    score.score = data.scores[index].score
+    score.score = origData.scores[index].score
     return score
   })
 
