@@ -4,8 +4,9 @@ import AuthUserContext from '../Session/context'
 import { Button, Col, Container, Row } from 'reactstrap'
 import { Score, Winner } from './RecentResults'
 import * as ROUTES from '../../constants/routes'
-import { Link } from 'react-router-dom'
+import { Link, withRouter } from 'react-router-dom'
 import ResultForm from './ResultForm'
+import { compose } from 'recompose'
 
 class Result extends Component {
 
@@ -26,6 +27,10 @@ class Result extends Component {
         scores: [],
       }
       edit = true
+      if (props.location.state && props.location.state.game) {
+        result.game = props.location.state.game
+        result.gameID = props.location.state.game.id
+      }
     }
     if (props.location.state && props.location.state.result) {
       result = props.location.state.result
@@ -67,6 +72,20 @@ class Result extends Component {
     })
   }
 
+  onSave = (result) => {
+    if (result.isNew) {
+      this.props.history.push(`${ROUTES.RESULTS}/${result.id}`)
+    }
+    this.setState({
+      result,
+      edit: false,
+    })
+  }
+
+  onDelete = (game_id) => {
+    this.props.history.push(ROUTES.RESULTS)
+  }
+
   render() {
     const { result, loading, edit } = this.state
     if (loading || !result) return (<div><Container>Loading ...</Container></div>)
@@ -76,49 +95,50 @@ class Result extends Component {
           <div>
             <Container>
               <h1>Result</h1>
-              <Row>
-                <Col sm={2}>Date</Col>
-                <Col>
-                  { new Intl.DateTimeFormat('de-DE', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: '2-digit',
-                    hour: 'numeric',
-                    minute: 'numeric'
-                  }).format(result.date.toDate()) }
-                </Col>
-              </Row>
-              <Row>
-                <Col sm={2}>Game</Col>
-                <Col><Link to={`${ROUTES.GAMES}/${result.gameID}`}>{result.game.name}</Link></Col>
-              </Row>
-              <Row>
-                <Col sm={2}>Winner</Col>
-                <Col><Winner result={result}/></Col>
-              </Row>
-              <Row>
-                <Col sm={2}>Score</Col>
-                <Col><Score result={result}/></Col>
-              </Row>
-              <Row>
-                <Col sm={2}>Notes</Col>
-                <Col>{result.notes}</Col>
-              </Row>
-              {result.image && <Row>
-                <Col sm={2}>Image</Col>
-                <Col>{result.image}</Col>
-              </Row>}
-              {result.location && <Row>
-                <Col sm={2}>Location</Col>
-                <Col>{result.location}</Col>
-              </Row>}
-              {!edit &&
-              <Row>
-                <Col sm={{size: 3, offset: 9}}>
-                  {authUser && authUser.uid === result.authorID && <Button onClick={this.onEditToggle}>Edit</Button>}
-                </Col>
-              </Row>}
-              { edit && <ResultForm user={authUser} result={result}/>}
+              { !edit && (<>
+                <Row>
+                  <Col sm={2}>Date</Col>
+                  <Col>
+                    { new Intl.DateTimeFormat('de-DE', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: '2-digit',
+                      hour: 'numeric',
+                      minute: 'numeric'
+                    }).format(result.date.toDate()) }
+                  </Col>
+                </Row>
+                <Row>
+                  <Col sm={2}>Game</Col>
+                  <Col><Link to={`${ROUTES.GAMES}/${result.gameID}`}>{result.game.name}</Link></Col>
+                </Row>
+                <Row>
+                  <Col sm={2}>Winner</Col>
+                  <Col><Winner result={result}/></Col>
+                </Row>
+                <Row>
+                  <Col sm={2}>Score</Col>
+                  <Col><Score result={result}/></Col>
+                </Row>
+                <Row>
+                  <Col sm={2}>Notes</Col>
+                  <Col>{result.notes}</Col>
+                </Row>
+                {result.image && <Row>
+                  <Col sm={2}>Image</Col>
+                  <Col>{result.image}</Col>
+                </Row>}
+                {result.location && <Row>
+                  <Col sm={2}>Location</Col>
+                  <Col>{result.location}</Col>
+                </Row>}
+                <Row>
+                  <Col sm={{size: 3, offset: 9}}>
+                    {authUser && authUser.uid === result.authorID && <Button onClick={this.onEditToggle}>Edit</Button>}
+                  </Col>
+                </Row>
+              </>)}
+              { edit && <ResultForm user={authUser} result={result} onSave={this.onSave} onDelete={this.onDelete} />}
             </Container>
           </div>
         )}
@@ -128,4 +148,7 @@ class Result extends Component {
 
 }
 
-export default withFirebase(Result)
+export default compose(
+  withFirebase,
+  withRouter,
+)(Result)

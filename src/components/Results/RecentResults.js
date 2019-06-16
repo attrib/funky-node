@@ -45,7 +45,7 @@ class RecentResults extends Component {
 }
 
 const Winner = ({result}) => {
-  const max = result.scores.reduce((max, value) => (value.score > max.score) ? value.score : max)
+  const max = result.scores.reduce((max, value) => (value.score > max.score) ? value : max)
   const scores = result.scores.filter((value) => value.score === max.score).sort((a, b) => {
     if (a.score > b.score) return -1
     if (a.score < b.score) return 1
@@ -59,7 +59,7 @@ const Winner = ({result}) => {
 }
 
 const Score = ({result}) => {
-  const max = result.scores.reduce((max, value) => (value.score > max.score) ? value.score : max)
+  const max = result.scores.reduce((max, value) => (value.score > max.score) ? value : max)
   const scores = result.scores.filter((value) => value.score < max.score).sort((a, b) => {
     if (a.score > b.score) return -1
     if (a.score < b.score) return 1

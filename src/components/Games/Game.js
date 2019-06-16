@@ -115,6 +115,12 @@ class Game extends Component {
     }
   }
 
+  onAddResult = () => {
+    this.props.history.push(`${ROUTES.RESULTS}/new`, {
+      game: this.state.game,
+    })
+  }
+
   successSave = (authUser, id) => {
     const game = this.state.game
     if (id) {
@@ -144,7 +150,7 @@ class Game extends Component {
                     <>
                       <p dangerouslySetInnerHTML={{__html: game.description}}/>
                       <ButtonGroup>
-                        {authUser && authUser.roles[ROLES.APPROVED] && <Button onClick={this.onEditToggle}>Add Result</Button>}
+                        {authUser && authUser.roles[ROLES.APPROVED] && <Button onClick={this.onAddResult}>Add Result</Button>}
                         {authUser && authUser.uid === game.authorID && <Button onClick={this.onEditToggle}>Edit</Button>}
                       </ButtonGroup>
                     </>

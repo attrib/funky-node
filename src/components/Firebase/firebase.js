@@ -15,7 +15,7 @@ const config = {
 class Firebase {
   constructor () {
     app.initializeApp(config)
-    app.firestore().enablePersistence()
+    app.firestore().enablePersistence({synchronizeTabs: true})
     this.emailAuthProvider = app.auth.EmailAuthProvider
     this.auth = app.auth()
     this.db = app.firestore()
@@ -125,6 +125,8 @@ class Firebase {
 
   result = (id) => this.db.collection('results').doc(id)
 
+  resultAdd = (item) => this.db.collection('results').add(item)
+
   resultsResolvePlayers = (results) => {
     let players = {}
     results.forEach((result) => {
@@ -171,31 +173,29 @@ class Firebase {
     .orderBy('nick').limit(5)
     .startAt(value).endAt(value + '\uf8ff').get()
 
-  playerByName = name => this.db.collection('players').where('nick', '==', name).get()
-    .then((snapshots) => {
-      if (snapshots.size === 0) {
-        return this.db.collection('players').add({
-          nick: name,
-          userID: ''
-        }).then((snapshot) => {
-          return {
-            id: snapshot.id,
-            nick: name,
-            userID: ''
-          }
-        })
-      }
-      else {
-        let player = []
-        snapshots.forEach((snapshot) => {
-          player.push({
-            ...snapshot.data(),
-            id: snapshot.id
-          })
-        })
-        return player.shift()
+  playerByName = name => this.playerByNameSnapshot(name)
+    .then((snapshot) => {
+      return {
+        ...snapshot.data(),
+        id: snapshot.id,
       }
     })
+
+  playerByNameSnapshot = name => this.db.collection('players').where('nick', '==', name).get()
+    .then((snapshots) => {
+      if (snapshots.size === 0) {
+        return this.db.collection('players')
+          .add({
+            nick: name,
+            userID: ''
+          })
+          .then((ref) => ref.get())
+      }
+      else {
+        return snapshots.docs.shift()
+      }
+    })
+
 }
 
 export default Firebase
