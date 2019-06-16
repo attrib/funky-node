@@ -142,7 +142,7 @@ class Firebase {
     return Promise.all(Object.values(players))
       .then((snapshots) => {
         let players = {}
-        snapshots.forEach((snapshot) => players[snapshot.id] = {...snapshot.data(), id:snapshot.id()})
+        snapshots.forEach((snapshot) => players[snapshot.id] = {...snapshot.data(), id:snapshot.id})
         return results.map((result) => {
           result.scores.map((score) => {
             score.players = score.players.map((player) => {
