@@ -105,7 +105,7 @@ class Firebase {
   /**
    * Games API
    */
-  games = () => this.db.collection('games').get()
+  games = () => this.db.collection('games').orderBy('name').get()
 
   game = (id) => this.db.collection('games').doc(id)
 
@@ -142,7 +142,7 @@ class Firebase {
     return Promise.all(Object.values(players))
       .then((snapshots) => {
         let players = {}
-        snapshots.forEach((snapshot) => players[snapshot.id] = snapshot.data())
+        snapshots.forEach((snapshot) => players[snapshot.id] = {...snapshot.data(), id:snapshot.id()})
         return results.map((result) => {
           result.scores.map((score) => {
             score.players = score.players.map((player) => {
@@ -163,6 +163,8 @@ class Firebase {
   playerByUID = uid => this.db.collection('players').where('userID', '==', uid).get()
 
   player = id => this.db.collection('players').doc(id)
+
+  players = () => this.db.collection('players').orderBy('nick').get()
 
   playerSearch = value => this.db.collection('players')
     .where('userID', '==', '')

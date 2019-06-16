@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { withFirebase } from '../Firebase'
 import { Col, Form, FormGroup, Input, Label, Row } from 'reactstrap'
 import { DateTimePicker } from 'react-widgets'
+import { Combobox } from 'react-widgets'
 import 'react-widgets/lib/scss/react-widgets.scss'
 
 class ResultForm extends Component {
@@ -18,9 +19,12 @@ class ResultForm extends Component {
       location: null,
       notes: "",
       playerIDs: [],
+      playerNames: [],
       scores: [
         {score: 0, players: [{nick: ""}]}
       ],
+      gameList: null,
+      playerList: null,
     }
     if (this.props.result) {
       state = {
@@ -42,6 +46,45 @@ class ResultForm extends Component {
     this.state = state
   }
 
+  componentDidMount() {
+    this.loadGames()
+    this.loadPlayers()
+  }
+
+  loadGames = () => {
+    if (this.state.gameList) {
+      return
+    }
+    this.props.firebase.games()
+      .then((snapshots) => {
+        let gameList = []
+        snapshots.forEach((snapshot) => {
+          gameList.push({
+            ...snapshot.data(),
+            id: snapshot.id,
+          })
+        })
+        this.setState({gameList})
+      })
+  }
+
+  loadPlayers = () => {
+    if (this.state.playerList) {
+      return
+    }
+    this.props.firebase.players()
+      .then((snapshots) => {
+        let playerList = []
+        snapshots.forEach((snapshot) => {
+          playerList.push({
+            ...snapshot.data(),
+            id: snapshot.id,
+          })
+        })
+        this.setState({playerList})
+      })
+  }
+
   onChange = (data) => {
     this.setState(data)
   }
@@ -55,13 +98,48 @@ class ResultForm extends Component {
   }
 
   onChangePlayer = (i, j, playerName) => {
+    let player = {}
+    if (typeof playerName === 'string') {
+      player = { nick: playerName }
+    }
+    else {
+      player = playerName
+    }
     let scores = this.state.scores
-    scores[i].players[j] = { nick: playerName }
+    scores[i].players[j] = player
     scores[i].players = scores[i].players.filter(player => player.nick !== '')
     scores = scores.filter((score) => !this.isScoreEmpty(score))
     scores[i].players.push({nick: ''})
     scores.push({score: 0, players: [{nick: ''}]})
-    this.onChange({ scores })
+
+    let playerIDs = [], playerNames = []
+    scores.forEach(score => score.players.forEach(player => {
+      playerIDs.push(player.id)
+      playerNames.push(player.name)
+    }))
+    playerIDs = playerIDs.filter((value, index, self) => self.indexOf(value) === index)
+    playerNames = playerNames.filter((value, index, self) => self.indexOf(value) === index)
+    this.onChange({ scores, playerIDs, playerNames })
+  }
+
+  filterSelectablePlayers = (player, value) => {
+    if (player.nick === value) return true
+    return this.state.playerNames.indexOf(player.nick) !== 0
+  }
+
+  onChangeGame = (value) => {
+    if (typeof value === 'string') {
+      this.setState({
+        game: {
+          name: value,
+        }
+      })
+    }
+    else {
+      this.setState({
+        game: value
+      })
+    }
   }
 
   isScoreEmpty = (score) => {
@@ -74,13 +152,13 @@ class ResultForm extends Component {
         <FormGroup row>
           <Label for="dateJS" sm={2}>Date</Label>
           <Col sm={10}>
-            <DateTimePicker name="dateJS" placeholder="Date" value={this.state.dateJS} onChange={dateJS => this.onChange({dateJS})} />
+            <DateTimePicker name="dateJS" placeholder="Date" value={this.state.date.toDate()} onChange={dateJS => this.onChange({date: this.props.firebase.Timestamp.fromDate(dateJS)})} />
           </Col>
         </FormGroup>
         <FormGroup row>
           <Label for="gamename" sm={2}>Game</Label>
           <Col sm={10}>
-            <Input type="text" placeholder="Game" value={this.state.gameName} onChange={event => this.onChange({gameName: event.target.value})}/>
+            <Combobox value={this.state.game} data={this.state.gameList} busy={this.state.gameList === null} textField="name" placeholder="Game" onChange={this.onChangeGame}/>
           </Col>
         </FormGroup>
         {
@@ -99,7 +177,7 @@ class ResultForm extends Component {
                 <Label for={`scores[${i}][players]`} sm={{size: 2, offset: 1}}>Players</Label>
                 <Col sm={9}>
                   { score.players.map((player, j) => (
-                    <Input key={j} type="text" placeholder="Nickname" value={player.nick} onChange={event => this.onChangePlayer(i, j, event.target.value)}/>
+                    <Combobox key={j} placeholder="Nickname" value={player} textField="nick" data={this.state.playerList} busy={this.state.playerList === null} filter={this.filterSelectablePlayers} onChange={value => this.onChangePlayer(i, j, value)}/>
                   ))}
                 </Col>
               </Row>
