@@ -154,7 +154,6 @@ class ResultForm extends Component {
       location: this.state.location,
       notes: this.state.notes,
       scores: this.state.scores,
-      playerIDs: this.state.playerIDs,
     }
     let players = []
     result.scores = result.scores.filter((score) => !this.isScoreEmpty(score))

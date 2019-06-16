@@ -1,5 +1,6 @@
 const functions = require('firebase-functions')
 const md = require('markdown-it')();
+const updateResults = require('./updateResults').updateResults
 
 exports.renderMarkdown = functions.firestore
   .document('News/{newsId}')
@@ -14,4 +15,14 @@ exports.renderMarkdown = functions.firestore
     return change.after.ref.set({
       Content: md.render(data.Markdown)
     }, {merge: true});
+  });
+
+exports.updateResults = functions.firestore
+  .document('results/{resultID}')
+  .onWrite((change, context) => {
+    // Retrieve the current value
+    const data = change.after.exists ? change.after.data() : null;
+    const updatedData = updateResults(data);
+    if (!updatedData) return null;
+    return change.after.ref.set(updatedData, {merge: true});
   });
