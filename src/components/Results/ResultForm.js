@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 import { withFirebase } from '../Firebase'
-import { Button, ButtonGroup, Col, Form, FormFeedback, FormGroup, Input, Label, Row } from 'reactstrap'
+import { Button, ButtonGroup, Col, Form, FormGroup, Input, Label } from 'reactstrap'
 import { DateTimePicker, DropdownList } from 'react-widgets'
-import { Combobox } from 'react-widgets'
 import 'react-widgets/lib/scss/react-widgets.scss'
+import ScoreTeamForm from './ScoreTeamForm'
 
 class ResultForm extends Component {
 
@@ -83,48 +83,6 @@ class ResultForm extends Component {
 
   onChange = (data) => {
     this.setState(data)
-  }
-
-  onChangeScore = (i, score) => {
-    let {scores, error} = this.state
-    // for better typing allow -, 0 and empty string
-    // otherwise you have to type 11 and then - (-11)
-    if (score !== '-0' && score !== '' && score !== '-' && !isNaN(Number(score))) {
-      scores[i].score = Number(score)
-      delete error[`scores[${i}][score]`]
-    }
-    else {
-      scores[i].score = score
-      error[`scores[${i}][score]`] = 'Invalid number'
-    }
-    scores = scores.filter((score) => !this.isScoreEmpty(score))
-    scores.push({score: 0, players: [{nick: ''}]})
-    this.onChange({ scores })
-  }
-
-  onChangePlayer = (i, j, playerName) => {
-    let player = {}
-    if (typeof playerName === 'string') {
-      player = { nick: playerName }
-    }
-    else {
-      player = playerName
-    }
-    let scores = this.state.scores
-    scores[i].players[j] = player
-    scores[i].players = scores[i].players.filter(player => player.nick !== '')
-    scores = scores.filter((score) => !this.isScoreEmpty(score))
-    scores[i].players.push({nick: ''})
-    scores.push({score: 0, players: [{nick: ''}]})
-
-    let playerIDs = [], playerNames = []
-    scores.forEach(score => score.players.forEach(player => {
-      playerIDs.push(player.id)
-      playerNames.push(player.nick)
-    }))
-    playerIDs = playerIDs.filter((value, index, self) => typeof value !== 'undefined' && value !== '' && self.indexOf(value) === index)
-    playerNames = playerNames.filter((value, index, self) => typeof value !== 'undefined' && value !== '' && self.indexOf(value) === index)
-    this.onChange({ scores, playerIDs, playerNames })
   }
 
   filterSelectablePlayers = (player, value) => {
@@ -248,30 +206,7 @@ class ResultForm extends Component {
             <DropdownList value={this.state.game} name="gamename" data={this.state.gameList} busy={this.state.gameList === null} textField="name" placeholder="Game" onChange={this.onChangeGame} filter="startsWith" />
           </Col>
         </FormGroup>
-        {
-          this.state.scores.map((score, i) => (
-            <FormGroup key={i}>
-              <Row>
-                <Col>Team {i+1}</Col>
-              </Row>
-              <Row>
-                <Label for={`scores[${i}][score]`} sm={{size: 2, offset: 1}}>Score</Label>
-                <Col sm={9}>
-                  <Input type="number" placeholder="Score" value={score.score} onChange={event => this.onChangeScore(i, event.target.value)} name={`scores[${i}][score]`} autoComplete="off" invalid={!!this.state.error[`scores[${i}][score]`]} />
-                  { this.state.error[`scores[${i}][score]`] && <FormFeedback>{this.state.error[`scores[${i}][score]`]}</FormFeedback>}
-                </Col>
-              </Row>
-              <Row>
-                <Label for={`scores[${i}][players]`} sm={{size: 2, offset: 1}}>Players</Label>
-                <Col sm={9}>
-                  { score.players.map((player, j) => (
-                    <Combobox key={j} placeholder="Nickname" value={player} textField="nick" data={this.state.playerList} busy={this.state.playerList === null} filter={this.filterSelectablePlayers} onChange={value => this.onChangePlayer(i, j, value)} name={`scores[${i}][players][${j}]`} autoComplete="off" />
-                  ))}
-                </Col>
-              </Row>
-            </FormGroup>
-          ))
-        }
+        <ScoreTeamForm scores={this.state.scores} error={this.state.error} playerList={this.state.playerList} filterSelectablePlayers={this.filterSelectablePlayers} isScoreEmpty={this.isScoreEmpty} onChange={this.onChange}/>
         <FormGroup row>
           <Label for="notes" sm={2}>Note</Label>
           <Col sm={10}>
