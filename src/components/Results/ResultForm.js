@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { withFirebase } from '../Firebase'
-import { Button, ButtonGroup, Col, Form, FormGroup, Input, Label, Row } from 'reactstrap'
+import { Button, ButtonGroup, Col, Form, FormFeedback, FormGroup, Input, Label, Row } from 'reactstrap'
 import { DateTimePicker, DropdownList } from 'react-widgets'
 import { Combobox } from 'react-widgets'
 import 'react-widgets/lib/scss/react-widgets.scss'
@@ -23,11 +23,13 @@ class ResultForm extends Component {
       scores: [
         {score: 0, players: [{nick: ""}]}
       ],
-      gameList: null,
-      playerList: null,
+      gameList: [],
+      playerList: [],
+      error: {},
     }
     if (this.props.result) {
       state = {
+        ...state,
         ...this.props.result,
       }
       state.scores = state.scores.map((score) => {
@@ -46,7 +48,7 @@ class ResultForm extends Component {
   }
 
   loadGames = () => {
-    if (this.state.gameList) {
+    if (this.state.gameList.length) {
       return
     }
     this.props.firebase.games()
@@ -63,7 +65,7 @@ class ResultForm extends Component {
   }
 
   loadPlayers = () => {
-    if (this.state.playerList) {
+    if (this.state.playerList.length) {
       return
     }
     this.props.firebase.players()
@@ -84,8 +86,17 @@ class ResultForm extends Component {
   }
 
   onChangeScore = (i, score) => {
-    let scores = this.state.scores
-    scores[i].score = Number(score)
+    let {scores, error} = this.state
+    // for better typing allow -, 0 and empty string
+    // otherwise you have to type 11 and then - (-11)
+    if (score !== '-0' && score !== '' && score !== '-' && !isNaN(Number(score))) {
+      scores[i].score = Number(score)
+      delete error[`scores[${i}][score]`]
+    }
+    else {
+      scores[i].score = score
+      error[`scores[${i}][score]`] = 'Invalid number'
+    }
     scores = scores.filter((score) => !this.isScoreEmpty(score))
     scores.push({score: 0, players: [{nick: ''}]})
     this.onChange({ scores })
@@ -246,7 +257,8 @@ class ResultForm extends Component {
               <Row>
                 <Label for={`scores[${i}][score]`} sm={{size: 2, offset: 1}}>Score</Label>
                 <Col sm={9}>
-                  <Input type="text" placeholder="Score" value={score.score} onChange={event => this.onChangeScore(i, event.target.value)} name={`scores[${i}][score]`} autoComplete="off" />
+                  <Input type="number" placeholder="Score" value={score.score} onChange={event => this.onChangeScore(i, event.target.value)} name={`scores[${i}][score]`} autoComplete="off" invalid={!!this.state.error[`scores[${i}][score]`]} />
+                  { this.state.error[`scores[${i}][score]`] && <FormFeedback>{this.state.error[`scores[${i}][score]`]}</FormFeedback>}
                 </Col>
               </Row>
               <Row>
@@ -271,7 +283,7 @@ class ResultForm extends Component {
             {this.props.user && this.state.id && this.props.user.uid === this.state.authorID &&
             <Button color="danger" type="submit" onClick={this.onDelete}>Delete</Button>}
             {this.props.user &&
-            <Button color="primary" type="submit" onClick={this.onSave}>Save</Button>}
+            <Button color="primary" type="submit" disabled={Object.keys(this.state.error).length > 0} onClick={this.onSave}>Save</Button>}
           </ButtonGroup>
         </FormGroup>
       </Form>
