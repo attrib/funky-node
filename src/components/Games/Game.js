@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Alert, Button, ButtonGroup, Col, Container, Form, FormGroup, Input, Row } from 'reactstrap'
+import { Alert, Button, ButtonGroup, Col, Container, Form, FormGroup, Input, Label, Row } from 'reactstrap'
 import MarkdownIt from 'markdown-it'
 import AuthUserContext from '../Session/context'
 import { withFirebase } from '../Firebase'
@@ -8,8 +8,19 @@ import * as ROLES from '../../constants/roles'
 import { withRouter } from 'react-router-dom'
 import { compose } from 'recompose'
 import RecentResults from '../Results/RecentResults'
+import { SelectList } from 'react-widgets'
 
 const md = new MarkdownIt()
+const scoreWidgetForms = [
+  {
+    id: 'ScoreTeamForm',
+    label: 'Scores for team or players (Default)',
+  },
+  {
+    id: 'ScoreRankingForm',
+    label: 'Ranking of players',
+  }
+]
 
 class Game extends Component {
 
@@ -24,6 +35,7 @@ class Game extends Component {
         description: '',
         description_markdown: '',
         image: null,
+        scoreWidget: 'ScoreTeamForm'
       }
       edit = true
     }
@@ -78,6 +90,12 @@ class Game extends Component {
   onChange = (event) => {
     let game = this.state.game
     game[event.target.name] = event.target.value
+    this.setState({game})
+  }
+
+  onChangeScoreWidget = (widget) => {
+    let game = this.state.game
+    game.scoreWidget = widget.id
     this.setState({game})
   }
 
@@ -166,13 +184,17 @@ class Game extends Component {
                                name="description_markdown"
                                placeholder="description"/>
                       </FormGroup>
-                      {error && <Alert color="danger">{error}</Alert>}
                       <FormGroup>
+                        <Label>Widget for result form</Label>
+                        <SelectList data={scoreWidgetForms} textField="label" valueField="id" value={game.scoreWidget} onChange={this.onChangeScoreWidget}/>
+                      </FormGroup>
+                      {error && <Alert color="danger">{error}</Alert>}
+                      <ButtonGroup>
                         {authUser && game.id && authUser.uid === game.authorID &&
                         <Button color="danger" type="submit" onClick={this.onDelete}>Delete</Button>}
                         {authUser &&
                         <Button color="primary" type="submit" onClick={() => this.onSave(authUser)}>Save</Button>}
-                      </FormGroup>
+                      </ButtonGroup>
                     </Form>
                   )}
                   {game.id && (
