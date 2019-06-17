@@ -1,6 +1,9 @@
 import React, { Component } from 'react'
 import { withFirebase } from '../Firebase'
 import { Button, Col, Row } from 'reactstrap'
+import { Multiselect } from 'react-widgets'
+import * as ROLES from '../../constants/roles'
+import 'react-widgets/lib/scss/react-widgets.scss'
 
 class UserItem extends Component {
   constructor (props) {
@@ -8,6 +11,7 @@ class UserItem extends Component {
     this.state = {
       loading: false,
       user: null,
+      savingRole: false,
     }
   }
 
@@ -35,8 +39,30 @@ class UserItem extends Component {
     this.props.firebase.doPasswordReset(this.state.user.email)
   }
 
+  onChangeRole = (rolesValue) => {
+    let user = this.state.user
+    let roles = {}
+    rolesValue.forEach((role) => {
+      roles[role] = role
+    })
+
+    user.roles = roles
+
+    this.setState({
+      user,
+      savingRole: true,
+    })
+
+    this.props.firebase.user(user.uid).set({roles}, { merge: true })
+      .then(() => {
+        this.setState({
+          savingRole: false,
+        })
+      })
+  }
+
   render () {
-    const {user, loading} = this.state
+    const {user, loading, savingRole} = this.state
     return (
       <div>
         <h2>User</h2>
@@ -54,6 +80,10 @@ class UserItem extends Component {
             <Row>
               <Col><strong>Username:</strong></Col>
               <Col>{user.username}</Col>
+            </Row>
+            <Row>
+              <Col><strong>Roles</strong></Col>
+              <Col><Multiselect placholder="Roles" data={Object.values(ROLES)} value={Object.keys(user.roles)} onChange={this.onChangeRole} busy={savingRole}/></Col>
             </Row>
             <Row>
               <Button
