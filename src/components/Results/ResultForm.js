@@ -1,9 +1,12 @@
 import React, { Component } from 'react'
 import { withFirebase } from '../Firebase'
-import { Button, ButtonGroup, Col, Form, FormGroup, Input, Label } from 'reactstrap'
+import { Alert, Button, ButtonGroup, Col, Form, FormGroup, Input, Label } from 'reactstrap'
 import { DateTimePicker, DropdownList } from 'react-widgets'
 import 'react-widgets/lib/scss/react-widgets.scss'
 import ScoreTeamForm from './ScoreTeamForm'
+import ScoreRankingForm from './ScoreRankingForm'
+import { Link } from 'react-router-dom'
+import * as ROUTES from '../../constants/routes'
 
 class ResultForm extends Component {
 
@@ -206,7 +209,16 @@ class ResultForm extends Component {
             <DropdownList value={this.state.game} name="gamename" data={this.state.gameList} busy={this.state.gameList === null} textField="name" placeholder="Game" onChange={this.onChangeGame} filter="startsWith" />
           </Col>
         </FormGroup>
-        <ScoreTeamForm scores={this.state.scores} error={this.state.error} playerList={this.state.playerList} filterSelectablePlayers={this.filterSelectablePlayers} isScoreEmpty={this.isScoreEmpty} onChange={this.onChange}/>
+        {(() => {
+          switch(this.state.game.scoreWidget) {
+            case 'ScoreTeamForm':
+              return <ScoreTeamForm scores={this.state.scores} error={this.state.error} playerList={this.state.playerList} filterSelectablePlayers={this.filterSelectablePlayers} isScoreEmpty={this.isScoreEmpty} onChange={this.onChange}/>;
+            case 'ScoreRankingForm':
+              return <ScoreRankingForm scores={this.state.scores} error={this.state.error} playerList={this.state.playerList} filterSelectablePlayers={this.filterSelectablePlayers} isScoreEmpty={this.isScoreEmpty} onChange={this.onChange} />
+            default:
+              return <Alert color="danger">Missing widget for <Link to={`${ROUTES.GAMES}/${this.state.game.id}`}>{this.state.game.name}</Link></Alert>;
+          }
+        })()}
         <FormGroup row>
           <Label for="notes" sm={2}>Note</Label>
           <Col sm={10}>
