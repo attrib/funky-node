@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { Table } from 'reactstrap'
 import { Link } from 'react-router-dom'
 import * as ROUTES from '../../constants/routes'
+import Funkies from './Funkies'
 
 class RecentResults extends Component {
 
@@ -44,7 +45,8 @@ class RecentResults extends Component {
   }
 }
 
-const Winner = ({result}) => {
+const Winner = ({result, funkies}) => {
+  funkies = !!funkies
   const max = result.scores.reduce((max, value) => (value.score > max.score) ? value : max)
   const scores = result.scores.filter((value) => value.score === max.score).sort((a, b) => {
     if (a.score > b.score) return -1
@@ -53,12 +55,13 @@ const Winner = ({result}) => {
   })
   return scores.map((score, i) => (
     <div key={result.id + 'w' + i}>
-      {score.players.map((player) => player.nick).join(', ')} ({score.score})
+      {(funkies && score.funkies) && <Funkies funkies={score.funkies} />} {score.players.map((player) => player.nick).join(', ')} ({score.score})
     </div>
   ))
 }
 
-const Score = ({result}) => {
+const Score = ({result, funkies}) => {
+  funkies = !!funkies
   const max = result.scores.reduce((max, value) => (value.score > max.score) ? value : max)
   const scores = result.scores.filter((value) => value.score < max.score).sort((a, b) => {
     if (a.score > b.score) return -1
@@ -67,7 +70,7 @@ const Score = ({result}) => {
   })
   return scores.map((score, i) => (
     <div key={result.id + 'w' + i}>
-      {score.players.map((player) => player.nick).join(', ')} ({score.score})
+      {(funkies && score.funkies) && <Funkies funkies={score.funkies} />} {score.players.map((player) => player.nick).join(', ')} ({score.score})
     </div>
   ))
 }

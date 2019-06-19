@@ -114,11 +114,11 @@ class Result extends Component {
                 </Row>
                 <Row>
                   <Col sm={2}>Winner</Col>
-                  <Col><Winner result={result}/></Col>
+                  <Col><Winner result={result} funkies={true} /></Col>
                 </Row>
                 <Row>
                   <Col sm={2}>Score</Col>
-                  <Col><Score result={result}/></Col>
+                  <Col><Score result={result} funkies={true}/></Col>
                 </Row>
                 <Row>
                   <Col sm={2}>Notes</Col>
