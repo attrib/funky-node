@@ -3,6 +3,7 @@ import { Table } from 'reactstrap'
 import { Link } from 'react-router-dom'
 import * as ROUTES from '../../constants/routes'
 import Funkies from './Funkies'
+import AuthUserContext from '../Session/context'
 
 class RecentResults extends Component {
 
@@ -55,7 +56,7 @@ const Winner = ({result, funkies}) => {
   })
   return scores.map((score, i) => (
     <div key={result.id + 'w' + i}>
-      {(funkies && score.funkies) && <Funkies funkies={score.funkies} />} {score.players.map((player) => player.nick).join(', ')} ({score.score})
+      {(funkies && score.funkies) && <Funkies funkies={score.funkies} />} <PlayerNames players={score.players}/> ({score.score})
     </div>
   ))
 }
@@ -70,8 +71,22 @@ const Score = ({result, funkies}) => {
   })
   return scores.map((score, i) => (
     <div key={result.id + 'w' + i}>
-      {(funkies && score.funkies) && <Funkies funkies={score.funkies} />} {score.players.map((player) => player.nick).join(', ')} ({score.score})
+      {(funkies && score.funkies) && <Funkies funkies={score.funkies} />} <PlayerNames players={score.players}/> ({score.score})
     </div>
+  ))
+}
+
+const PlayerNames = ({players}) => {
+  return players.map((player, i) => (
+    <AuthUserContext.Consumer key={player.nick}>
+      {authUser => (
+        <>
+          { (authUser && player.id in authUser.players) && <strong>{player.nick}</strong>}
+          { (!authUser || !(player.id in authUser.players)) && player.nick}
+          {i < players.length - 1 && ', '}
+        </>
+      )}
+    </AuthUserContext.Consumer>
   ))
 }
 
