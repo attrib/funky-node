@@ -88,7 +88,7 @@ class Player extends Component {
                   funkies: player.funkies,
                   won: stats.games[ranking.id] ? stats.games[ranking.id].won : stats.won,
                   played: stats.games[ranking.id] ? stats.games[ranking.id].played : stats.played,
-                  funkyDiff: stats.games[ranking.id] ? stats.games[ranking.id].sum - stats.games[ranking.id].played  + 1 : stats.sum - stats.played,
+                  funkyDiff: stats.games[ranking.id] ? stats.games[ranking.id].sum - stats.games[ranking.id].played  + 1 : stats.sum - stats.played + 1,
                   wonPercentage: stats.games[ranking.id] ? stats.games[ranking.id].won / stats.games[ranking.id].played  * 100 : stats.won / stats.played * 100,
                 })
               }
