@@ -200,6 +200,29 @@ class Firebase {
    * ranking API
    */
 
+  rankingWithGame = name => this.db.collection('ranking').doc(name).get()
+    .then((ranking) => {
+      const data = ranking.data()
+      delete data.played
+      let players = []
+      Object.keys(data).forEach((player) => {
+        players.push({id: player, funkies: data[player]})
+      })
+      players.sort((a, b) => {
+        if (a.funkies > b.funkies) return -1
+        if (a.funkies < b.funkies) return 1
+        return 0
+      })
+      return this.game(name).get()
+        .then((game) => {
+          return {
+            players: players,
+            game: game.exists ? game.data() : null,
+            id: ranking.id,
+          }
+        })
+    })
+
   ranking = name => this.db.collection('ranking').doc(name).get()
     .then((snapshot) => {
       if (!snapshot.exists) {

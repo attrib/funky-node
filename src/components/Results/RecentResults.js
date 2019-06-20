@@ -81,13 +81,19 @@ const PlayerNames = ({players}) => {
     <AuthUserContext.Consumer key={player.nick}>
       {authUser => (
         <>
-          { (authUser && player.id in authUser.players) && <strong>{player.nick}</strong>}
-          { (!authUser || !(player.id in authUser.players)) && player.nick}
+          { (authUser && player.id in authUser.players) && <strong><PlayerLink player={player}/></strong>}
+          { (!authUser || !(player.id in authUser.players)) && <PlayerLink player={player}/>}
           {i < players.length - 1 && ', '}
         </>
       )}
     </AuthUserContext.Consumer>
   ))
+}
+
+const PlayerLink = ({player}) => {
+  return (
+    <Link to={{ pathname: ROUTES.PLAYER.replace(':id', player.id), state: {player}}}>{player.nick}</Link>
+      )
 }
 
 

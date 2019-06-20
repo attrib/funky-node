@@ -18,6 +18,7 @@ import { withAuthentication } from '../Session'
 import Moment from 'moment'
 import momentLocalizer from 'react-widgets-moment';
 import Ranking from '../Ranking'
+import Player from '../Player'
 
 Moment.locale('de')
 momentLocalizer()
@@ -40,7 +41,7 @@ const App = () => (
       <Route exact path={ROUTES.RESULTS} component={Results}/>
       <Route path={ROUTES.RESULT} component={Result}/>
       <Route path={ROUTES.RANKING} component={Ranking}/>
-      {/*<Route path={`${ROUTES.PLAYER}/:id`} component={Player}/>*/}
+      <Route path={ROUTES.PLAYER} component={Player}/>
     </div>
   </Router>
 )
