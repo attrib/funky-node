@@ -25,6 +25,10 @@ class Player extends Component {
     }
   }
 
+  componentDidMount () {
+    this.componentWillReceiveProps(this.props)
+  }
+
   componentWillReceiveProps (props) {
     const playerID = props.match.params.id
     const idChanged = this.state.player.id !== playerID
