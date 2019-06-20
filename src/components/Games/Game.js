@@ -9,6 +9,7 @@ import { withRouter } from 'react-router-dom'
 import { compose } from 'recompose'
 import RecentResults from '../Results/RecentResults'
 import { SelectList } from 'react-widgets'
+import RankingTable from '../Ranking/RankingTable'
 
 const md = new MarkdownIt()
 const scoreWidgetForms = [
@@ -47,6 +48,7 @@ class Game extends Component {
       error: null,
       recentResults: [],
       scores: [],
+      ranking: null,
     }
   }
 
@@ -54,9 +56,11 @@ class Game extends Component {
     if (this.state.game) {
       return
     }
+    const gameID = this.props.match.params.id
+
     this.setState({loading: true})
     this.props.firebase
-      .game(this.props.match.params.id)
+      .game(gameID)
       .get()
       .then(doc => {
         this.setState({
@@ -67,8 +71,10 @@ class Game extends Component {
           loading: false,
         })
       })
+
+
     this.props.firebase
-      .resultsByGameId(this.props.match.params.id)
+      .resultsByGameId(gameID)
       .then(snapshot => {
         let results = []
         snapshot.forEach(document => {
@@ -83,6 +89,37 @@ class Game extends Component {
       .then((results) => {
         this.setState({
           recentResults: results,
+        })
+      })
+
+
+    this.props.firebase.ranking(gameID)
+      .then(ranking => {
+        let promises = []
+        ranking.players.forEach((player) => {
+          promises.push(this.props.firebase.stats(player.id))
+        })
+        return Promise.all(promises)
+          .then((stats) => {
+            ranking.players = ranking.players.map((player) => {
+              stats.forEach((stat) => {
+                if (stat.id === player.id) {
+                  player.stats = stat.games[gameID]
+                  player.funkyDiff = stat.games[gameID].sum - stat.games[gameID].played + 1
+                  player.won = stat.games[gameID].won
+                  player.played = stat.games[gameID].played
+                  player.wonPercentage = stat.games[gameID].won / stat.games[gameID].played * 100
+                }
+              })
+              return player
+            })
+            return ranking
+          })
+      })
+      .then((ranking) => {
+        this.setState({
+          ranking,
+          loading: false,
         })
       })
   }
@@ -153,7 +190,7 @@ class Game extends Component {
   }
 
   render () {
-    const {game, loading, edit, error, recentResults} = this.state
+    const {game, loading, edit, error, recentResults, ranking} = this.state
     return (
       <AuthUserContext.Consumer>
         {authUser => (
@@ -201,6 +238,7 @@ class Game extends Component {
                     <Row>
                       <Col>
                         <h2>Ranking</h2>
+                        { ranking && <RankingTable ranking={ranking} />}
                       </Col>
                       <Col>
                         <h2>Recent Results</h2>

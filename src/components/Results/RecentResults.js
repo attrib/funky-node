@@ -92,4 +92,4 @@ const PlayerNames = ({players}) => {
 
 
 export default RecentResults
-export { Winner, Score }
+export { Winner, Score, PlayerNames }

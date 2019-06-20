@@ -202,6 +202,12 @@ class Firebase {
 
   ranking = name => this.db.collection('ranking').doc(name).get()
     .then((snapshot) => {
+      if (!snapshot.exists) {
+        return {
+          played: 0,
+          players: [],
+        }
+      }
       const data = snapshot.data()
       const played = data.played
       delete data.played
