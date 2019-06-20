@@ -25,9 +25,10 @@ class Player extends Component {
     }
   }
 
-  componentDidMount () {
-    const playerID = this.props.match.params.id
-    if (!this.state.player) {
+  componentWillReceiveProps (props) {
+    const playerID = props.match.params.id
+    const idChanged = this.state.player.id !== playerID
+    if (!this.state.player || idChanged) {
       this.setState({loading: true})
       this.props.firebase.player(playerID).get()
         .then((playerSnapshot) => {
@@ -41,7 +42,7 @@ class Player extends Component {
         })
     }
 
-    if (!this.state.recentResults) {
+    if (!this.state.recentResults || idChanged) {
       this.props.firebase.resultsByPlayerId(playerID)
         .then(snapshot => {
           let results = []
@@ -61,7 +62,7 @@ class Player extends Component {
         })
     }
 
-    if (!this.state.stats) {
+    if (!this.state.stats || idChanged) {
       this.props.firebase.stats(playerID)
         .then((stats) => {
           this.setState({
@@ -81,6 +82,7 @@ class Player extends Component {
             ranking.players.forEach((player, i) => {
               if (player.id === playerID) {
                 playerRankings.push({
+                  id: ranking.id,
                   rank: i+1,
                   game: ranking.game ? ranking.game : ranking.id,
                   funkies: player.funkies,
@@ -156,7 +158,7 @@ class Player extends Component {
                     </thead>
                     <tbody>
                     {playerRankings.map((ranking) => (
-                      <tr key={ranking.game.id} style={ranking.game === 'all' ? styleOverall : null}>
+                      <tr key={`ranking-${ranking.id}`} style={ranking.game === 'all' ? styleOverall : null}>
                         <td>{ranking.rank}</td>
                         <td>
                           { ranking.game !== 'all' && <Link to={`${ROUTES.GAMES}/${ranking.id}`}>{ranking.game.name}</Link>}
