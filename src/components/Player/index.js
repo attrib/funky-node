@@ -76,6 +76,7 @@ class Player extends Component {
         })
         .then((rankings) => {
           let playerRankings = []
+          const stats = this.state.stats
           rankings.forEach((ranking) => {
             ranking.players.forEach((player, i) => {
               if (player.id === playerID) {
@@ -83,6 +84,10 @@ class Player extends Component {
                   rank: i+1,
                   game: ranking.game ? ranking.game : ranking.id,
                   funkies: player.funkies,
+                  won: stats.games[ranking.id] ? stats.games[ranking.id].won : stats.won,
+                  played: stats.games[ranking.id] ? stats.games[ranking.id].played : stats.played,
+                  funkyDiff: stats.games[ranking.id] ? stats.games[ranking.id].sum - stats.games[ranking.id].played  + 1 : stats.sum - stats.played,
+                  wonPercentage: stats.games[ranking.id] ? stats.games[ranking.id].won / stats.games[ranking.id].played  * 100 : stats.won / stats.played * 100,
                 })
               }
             })
@@ -142,9 +147,11 @@ class Player extends Component {
                   <Table>
                     <thead>
                     <tr>
-                      <td>#</td>
-                      <td>Game</td>
-                      <td>Avg</td>
+                      <th>#</th>
+                      <th>Game</th>
+                      <th>Avg</th>
+                      <th>Credit</th>
+                      <th>Won</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -156,6 +163,8 @@ class Player extends Component {
                           { ranking.game === 'all' && 'Overall' }
                         </td>
                         <td>{ranking.funkies.toFixed(2)} <GiTwoCoins style={{color: 'yellowgreen'}}/></td>
+                        <td><Funkies funkies={ranking.funkyDiff}/></td>
+                        <td>{ranking.won} / {ranking.played} ({ranking.wonPercentage.toFixed(0)}%)</td>
                       </tr>
                     ))}
                     </tbody>
