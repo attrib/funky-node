@@ -18,7 +18,7 @@ deleteCollection(firestore, 'ranking', 10)
       promises.push(new Promise((resolve, reject) => {
         setTimeout(() => {
           resolve(document.id)
-        }, i * 1000)
+        }, i * 1500)
       })
         .then((id) => {
           console.log(id)
