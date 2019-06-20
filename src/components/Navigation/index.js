@@ -16,6 +16,9 @@ const NavigationAuth = ({authUser}) => (
       <NavLink tag={RRNavLink} to={ROUTES.RESULTS} activeClassName="active">Results</NavLink>
     </NavItem>
     <NavItem>
+      <NavLink tag={RRNavLink} to={ROUTES.RANKING} activeClassName="active">Ranking</NavLink>
+    </NavItem>
+    <NavItem>
       <NavLink tag={RRNavLink} exact to={ROUTES.HOME} activeClassName="active">Home</NavLink>
     </NavItem>
     <NavItem>
@@ -39,6 +42,9 @@ const NavigationNonAuth = () => (
     </NavItem>
     <NavItem>
       <NavLink tag={RRNavLink} to={ROUTES.RESULTS} activeClassName="active">Results</NavLink>
+    </NavItem>
+    <NavItem>
+      <NavLink tag={RRNavLink} to={ROUTES.RANKING} activeClassName="active">Ranking</NavLink>
     </NavItem>
     <NavItem>
       <NavLink tag={RRNavLink} exact to={ROUTES.SIGN_IN} activeClassName="active">Sign In</NavLink>

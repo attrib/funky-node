@@ -196,6 +196,51 @@ class Firebase {
       }
     })
 
+  /**
+   * ranking API
+   */
+
+  ranking = name => this.db.collection('ranking').doc(name).get()
+    .then((snapshot) => {
+      const data = snapshot.data()
+      const played = data.played
+      delete data.played
+      let promises = []
+      Object.keys(data).forEach((playerID) => {
+        promises.push(this.player(playerID).get()
+          .then((player) => {
+            return {
+              ...player.data(),
+              id: player.id,
+              funkies: data[player.id]
+            }
+          })
+        )
+      })
+      return Promise.all(promises)
+        .then((players) => {
+          let rankings = {
+            played: played,
+            players: players,
+          }
+          rankings.players.sort((a, b) => {
+            if (a.funkies > b.funkies) return -1
+            if (a.funkies < b.funkies) return 1
+            return 0
+          })
+          return rankings
+        })
+    })
+
+  stats = playerId => this.db.collection('stats').doc(playerId).get()
+    .then((stats) => {
+      return {
+        ...stats.data(),
+        id: stats.id,
+      }
+    })
+
+
 }
 
 export default Firebase
