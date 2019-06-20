@@ -50,7 +50,7 @@ exports.updateStats = functions.firestore
         if (!oldData || !oldData.games || !oldData.games[gameID] || oldData.games[gameID].played !== data.games[gameID].played || oldData.games[gameID].sum !== data.games[gameID].sum) {
           updatedData[`games.${gameID}.avg`] = data.games[gameID].sum / data.games[gameID].played
           promises.push(firestore.doc(`ranking/${gameID}`).set({
-            [context.params.playerID]: updatedData.avg
+            [context.params.playerID]: data.games[gameID].sum / data.games[gameID].played
           }, {merge: true}))
         }
       })
