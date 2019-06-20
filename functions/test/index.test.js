@@ -65,6 +65,8 @@ describe('updateResults', () => {
       result = updateResults(JSON.parse(JSON.stringify(data)))
       assert.equal(result.scores[0].funkies, 1)
       assert.equal(result.scores[1].funkies, 1)
+      assert.equal(result.scores[0].won, 1)
+      assert.equal(result.scores[1].won, 1)
     })
 
     it('player 1 wins', () => {
@@ -73,6 +75,8 @@ describe('updateResults', () => {
       result = updateResults(JSON.parse(JSON.stringify(data)))
       assert.equal(result.scores[0].funkies, 1.5)
       assert.equal(result.scores[1].funkies, 0.5)
+      assert.equal(result.scores[0].won, 1)
+      assert.equal(result.scores[1].won, 0)
     })
 
     it('player 2 wins', () => {
@@ -81,6 +85,8 @@ describe('updateResults', () => {
       result = updateResults(JSON.parse(JSON.stringify(data)))
       assert.equal(result.scores[0].funkies, 0.5)
       assert.equal(result.scores[1].funkies, 1.5)
+      assert.equal(result.scores[0].won, 0)
+      assert.equal(result.scores[1].won, 1)
     })
 
     it('high win for player 2', () => {
@@ -89,6 +95,8 @@ describe('updateResults', () => {
       result = updateResults(JSON.parse(JSON.stringify(data)))
       assert.equal(Math.round(result.scores[0].funkies * 10) / 10, 0.1)
       assert.equal(Math.round(result.scores[1].funkies * 10) / 10, 1.9)
+      assert.equal(result.scores[0].won, 0)
+      assert.equal(result.scores[1].won, 1)
     })
 
     it('one negative score', () => {
@@ -97,6 +105,8 @@ describe('updateResults', () => {
       result = updateResults(JSON.parse(JSON.stringify(data)))
       assert.equal(Math.round(result.scores[0].funkies * 10) / 10, 0.3)
       assert.equal(Math.round(result.scores[1].funkies * 10) / 10, 1.7)
+      assert.equal(result.scores[0].won, 0)
+      assert.equal(result.scores[1].won, 1)
     })
 
     it('all negative score', () => {
@@ -105,6 +115,8 @@ describe('updateResults', () => {
       result = updateResults(JSON.parse(JSON.stringify(data)))
       assert.equal(result.scores[0].funkies, 1.25)
       assert.equal(result.scores[1].funkies, 0.75)
+      assert.equal(result.scores[0].won, 1)
+      assert.equal(result.scores[1].won, 0)
     })
   })
 
@@ -150,6 +162,9 @@ describe('updateResults', () => {
       assert.equal(result.scores[0].funkies, 1)
       assert.equal(result.scores[1].funkies, 1)
       assert.equal(result.scores[2].funkies, 1)
+      assert.equal(result.scores[0].won, 1)
+      assert.equal(result.scores[1].won, 1)
+      assert.equal(result.scores[2].won, 1)
     })
 
     it('high win for player 2', () => {
@@ -160,6 +175,9 @@ describe('updateResults', () => {
       assert.equal(Math.round(result.scores[0].funkies * 10) / 10, 0.1)
       assert.equal(Math.round(result.scores[1].funkies * 10) / 10, 0.3)
       assert.equal(Math.round(result.scores[2].funkies * 10) / 10, 2.6)
+      assert.equal(result.scores[0].won, 0)
+      assert.equal(result.scores[1].won, 0)
+      assert.equal(result.scores[2].won, 1)
     })
 
     it('one negative score', () => {
@@ -170,6 +188,10 @@ describe('updateResults', () => {
       assert.equal(Math.round(result.scores[0].funkies * 10) / 10, 0.3)
       assert.equal(Math.round(result.scores[1].funkies * 10) / 10, 1.5)
       assert.equal(Math.round(result.scores[2].funkies * 10) / 10, 1.2)
+      assert.equal(result.scores[0].won, 0)
+      assert.equal(result.scores[1].won, 1)
+      assert.equal(result.scores[2].won, 0)
+
     })
 
     it('all negative score', () => {
@@ -180,6 +202,9 @@ describe('updateResults', () => {
       assert.equal(result.scores[0].funkies, 1.25)
       assert.equal(result.scores[1].funkies, 1)
       assert.equal(result.scores[2].funkies, 0.75)
+      assert.equal(result.scores[0].won, 1)
+      assert.equal(result.scores[1].won, 0)
+      assert.equal(result.scores[2].won, 0)
     })
   })
 
@@ -221,6 +246,8 @@ describe('updateResults', () => {
       result = updateResults(JSON.parse(JSON.stringify(data)))
       assert.equal(result.scores[0].funkies, 1)
       assert.equal(result.scores[1].funkies, 1)
+      assert.equal(result.scores[0].won, 1)
+      assert.equal(result.scores[1].won, 1)
     })
 
     it('high win for team 2', () => {
@@ -229,6 +256,8 @@ describe('updateResults', () => {
       result = updateResults(JSON.parse(JSON.stringify(data)))
       assert.equal(Math.round(result.scores[0].funkies * 10) / 10, 0.1)
       assert.equal(Math.round(result.scores[1].funkies * 10) / 10, 1.9)
+      assert.equal(result.scores[0].won, 0)
+      assert.equal(result.scores[1].won, 1)
     })
 
     it('one negative score', () => {
@@ -237,6 +266,8 @@ describe('updateResults', () => {
       result = updateResults(JSON.parse(JSON.stringify(data)))
       assert.equal(Math.round(result.scores[0].funkies * 10) / 10, 0.3)
       assert.equal(Math.round(result.scores[1].funkies * 10) / 10, 1.7)
+      assert.equal(result.scores[0].won, 0)
+      assert.equal(result.scores[1].won, 1)
     })
 
     it('all negative score', () => {
@@ -245,6 +276,8 @@ describe('updateResults', () => {
       result = updateResults(JSON.parse(JSON.stringify(data)))
       assert.equal(Math.round(result.scores[0].funkies * 10) / 10, 1.2)
       assert.equal(Math.round(result.scores[1].funkies * 10) / 10, 0.8)
+      assert.equal(result.scores[0].won, 1)
+      assert.equal(result.scores[1].won, 0)
     })
 
   })
@@ -286,6 +319,8 @@ describe('updateResults', () => {
       // if one alone wins with equal score against two players, the player "won"
       assert.equal(result.scores[0].funkies, 0.75)
       assert.equal(result.scores[1].funkies, 1.5)
+      assert.equal(result.scores[0].won, 1)
+      assert.equal(result.scores[1].won, 1)
     })
 
     it('high win for team 1', () => {
@@ -294,6 +329,8 @@ describe('updateResults', () => {
       result = updateResults(JSON.parse(JSON.stringify(data)))
       assert.equal(Math.round(result.scores[0].funkies * 10) / 10, 0.1)
       assert.equal(Math.round(result.scores[1].funkies * 10) / 10, 2.8)
+      assert.equal(result.scores[0].won, 0)
+      assert.equal(result.scores[1].won, 1)
     })
 
     it('high win for team 2', () => {
@@ -302,6 +339,8 @@ describe('updateResults', () => {
       result = updateResults(JSON.parse(JSON.stringify(data)))
       assert.equal(Math.round(result.scores[0].funkies * 100) / 100, 1.45)
       assert.equal(Math.round(result.scores[1].funkies * 10) / 10, 0.1)
+      assert.equal(result.scores[0].won, 1)
+      assert.equal(result.scores[1].won, 0)
     })
 
     it('one negative score', () => {
@@ -310,6 +349,8 @@ describe('updateResults', () => {
       result = updateResults(JSON.parse(JSON.stringify(data)))
       assert.equal(Math.round(result.scores[0].funkies * 100) / 100, 0.25)
       assert.equal(Math.round(result.scores[1].funkies * 10) / 10, 2.5)
+      assert.equal(result.scores[0].won, 0)
+      assert.equal(result.scores[1].won, 1)
     })
 
     it('all negative score', () => {
@@ -318,6 +359,8 @@ describe('updateResults', () => {
       result = updateResults(JSON.parse(JSON.stringify(data)))
       assert.equal(Math.round(result.scores[0].funkies * 10) / 10, 0.9)
       assert.equal(Math.round(result.scores[1].funkies * 10) / 10, 1.2)
+      assert.equal(result.scores[0].won, 1)
+      assert.equal(result.scores[1].won, 0)
     })
 
   })

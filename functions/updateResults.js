@@ -31,12 +31,14 @@ exports.updateResults = function (data) {
 
   let playerIDs = [];
   const sumScoreNormalized = normalizedScore.reduce((acc, value) => acc + value.score, 0);
+  const max = normalizedScore.reduce((max, value) => (value.score > max.score) ? value : max)
   const scores = normalizedScore.map((score, index) => {
     score.funkies = countPlayers * score.score / score.players.length / sumScoreNormalized;
     score.players.forEach((player) => {
       playerIDs.push(player.id)
     })
     score.score = origData.scores[index].score
+    score.won = (max.score === score.score) ? 1 : 0;
     return score
   })
 
