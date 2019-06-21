@@ -63,3 +63,40 @@ exports.updateStats = functions.firestore
     }
     return null;
   })
+
+exports.createLiveGames = functions.firestore
+  .document('liveGames/{liveGameID}')
+  .onCreate((doc, context) => {
+    const data = doc.data()
+    let updatedData = {
+      playerIDs: [],
+      lastUpdatedDate: admin.firestore.FieldValue.serverTimestamp(),
+    }
+    data.scores.forEach((score) => {
+      score.players.forEach((player) => {
+        updatedData.playerIDs.push(player.id)
+      })
+    })
+    return doc.ref.set(updatedData, {merge: true})
+  })
+
+exports.updateLiveGames = functions.firestore
+  .document('liveGames/{liveGameID}')
+  .onUpdate((change, context) => {
+    const data = change.after.data()
+    if (!data.playerIDs) {
+      let updatedData = {
+        playerIDs: [],
+        lastUpdatedDate: admin.firestore.FieldValue.serverTimestamp(),
+      }
+
+      data.scores.forEach((score) => {
+        score.players.forEach((player) => {
+          updatedData.playerIDs.push(player.id)
+        })
+      })
+
+      return change.after.ref.set(updatedData, {merge: true})
+    }
+    return null
+  })

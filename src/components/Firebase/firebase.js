@@ -20,6 +20,7 @@ class Firebase {
     this.auth = app.auth()
     this.db = app.firestore()
     this.Timestamp = app.firestore.Timestamp
+    this.FieldValue = app.firestore.FieldValue
 
     this.googleProvider = new app.auth.GoogleAuthProvider()
   }
@@ -269,6 +270,31 @@ class Firebase {
       }
     })
 
+  /**
+   * live games
+   */
+
+  liveGames = (resolve) => this.db.collection('liveGames')
+    .onSnapshot((livegamesSnapshot) => {
+      let livegames = [], promises = []
+      livegamesSnapshot.forEach((snapshot) => {
+        const data = snapshot.data()
+        if (data.playerIDs) {
+          livegames.push({
+            ...data,
+            id: snapshot.id,
+          })
+        }
+      })
+      this.resultsResolvePlayers(livegames)
+        .then(() => {
+          resolve(livegames)
+        })
+    })
+
+  liveGame = (id) => this.db.collection('liveGames').doc(id)
+
+  liveGameAdd = (item) => this.db.collection('liveGames').add(item)
 
 }
 

@@ -19,6 +19,8 @@ import Moment from 'moment'
 import momentLocalizer from 'react-widgets-moment';
 import Ranking from '../Ranking'
 import Player from '../Player'
+import LiveGames from '../LiveGames'
+import LiveGame from '../LiveGames/LiveGame'
 
 Moment.locale('de')
 momentLocalizer()
@@ -42,6 +44,8 @@ const App = () => (
       <Route path={ROUTES.RESULT} component={Result}/>
       <Route path={ROUTES.RANKING} component={Ranking}/>
       <Route path={ROUTES.PLAYER} component={Player}/>
+      <Route exact path={ROUTES.LIVE_GAMES} component={LiveGames}/>
+      <Route path={ROUTES.LIVE_GAME} component={LiveGame}/>
     </div>
   </Router>
 )
