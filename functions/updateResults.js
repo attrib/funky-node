@@ -61,9 +61,9 @@ function updateStatsFromResults (firestore, data, oldData, force = false) {
           played: admin.firestore.FieldValue.increment(-1),
           sum: admin.firestore.FieldValue.increment(score.funkies * -1),
           gameIDs: admin.firestore.FieldValue.arrayUnion(oldData.gameID),
-          [`games.${data.gameID}.won`]: admin.firestore.FieldValue.increment(score.won * -1),
-          [`games.${data.gameID}.played`]: admin.firestore.FieldValue.increment(-1),
-          [`games.${data.gameID}.sum`]: admin.firestore.FieldValue.increment(score.funkies * -1),
+          [`games.${oldData.gameID}.won`]: admin.firestore.FieldValue.increment(score.won * -1),
+          [`games.${oldData.gameID}.played`]: admin.firestore.FieldValue.increment(-1),
+          [`games.${oldData.gameID}.sum`]: admin.firestore.FieldValue.increment(score.funkies * -1),
         }))
       })
     })
