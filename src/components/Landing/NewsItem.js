@@ -6,6 +6,7 @@ import MarkdownIt from 'markdown-it'
 import * as ROUTES from '../../constants/routes'
 import { withRouter } from 'react-router-dom'
 import { compose } from 'recompose'
+import { FormattedDate } from '../Utils/FormattedDate'
 const md = new MarkdownIt()
 
 class NewsItem extends Component {
@@ -80,11 +81,7 @@ class NewsItem extends Component {
           <Row className="news">
             <Col className="news-entry">
               <h2>{Title}</h2>
-              <div className="date">{new Intl.DateTimeFormat('de-DE', {
-                year: 'numeric',
-                month: 'long',
-                day: '2-digit'
-              }).format(Date.toDate())}</div>
+              <div className="date"><FormattedDate date={Date} /></div>
               {
                 !edit && (
                   <>

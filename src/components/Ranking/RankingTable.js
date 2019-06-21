@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
-import { PlayerNames } from '../Results/RecentResults'
 import Funkies from '../Results/Funkies'
 import { Table } from 'reactstrap'
 import { FaSortDown } from 'react-icons/fa'
 import { GiTwoCoins } from 'react-icons/gi'
+import PlayerNames from '../Player/PlayerNames'
 
 class RankingTable extends Component {
 

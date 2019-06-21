@@ -62,7 +62,10 @@ class NewsList extends Component {
         </AuthUserContext.Consumer>
         {
           news.map(news => (
-            <NewsItem news={news} key={news.id}/>
+            <div key={news.id}>
+              <NewsItem news={news}/>
+              <hr/>
+            </div>
           ))
         }
       </div>

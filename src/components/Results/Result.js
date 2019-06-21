@@ -2,11 +2,13 @@ import React, { Component } from 'react'
 import { withFirebase } from '../Firebase'
 import AuthUserContext from '../Session/context'
 import { Button, Col, Container, Row } from 'reactstrap'
-import { Score, Winner } from './RecentResults'
 import * as ROUTES from '../../constants/routes'
-import { Link, withRouter } from 'react-router-dom'
+import { withRouter } from 'react-router-dom'
 import ResultForm from './ResultForm'
 import { compose } from 'recompose'
+import Score from './Score'
+import GameLink from '../Games/GameLink'
+import { FormattedDateTime } from '../Utils/FormattedDate'
 
 class Result extends Component {
 
@@ -99,26 +101,20 @@ class Result extends Component {
                 <Row>
                   <Col sm={2}>Date</Col>
                   <Col>
-                    { new Intl.DateTimeFormat('de-DE', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: '2-digit',
-                      hour: 'numeric',
-                      minute: 'numeric'
-                    }).format(result.date.toDate()) }
+                    <FormattedDateTime date={result.date} />
                   </Col>
                 </Row>
                 <Row>
                   <Col sm={2}>Game</Col>
-                  <Col><Link to={`${ROUTES.GAMES}/${result.gameID}`}>{result.game.name}</Link></Col>
+                  <Col><GameLink game={result.game}/></Col>
                 </Row>
                 <Row>
                   <Col sm={2}>Winner</Col>
-                  <Col><Winner result={result} funkies={true} /></Col>
+                  <Col><Score winners result={result} funkies={true} /></Col>
                 </Row>
                 <Row>
                   <Col sm={2}>Score</Col>
-                  <Col><Score result={result} funkies={true}/></Col>
+                  <Col><Score losers result={result} funkies={true}/></Col>
                 </Row>
                 <Row>
                   <Col sm={2}>Notes</Col>

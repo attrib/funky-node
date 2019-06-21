@@ -111,6 +111,11 @@ class LinkedPlayers extends Component {
           userID: this.props.user.uid
         }, {merge: true})
           .then(() => {
+            return this.props.firebase.user(this.props.user.uid).set({
+              playerIDs: this.props.firebase.FieldValue.arrayUnion(player.id)
+            }, {merge: true})
+          })
+          .then(() => {
             player.userID = this.props.user.uid
             const players = this.state.players
             players.push(player)
