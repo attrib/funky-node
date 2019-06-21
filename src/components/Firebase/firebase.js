@@ -276,7 +276,7 @@ class Firebase {
 
   liveGames = (resolve) => this.db.collection('liveGames')
     .onSnapshot((livegamesSnapshot) => {
-      let livegames = [], promises = []
+      let livegames = []
       livegamesSnapshot.forEach((snapshot) => {
         const data = snapshot.data()
         if (data.playerIDs) {

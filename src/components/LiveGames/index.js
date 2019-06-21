@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { withFirebase } from '../Firebase'
-import { Table, Container, Button } from 'reactstrap'
+import { Table, Container } from 'reactstrap'
 import GameLink from '../Games/GameLink'
 import { FormattedDateTime } from '../Utils/FormattedDate'
 import LiveGameLink from './LiveGameLink'
