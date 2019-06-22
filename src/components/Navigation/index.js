@@ -29,7 +29,7 @@ const NavigationAuth = ({authUser}) => (
     </NavItem>
     {!!authUser.roles[ROLES.ADMIN] && (
       <NavItem>
-        <NavLink tag={RRNavLink} exact to={ROUTES.ADMIN} activeClassName="active">Admin</NavLink>
+        <NavLink tag={RRNavLink} to={ROUTES.ADMIN} activeClassName="active">Admin</NavLink>
       </NavItem>
     )}
     <NavItem>

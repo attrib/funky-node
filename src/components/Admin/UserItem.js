@@ -26,10 +26,7 @@ class UserItem extends Component {
       .get()
       .then(doc => {
         this.setState({
-          user: {
-            uid: doc.id,
-            ...doc.data(),
-          },
+          user: doc,
           loading: false,
         })
       })
@@ -46,16 +43,16 @@ class UserItem extends Component {
       roles[role] = role
     })
 
-    user.roles = roles
-
     this.setState({
-      user,
       savingRole: true,
     })
-
-    this.props.firebase.user(user.uid).set({roles}, { merge: true })
+    user.ref.update({roles})
       .then(() => {
+        return user.ref.get()
+      })
+      .then((doc) => {
         this.setState({
+          user: doc,
           savingRole: false,
         })
       })
@@ -63,6 +60,7 @@ class UserItem extends Component {
 
   render () {
     const {user, loading, savingRole} = this.state
+    const userData = user ? user.data() : null
     return (
       <div>
         <h2>User</h2>
@@ -71,19 +69,19 @@ class UserItem extends Component {
           <>
             <Row>
               <Col><strong>ID:</strong></Col>
-              <Col>{user.uid}</Col>
+              <Col>{user.id}</Col>
             </Row>
             <Row>
               <Col><strong>E-Mail:</strong></Col>
-              <Col>{user.email}</Col>
+              <Col>{userData.email}</Col>
             </Row>
             <Row>
               <Col><strong>Username:</strong></Col>
-              <Col>{user.username}</Col>
+              <Col>{userData.username}</Col>
             </Row>
             <Row>
               <Col><strong>Roles</strong></Col>
-              <Col><Multiselect placholder="Roles" data={Object.values(ROLES)} value={Object.keys(user.roles)} onChange={this.onChangeRole} busy={savingRole}/></Col>
+              <Col><Multiselect placholder="Roles" data={Object.values(ROLES)} value={Object.keys(userData.roles)} onChange={this.onChangeRole} busy={savingRole}/></Col>
             </Row>
             <Row>
               <Button

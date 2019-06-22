@@ -17,22 +17,18 @@ class UserList extends Component {
   componentDidMount () {
     this.setState({loading: true})
 
-    this.props.firebase.users()
-      .then(snapshot => {
-        let usersList = []
-        snapshot.forEach(document => {
-          usersList.push({
-            ...document.data(),
-            uid: document.id,
-          })
-        })
-
-        this.setState({
-          users: usersList,
-          loading: false,
-        })
+    this.unsubscribe = this.props.firebase.users((usersList) => {
+      this.setState({
+        users: usersList.docs,
+        loading: false,
       })
-      .catch(error => console.log(error))
+    }, (error) => {
+      console.log(error)
+    })
+  }
+
+  componentWillUnmount () {
+    this.unsubscribe()
   }
 
   render () {
@@ -53,23 +49,24 @@ class UserList extends Component {
             </tr>
           </thead>
           <tbody>
-          {users.map(user => (
-            <tr key={user.uid}>
-              <td>{user.uid}</td>
-              <td>{user.username}</td>
-              <td><Roles roles={user.roles}/></td>
+          {users.map(user => {
+            const userData = user.data()
+            return (
+            <tr key={user.id}>
+              <td>{user.id}</td>
+              <td>{userData.username}</td>
+              <td><Roles roles={userData.roles}/></td>
               <td>
                 <Link
                   to={{
-                    pathname: `${ROUTES.ADMIN}/${user.uid}`,
-                    state: {user},
+                    pathname: ROUTES.ADMIN_DETAILS.replace(':id', user.id),
                   }}
                 >
                   Details
                 </Link>
               </td>
             </tr>
-          ))}
+          )})}
           </tbody>
         </Table>
       </div>
