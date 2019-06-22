@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Alert, Button, ButtonGroup, Col, Form, FormGroup, Input, Label, Row } from 'reactstrap'
+import { Alert, Button, ButtonGroup, Col, Form, FormGroup, Input, Label, Row, Spinner } from 'reactstrap'
 import { DateTimePicker, DropdownList } from 'react-widgets'
 import { withFirebase } from '../Firebase'
 import SimpleTableForm from './SimpleTableForm'
@@ -290,7 +290,7 @@ class LiveGameForm extends Component {
         </FormGroup>
         <FormGroup row>
           <ButtonGroup className="col-sm-3 offset-sm-9">
-            {/*{this.state.liveUpdate && <Spinner color="success" />}*/}
+            {this.state.liveUpdate && <Spinner color="success" />}
             {this.props.user && this.state.id && this.props.user.uid === this.state.authorID &&
             <Button color="danger" type="submit" onClick={this.onDelete}>Delete</Button>}
             {this.props.user &&
