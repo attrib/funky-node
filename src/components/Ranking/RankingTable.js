@@ -10,10 +10,19 @@ class RankingTable extends Component {
   constructor (props) {
     super(props)
 
+    this.sort(props.ranking, 'funkyDiff')
     this.state = {
       ranking: props.ranking,
-      sort: 'funkies',
+      sort: 'funkyDiff',
     }
+  }
+
+  sort = (ranking, field) => {
+    ranking.players.sort((a, b) => {
+      if (a[field] > b[field]) return -1
+      if (a[field] < b[field]) return 1
+      return 0
+    })
   }
 
   onSort = (field) => {
@@ -21,11 +30,7 @@ class RankingTable extends Component {
       return
     }
     let ranking = this.state.ranking
-    ranking.players.sort((a, b) => {
-      if (a[field] > b[field]) return -1
-      if (a[field] < b[field]) return 1
-      return 0
-    })
+    this.sort(ranking, field)
     this.setState({ranking, sort: field})
   }
 
