@@ -11,7 +11,6 @@ You will find some information on how to perform common tasks [here](https://git
 ## todos
 
 * (WiP) Live Games
-* import old data (2014)
 * upload images / location
 * pagination
 * (WiP) Mobile support

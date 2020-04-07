@@ -61,6 +61,7 @@ class ScoreRankingForm extends Component {
     // convert to score structure
     let scores = [], points = 1
     ranking.reverse().forEach((score, index) => {
+      let skip = 0
       score.players.forEach((player) => {
         if (player.nick !== '') {
           scores.push({
@@ -68,9 +69,10 @@ class ScoreRankingForm extends Component {
             players: [player],
             rank: score.rank,
           })
+          skip++
         }
       })
-      points++
+      points = points + skip
     })
     ranking.reverse()
     scores = scores.reverse()
