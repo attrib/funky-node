@@ -13,6 +13,10 @@ const RankingGames = ['Poker']
 const tables = {}
 
 fs.readFile('funkyOld.sql', (err, data) => {
+  if (err) {
+    console.log('Error reading file', err);
+    return
+  }
   const regexp = RegExp('INSERT INTO `(.*)` VALUES (.*);','gi');
   const matches = data.toString('utf8').matchAll(regexp);
 
@@ -52,6 +56,7 @@ fs.readFile('funkyOld.sql', (err, data) => {
         }
         tables.result[item.rawData[2]].scores[item.rawData[4]].players.push(tables.player[item.rawData[1]].ref);
       })
+      return tables
     })
     .then(() => {
       let promises = []
@@ -73,7 +78,7 @@ fs.readFile('funkyOld.sql', (err, data) => {
         if (tables.game[item.rawData[1]].doc && tables.game[item.rawData[1]].doc.scoreWidget === 'ScoreRankingForm') {
           const newScores = []
           let points = 0, lastScore = -1, rank = result.scores.length+1, skip = 1
-          result.scores.sort(function (a, b) {
+          result.scores.sort((a, b) => {
             return a.score - b.score;
           }).forEach((scoreItem) => {
             if (lastScore !== scoreItem.score) {
@@ -110,6 +115,9 @@ fs.readFile('funkyOld.sql', (err, data) => {
       })
       return Promise.all(promises)
     })
+    .catch((err) => {
+      console.log('error fetching game', err)
+    })
 })
 
 function fetchGames () {
@@ -124,9 +132,10 @@ function fetchGames () {
           const snapshot = snapshots.docs.shift();
           item.id = snapshot.id
           item.doc = snapshot.data()
+          return item
         }
         else if (snapshots.size > 1) {
-          console.error(`Multiple games found for ${item.name}`)
+          throw new Error(`Multiple games found for ${item.name}`)
         }
         else {
           console.log(`Unknown game ${item.name}`)
@@ -137,6 +146,7 @@ function fetchGames () {
             authorID: authorID,
             image: null,
             liveGameWidget: 'SimpleTable',
+            // eslint-disable-next-line promise/always-return
             scoreWidget: RankingGames.includes(gameName) ? 'ScoreRankingForm' : 'ScoreTeamForm',
           }).then((game) => {
             return game.get()
@@ -144,6 +154,7 @@ function fetchGames () {
           .then((game) => {
             item.id = game.id
             item.doc = game.data()
+            return item
           })
         }
       }))
@@ -163,9 +174,10 @@ function fetchPlayers () {
           item.id = snapshot.id
           item.ref = snapshot.ref
           item.doc = snapshot.data()
+          return item
         }
         else if (snapshots.size > 1) {
-          console.log(`Multiple players found for ${item.nick}`)
+          throw new Error(`Multiple players found for ${item.nick}`)
         }
         else {
           console.log(`Unknown player ${item.nick}`)
@@ -179,6 +191,7 @@ function fetchPlayers () {
               item.id = player.id
               item.ref = player.ref
               item.doc = player.data()
+              return item
             })
         }
       }))

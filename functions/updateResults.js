@@ -50,13 +50,13 @@ function updateResults(data, force = false) {
   }
 }
 
-function updateStatsFromResults (firestore, data, oldData, force = false) {
+function updateStatsFromResults (firestore, data, oldData, forceResultUpdate = false, forceStatsRankingUpdate = false, seasonPrefix = '') {
   let promises = [];
   // delete result
   if (data === null) {
     oldData.scores.forEach((score) => {
       score.players.forEach((player) => {
-        promises.push(firestore.doc(`stats/${player.id}`).update({
+        promises.push(firestore.doc(`${seasonPrefix}/stats/${player.id}`).update({
           won: admin.firestore.FieldValue.increment(score.won * -1),
           played: admin.firestore.FieldValue.increment(-1),
           sum: admin.firestore.FieldValue.increment(score.funkies * -1),
@@ -70,11 +70,17 @@ function updateStatsFromResults (firestore, data, oldData, force = false) {
     return Promise.all(promises);
   }
   // create/update result
-  const updatedData = updateResults(data, force);
+  let updatedData = false
+  if (forceResultUpdate) {
+    updatedData = updateResults(data, forceResultUpdate)
+  }
+  if (!updatedData && forceStatsRankingUpdate) {
+    updatedData = data
+  }
   if (!updatedData) return new Promise(() => {});
   updatedData.scores.forEach((score, i) => {
     score.players.forEach((player, j) => {
-      promises.push(firestore.doc(`stats/${player.id}`).get())
+      promises.push(firestore.doc(`${seasonPrefix}/stats/${player.id}`).get())
     })
   })
   return Promise.all(promises)
@@ -88,7 +94,7 @@ function updateStatsFromResults (firestore, data, oldData, force = false) {
               if (player.id === playerID) {
                 const won = oldData ? score.won - oldData.scores[i].won : score.won
                 const funkies = oldData ? score.funkies - oldData.scores[i].score : score.funkies
-                promises.push(firestore.doc(`stats/${player.id}`).update({
+                promises.push(firestore.doc(`${seasonPrefix}/stats/${player.id}`).update({
                   won: admin.firestore.FieldValue.increment(won),
                   played: admin.firestore.FieldValue.increment(oldData ? 0 : 1),
                   sum: admin.firestore.FieldValue.increment(funkies),
@@ -105,7 +111,7 @@ function updateStatsFromResults (firestore, data, oldData, force = false) {
           updatedData.scores.forEach((score, i) => {
             score.players.forEach((player, j) => {
               if (player.id === playerID) {
-                promises.push(firestore.doc(`stats/${player.id}`).set({
+                promises.push(firestore.doc(`${seasonPrefix}/stats/${player.id}`).set({
                   won: score.won,
                   played: 1,
                   sum: score.funkies,
@@ -124,8 +130,8 @@ function updateStatsFromResults (firestore, data, oldData, force = false) {
         }
       })
       if (!oldData) {
-        promises.push(firestore.doc(`ranking/all`).set({played: admin.firestore.FieldValue.increment(1)}, {merge: true}))
-        promises.push(firestore.doc(`ranking/${data.gameID}`).set({played: admin.firestore.FieldValue.increment(1)}, {merge: true}))
+        promises.push(firestore.doc(`${seasonPrefix}/ranking/all`).set({played: admin.firestore.FieldValue.increment(1)}, {merge: true}))
+        promises.push(firestore.doc(`${seasonPrefix}/ranking/${data.gameID}`).set({played: admin.firestore.FieldValue.increment(1)}, {merge: true}))
       }
       return Promise.all(promises)
     })

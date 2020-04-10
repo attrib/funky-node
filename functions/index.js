@@ -29,7 +29,21 @@ exports.updateResults = functions.firestore
     return updateStatsFromResults(firestore, data, oldData)
       .then((updatedData) => {
         return change.after.ref.set(updatedData, {merge: true})
-      });
+      })
+      .then(() => {
+        const date = data ? data.date : oldData.date;
+        return firestore.collection('season')
+          .where('startDate', '>=', date)
+          .where('endDate', '<', date)
+          .get()
+      })
+      .then((snapshots) => {
+        const promises = []
+        snapshots.forEach((snapshot) => {
+          promises.push(updateStatsFromResults(firestore, data, oldData, false, true, `season/${snapshot.id}`))
+        })
+        return Promise.all(promises)
+      })
   });
 
 exports.updateStats = functions.firestore

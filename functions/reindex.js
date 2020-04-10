@@ -3,13 +3,25 @@ const admin = require('firebase-admin')
 admin.initializeApp()
 const firestore = admin.firestore()
 const updateStatsFromResults = require('./updateResults').updateStatsFromResults
+const seasonPrefix = 'season/spjNV8vZz7KfGZFbE2d2'
+const forceUpdateFunkiesPerResult = false
+const wait = forceUpdateFunkiesPerResult ? 1500 : 0
 
-deleteCollection(firestore, 'ranking', 10)
+const DateFormat = new Intl.DateTimeFormat('de-DE', {
+  year: 'numeric',
+  month: 'numeric',
+  day: '2-digit',
+})
+
+deleteCollection(firestore, `${seasonPrefix}/ranking`, 10)
   .then(() => {
-    return deleteCollection(firestore, 'stats', 10)
+    return deleteCollection(firestore, `${seasonPrefix}/stats`, 10)
   })
   .then(() => {
-    return firestore.collection('results').get()
+    let collection = firestore.collection('results');
+    collection = collection.where('date', '>=', new Date('2011-01-01'))
+    collection = collection.where('date', '<', new Date('2013-01-01'))
+    return collection.get()
   })
   .then((documents) => {
     let promises = [], i = 1
@@ -18,14 +30,19 @@ deleteCollection(firestore, 'ranking', 10)
       promises.push(new Promise((resolve, reject) => {
         setTimeout(() => {
           resolve(document.id)
-        }, i * 1500)
+        }, i * wait)
       })
         .then((id) => {
-          console.log(id)
-          return updateStatsFromResults(firestore, updatedData, null, true)
+          console.log(id + ' from ' + DateFormat.format(updatedData.date.toDate()))
+          return updateStatsFromResults(firestore, updatedData, null, forceUpdateFunkiesPerResult, true, seasonPrefix)
         })
         .then((updatedData) => {
-          return document.ref.set(updatedData, {merge: true})
+          if (forceUpdateFunkiesPerResult) {
+            return document.ref.set(updatedData, {merge: true})
+          }
+          else {
+            return {write: false}
+          }
         }))
       i++
     })
