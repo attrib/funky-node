@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { Container } from 'reactstrap'
 import { withFirebase } from '../Firebase'
 import RankingTable from './RankingTable'
+import withSeason from '../Season/withSeason'
 
 class Ranking extends Component {
 
@@ -15,17 +16,26 @@ class Ranking extends Component {
   }
 
   componentDidMount () {
-    if (this.state.ranking) {
+    this.updateRankings()
+  }
+
+  componentDidUpdate () {
+    this.updateRankings()
+  }
+
+  updateRankings = () => {
+    if ((this.state.ranking && this.props.seasonPrefix === this.state.ranking.loadedSeasonPrefix) || this.state.loading) {
       return
     }
 
     this.setState({loading: true})
 
-    this.props.firebase.ranking('all')
+    this.props.firebase.ranking('all', this.props.seasonPrefix)
       .then(ranking => {
         let promises = []
+        ranking.loadedSeasonPrefix = this.props.seasonPrefix
         ranking.players.forEach((player) => {
-          promises.push(this.props.firebase.stats(player.id))
+          promises.push(this.props.firebase.stats(player.id, this.props.seasonPrefix))
         })
         return Promise.all(promises)
           .then((stats) => {
@@ -66,4 +76,4 @@ class Ranking extends Component {
 
 }
 
-export default withFirebase(Ranking)
+export default withSeason(withFirebase(Ranking))

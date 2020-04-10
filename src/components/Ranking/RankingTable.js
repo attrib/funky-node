@@ -17,6 +17,15 @@ class RankingTable extends Component {
     }
   }
 
+  componentDidUpdate (prevProps, prevState, snapshot) {
+    if (!prevState.ranking || prevState.ranking.loadedSeasonPrefix !== this.props.ranking.loadedSeasonPrefix) {
+      this.sort(this.props.ranking, 'funkyDiff')
+      this.setState({
+        ranking: this.props.ranking,
+      })
+    }
+  }
+
   sort = (ranking, field) => {
     ranking.players.sort((a, b) => {
       if (a[field] > b[field]) return -1

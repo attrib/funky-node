@@ -6,6 +6,7 @@ import * as ROUTES from '../../constants/routes'
 import * as ROLES from '../../constants/roles'
 import { Collapse, Nav, Navbar, NavbarBrand, NavbarToggler, NavItem, NavLink } from 'reactstrap'
 import { AuthUserContext } from '../Session'
+import SeasonSelector from '../Season/SeasonSelector'
 
 const NavigationAuth = ({authUser}) => (
   <>
@@ -35,6 +36,7 @@ const NavigationAuth = ({authUser}) => (
     <NavItem>
       <SignOutButton/>
     </NavItem>
+    <SeasonSelector/>
   </>
 )
 
@@ -55,6 +57,7 @@ const NavigationNonAuth = () => (
     <NavItem>
       <NavLink tag={RRNavLink} exact to={ROUTES.SIGN_IN} activeClassName="active">Sign In</NavLink>
     </NavItem>
+    <SeasonSelector/>
   </>
 )
 

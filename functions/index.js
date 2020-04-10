@@ -49,34 +49,44 @@ exports.updateResults = functions.firestore
 exports.updateStats = functions.firestore
   .document('stats/{playerID}')
   .onWrite((change, context) => {
-    if (change.after.exists) {
-      const data = change.after.data();
-      const oldData = change.before.data();
-      let updatedData = {}
-      let promises = []
-      if (!oldData || oldData.played !== data.played || oldData.sum !== data.sum || !data.avg || Math.round(data.avg * 1000) !== Math.round(data.sum / data.played * 1000)) {
-        updatedData.avg = data.sum / data.played
-        promises.push(firestore.doc(`ranking/all`).set({
-          [context.params.playerID]: updatedData.avg
+    updateStats(change, context, '')
+  })
+
+exports.updateSeasonStats = functions.firestore
+  .document('season/{seasonID}/stats/{playerID}')
+  .onWrite((change, context) => {
+    updateStats(change, context, 'season/' + context.params.seasonID)
+  })
+
+function updateStats(change, context, seasonPrefix)  {
+  if (change.after.exists) {
+    const data = change.after.data();
+    const oldData = change.before.data();
+    let updatedData = {}
+    let promises = []
+    if (!oldData || oldData.played !== data.played || oldData.sum !== data.sum || !data.avg || Math.round(data.avg * 1000) !== Math.round(data.sum / data.played * 1000)) {
+      updatedData.avg = data.sum / data.played
+      promises.push(firestore.doc(`${seasonPrefix}/ranking/all`).set({
+        [context.params.playerID]: updatedData.avg
+      }, {merge: true}))
+    }
+    Object.keys(data.games).forEach((gameID) => {
+      if (!oldData || !oldData.games || !oldData.games[gameID] || oldData.games[gameID].played !== data.games[gameID].played || oldData.games[gameID].sum !== data.games[gameID].sum || !data.games[gameID].avg || Math.round(data.games[gameID].avg * 1000) !== Math.round(data.games[gameID].sum / data.games[gameID].played * 1000)) {
+        updatedData[`games.${gameID}.avg`] = data.games[gameID].sum / data.games[gameID].played
+        promises.push(firestore.doc(`${seasonPrefix}/ranking/${gameID}`).set({
+          [context.params.playerID]: data.games[gameID].sum / data.games[gameID].played
         }, {merge: true}))
       }
-      Object.keys(data.games).forEach((gameID) => {
-        if (!oldData || !oldData.games || !oldData.games[gameID] || oldData.games[gameID].played !== data.games[gameID].played || oldData.games[gameID].sum !== data.games[gameID].sum || !data.games[gameID].avg || Math.round(data.games[gameID].avg * 1000) !== Math.round(data.games[gameID].sum / data.games[gameID].played * 1000)) {
-          updatedData[`games.${gameID}.avg`] = data.games[gameID].sum / data.games[gameID].played
-          promises.push(firestore.doc(`ranking/${gameID}`).set({
-            [context.params.playerID]: data.games[gameID].sum / data.games[gameID].played
-          }, {merge: true}))
-        }
-      })
-      if (Object.keys(updatedData).length > 0) {
-        promises.push(change.after.ref.update(updatedData))
-      }
-      if (promises.length > 0) {
-        return Promise.all(promises)
-      }
+    })
+    if (Object.keys(updatedData).length > 0) {
+      promises.push(change.after.ref.update(updatedData))
     }
-    return null;
-  })
+    if (promises.length > 0) {
+      return Promise.all(promises)
+    }
+  }
+  return null;
+}
 
 exports.createLiveGames = functions.firestore
   .document('liveGames/{liveGameID}')

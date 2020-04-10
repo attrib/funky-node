@@ -3,9 +3,9 @@ const admin = require('firebase-admin')
 admin.initializeApp()
 const firestore = admin.firestore()
 const updateStatsFromResults = require('./updateResults').updateStatsFromResults
-const seasonPrefix = 'season/spjNV8vZz7KfGZFbE2d2'
+const seasonPrefix = 'season/nfgiPoF2rtTvBSD1IGVS'
 const forceUpdateFunkiesPerResult = false
-const wait = forceUpdateFunkiesPerResult ? 1500 : 0
+const wait = forceUpdateFunkiesPerResult ? 1500 : 200
 
 const DateFormat = new Intl.DateTimeFormat('de-DE', {
   year: 'numeric',
@@ -19,8 +19,8 @@ deleteCollection(firestore, `${seasonPrefix}/ranking`, 10)
   })
   .then(() => {
     let collection = firestore.collection('results');
-    collection = collection.where('date', '>=', new Date('2011-01-01'))
-    collection = collection.where('date', '<', new Date('2013-01-01'))
+    collection = collection.where('date', '>=', new Date('2020-01-01'))
+    collection = collection.where('date', '<', new Date('2021-01-01'))
     return collection.get()
   })
   .then((documents) => {

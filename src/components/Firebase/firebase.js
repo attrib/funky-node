@@ -224,7 +224,7 @@ class Firebase {
         })
     })
 
-  ranking = name => this.db.collection('ranking').doc(name).get()
+  ranking = (name, prefix = '') => this.db.collection(`${prefix}/ranking`).doc(name).get()
     .then((snapshot) => {
       if (!snapshot.exists) {
         return {
@@ -262,7 +262,7 @@ class Firebase {
         })
     })
 
-  stats = playerId => this.db.collection('stats').doc(playerId).get()
+  stats = (playerId, seasonPrefix = '') => this.db.collection(`${seasonPrefix}/stats`).doc(playerId).get()
     .then((stats) => {
       return {
         ...stats.data(),
@@ -295,6 +295,20 @@ class Firebase {
   liveGame = (id) => this.db.collection('liveGames').doc(id)
 
   liveGameAdd = (item) => this.db.collection('liveGames').add(item)
+
+  seasons = () => this.db.collection('season')
+    .orderBy('endDate', 'asc')
+    .get()
+    .then((snapshots) => {
+      let seasons = []
+      snapshots.forEach((snapshot) => {
+        seasons.push({
+          ...snapshot.data(),
+          id: snapshot.id
+        })
+      })
+      return seasons
+    })
 
 }
 
