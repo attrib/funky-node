@@ -28,7 +28,7 @@ class Ranking extends Component {
       return
     }
 
-    this.setState({loading: true})
+    this.setState({loading: true, ranking: null})
 
     this.props.firebase.ranking('all', this.props.seasonPrefix)
       .then(ranking => {

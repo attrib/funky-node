@@ -14,3 +14,11 @@ You will find some information on how to perform common tasks [here](https://git
 * upload images / location
 * pagination
 * (WiP) Mobile support
+
+
+# local testing
+
+    export GOOGLE_APPLICATION_CREDENTIALS=`pwd`/functions/account.json
+    firebase emulators:start #--import=./dir
+    
+    node functions/test/create_testdata.js

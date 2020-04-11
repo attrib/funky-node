@@ -3,9 +3,9 @@ const admin = require('firebase-admin')
 admin.initializeApp()
 const firestore = admin.firestore()
 const updateStatsFromResults = require('./updateResults').updateStatsFromResults
-const seasonPrefix = 'season/nfgiPoF2rtTvBSD1IGVS'
+const seasons = []
 const forceUpdateFunkiesPerResult = false
-const wait = forceUpdateFunkiesPerResult ? 1500 : 200
+const wait = 1000
 
 const DateFormat = new Intl.DateTimeFormat('de-DE', {
   year: 'numeric',
@@ -13,14 +13,38 @@ const DateFormat = new Intl.DateTimeFormat('de-DE', {
   day: '2-digit',
 })
 
-deleteCollection(firestore, `${seasonPrefix}/ranking`, 10)
+firestore.collection('season').get()
+  .then((snapshots) => {
+    snapshots.forEach((snapshot) => {
+      const seasonData = snapshot.data()
+      seasons.push({
+        ...snapshot.data(),
+        id: snapshot.id,
+        prefix: `season/${snapshot.id}`,
+      })
+    })
+    seasons.push({
+      prefix: '',
+      id: 'all'
+    })
+    return seasons
+  })
+  .then((seasons) => {
+    const promises = []
+    seasons.forEach((season) => {
+      promises.push(deleteCollection(firestore, `${season.prefix}/ranking`, 10))
+    })
+    return Promise.all(promises)
+  })
   .then(() => {
-    return deleteCollection(firestore, `${seasonPrefix}/stats`, 10)
+    const promises = []
+    seasons.forEach((season) => {
+      promises.push(deleteCollection(firestore, `${season.prefix}/stats`, 10))
+    })
+    return Promise.all(promises)
   })
   .then(() => {
     let collection = firestore.collection('results');
-    collection = collection.where('date', '>=', new Date('2020-01-01'))
-    collection = collection.where('date', '<', new Date('2021-01-01'))
     return collection.get()
   })
   .then((documents) => {
@@ -34,7 +58,13 @@ deleteCollection(firestore, `${seasonPrefix}/ranking`, 10)
       })
         .then((id) => {
           console.log(id + ' from ' + DateFormat.format(updatedData.date.toDate()))
-          return updateStatsFromResults(firestore, updatedData, null, forceUpdateFunkiesPerResult, true, seasonPrefix)
+          let seasonPrefixes = []
+          seasons.forEach((season) => {
+            if (season.id === 'all' || (updatedData.date < season.endDate && updatedData.date >= season.startDate)) {
+              seasonPrefixes.push(season.prefix)
+            }
+          })
+          return updateStatsFromResults(firestore, updatedData, null, forceUpdateFunkiesPerResult, true, seasonPrefixes)
         })
         .then((updatedData) => {
           if (forceUpdateFunkiesPerResult) {

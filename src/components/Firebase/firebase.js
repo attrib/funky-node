@@ -15,7 +15,14 @@ const config = {
 class Firebase {
   constructor () {
     app.initializeApp(config)
-    app.firestore().enablePersistence({synchronizeTabs: true})
+
+    if (process.env.NODE_ENV !== 'production') {
+      app.firestore().settings({ host: "localhost:8080", ssl: false });
+    }
+    else {
+      app.firestore().enablePersistence({synchronizeTabs: true})
+    }
+
     this.emailAuthProvider = app.auth.EmailAuthProvider
     this.auth = app.auth()
     this.db = app.firestore()

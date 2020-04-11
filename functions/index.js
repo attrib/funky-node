@@ -26,36 +26,41 @@ exports.updateResults = functions.firestore
     // Retrieve the current value
     const data = change.after.exists ? change.after.data() : null;
     const oldData = change.before.data();
-    return updateStatsFromResults(firestore, data, oldData)
-      .then((updatedData) => {
-        return change.after.ref.set(updatedData, {merge: true})
-      })
-      .then(() => {
-        const date = data ? data.date : oldData.date;
-        return firestore.collection('season')
-          .where('startDate', '>=', date)
-          .where('endDate', '<', date)
-          .get()
-      })
-      .then((snapshots) => {
-        const promises = []
-        snapshots.forEach((snapshot) => {
-          promises.push(updateStatsFromResults(firestore, data, oldData, false, true, `season/${snapshot.id}`))
+    const date = data ? data.date : oldData.date;
+
+    return firestore.collection('season')
+      .where('endDate', '>=', date)
+      .get()
+      .then((documents) => {
+        let docs = []
+        documents.forEach((document) => {
+          const docData = document.data()
+          if (docData.startDate <= date) {
+            docs.push(document.id)
+          }
         })
-        return Promise.all(promises)
+        return docs
+      })
+      .then((seasonIds) => {
+        seasonIds = seasonIds.map((seasonId) => {
+          return `season/${seasonId}`
+        })
+        // all season
+        seasonIds.push('');
+        return updateStatsFromResults(firestore, data, oldData, false, false, seasonIds)
       })
   });
 
 exports.updateStats = functions.firestore
   .document('stats/{playerID}')
   .onWrite((change, context) => {
-    updateStats(change, context, '')
+    return updateStats(change, context, '')
   })
 
 exports.updateSeasonStats = functions.firestore
   .document('season/{seasonID}/stats/{playerID}')
   .onWrite((change, context) => {
-    updateStats(change, context, 'season/' + context.params.seasonID)
+    return updateStats(change, context, 'season/' + context.params.seasonID)
   })
 
 function updateStats(change, context, seasonPrefix)  {
