@@ -61,7 +61,7 @@ class RankingTable extends Component {
           <tr key={player.id}>
             <td>{i+1}</td>
             <td><PlayerNames players={[player]}/></td>
-            <td>{player.funkies.toFixed(2)} <GiTwoCoins style={{color: 'yellowgreen'}}/></td>
+            <td>{player.funkies.toFixed(2).replace('.', ',')} <GiTwoCoins style={{color: 'yellowgreen'}}/></td>
             <td><Funkies funkies={player.funkyDiff} /></td>
             <td>{player.won} / {player.played} ({player.wonPercentage.toFixed(0)}%)</td>
           </tr>

@@ -2,6 +2,8 @@ import Funkies from './Funkies'
 import PlayerNames from '../Player/PlayerNames'
 import React from 'react'
 
+const formatter = new Intl.NumberFormat('de-DE', { maximumSignificantDigits: 2 })
+
 const Score = ({result, funkies, winners, losers}) => {
   funkies = !!funkies
   const max = result.scores.reduce((max, value) => (value.score > max.score) ? value : max)
@@ -19,7 +21,7 @@ const Score = ({result, funkies, winners, losers}) => {
   })
   return scores.map((score, i) => (
     <div key={result.id + 'w' + i}>
-      {(funkies && score.funkies) && <Funkies funkies={score.funkies} />} <PlayerNames players={score.players}/> ({score.score})
+      {(funkies && score.funkies) && <Funkies funkies={score.funkies} />} <PlayerNames players={score.players}/> ({formatter.format(score.score)})
     </div>
   ))
 }

@@ -10,6 +10,7 @@ const Funkies = ({funkies}) => {
   else {
     funkies = funkies.toFixed(2)
   }
+  funkies = funkies.replace('.', ',')
   return (
     <span style={{color, width: '4.5em', display: 'inline-block'}}>{ funkies } <GiTwoCoins style={{color: 'yellowgreen'}}/></span>
   )
