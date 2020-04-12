@@ -45,7 +45,7 @@ class SeasonSelector extends Component {
               </DropdownItem>
             )) }
             <DropdownItem divider />
-            <DropdownItem active={selectedSeason.id === 'all'} onClick={() => changeSeason({id: 'all', name: 'Overall'})}>
+            <DropdownItem active={selectedSeason.id === 'all'} onClick={() => changeSeason({id: 'all', name: 'Overall', startDate: new Date('2000-01-01'), endDate: new Date('2040-01-01')})}>
               Overall
             </DropdownItem>
           </DropdownMenu>

@@ -3,6 +3,7 @@ import { compose } from 'recompose'
 import { withFirebase } from '../Firebase'
 import { Container } from 'reactstrap'
 import RecentResults from './RecentResults'
+import withSeason from '../Season/withSeason'
 
 class Results extends Component {
 
@@ -12,13 +13,25 @@ class Results extends Component {
     this.state = {
       loading: false,
       results: [],
+      lastSeason: null,
     }
   }
 
   componentDidMount () {
-    this.setState({loading: true})
+    this.updateResults()
+  }
 
-    this.props.firebase.results()
+  componentDidUpdate (prevProps, prevState, snapshot) {
+    this.updateResults()
+  }
+
+  updateResults = () => {
+    if (this.state.loading || this.state.lastSeason === this.props.seasonPrefix) {
+      return
+    }
+
+    this.setState({loading: true, results: []})
+    this.props.firebase.resultsForSeason(this.props.selectedSeason)
       .then(snapshot => {
         let results = []
         snapshot.forEach(document => {
@@ -32,7 +45,8 @@ class Results extends Component {
       .then((results) => {
         this.setState({
           results,
-          loading: false
+          loading: false,
+          lastSeason: this.props.seasonPrefix,
         })
       })
       .catch(error => console.log(error))
@@ -45,7 +59,7 @@ class Results extends Component {
       <div>
         <Container>
           {loading && <div>Loading ...</div>}
-          <RecentResults results={results} showGames showNotes/>
+          {!loading && <RecentResults results={results} showGames showNotes/>}
         </Container>
       </div>
     )
@@ -54,4 +68,5 @@ class Results extends Component {
 
 export default compose(
   withFirebase,
+  withSeason
 )(Results)

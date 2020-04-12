@@ -10,6 +10,7 @@ import { compose } from 'recompose'
 import RecentResults from '../Results/RecentResults'
 import { SelectList } from 'react-widgets'
 import RankingTable from '../Ranking/RankingTable'
+import { withSeason } from '../Season/withSeason'
 
 const md = new MarkdownIt()
 const scoreWidgetForms = [
@@ -47,8 +48,10 @@ class Game extends Component {
       game: game,
       error: null,
       recentResults: [],
+      recentResultsSeasonPrefix: null,
       scores: [],
       ranking: null,
+      rankingSeasonPrefix: null,
     }
   }
 
@@ -73,8 +76,25 @@ class Game extends Component {
       })
 
 
+    this.updateRecentResults()
+
+    this.updateRankings()
+  }
+
+  componentDidUpdate (prevProps, prevState, snapshot) {
+    this.updateRecentResults()
+    this.updateRankings()
+  }
+
+  updateRecentResults = () => {
+    if (this.state.recentResultsSeasonPrefix === this.props.seasonPrefix) {
+      return
+    }
+
+    const gameID = this.props.match.params.id
+
     this.props.firebase
-      .resultsByGameId(gameID)
+      .resultsByGameId(gameID, this.props.selectedSeason)
       .then(snapshot => {
         let results = []
         snapshot.forEach(document => {
@@ -89,15 +109,23 @@ class Game extends Component {
       .then((results) => {
         this.setState({
           recentResults: results,
+          recentResultsSeasonPrefix: this.props.seasonPrefix,
         })
       })
+  }
 
+  updateRankings = () => {
+    if (this.state.loading || this.state.rankingSeasonPrefix === this.props.seasonPrefix) {
+      return
+    }
 
-    this.props.firebase.ranking(gameID)
+    const gameID = this.props.match.params.id
+
+    this.props.firebase.ranking(gameID, this.props.seasonPrefix)
       .then(ranking => {
         let promises = []
         ranking.players.forEach((player) => {
-          promises.push(this.props.firebase.stats(player.id))
+          promises.push(this.props.firebase.stats(player.id, this.props.seasonPrefix))
         })
         return Promise.all(promises)
           .then((stats) => {
@@ -117,9 +145,11 @@ class Game extends Component {
           })
       })
       .then((ranking) => {
+        ranking.loadedSeasonPrefix = this.props.seasonPrefix
         this.setState({
           ranking,
           loading: false,
+          rankingSeasonPrefix: this.props.seasonPrefix,
         })
       })
   }
@@ -259,5 +289,6 @@ class Game extends Component {
 
 export default compose(
   withFirebase,
-  withRouter
+  withRouter,
+  withSeason
 )(Game)

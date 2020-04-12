@@ -127,7 +127,9 @@ class Firebase {
 
   results = () => this.resultsCollection().get()
 
-  resultsByGameId = (gameID) => this.resultsCollection().where('gameID', '==', gameID).get()
+  resultsForSeason = (season) => this.resultsCollection().where('date', '>=', season.startDate).where('date', '<', season.endDate).get()
+
+  resultsByGameId = (gameID, season) => this.resultsCollection().where('gameID', '==', gameID).where('date', '>=', season.startDate).where('date', '<', season.endDate).get()
 
   resultsByPlayerId = (playerID) => this.resultsCollection().where('playerIDs', 'array-contains', playerID).get()
 

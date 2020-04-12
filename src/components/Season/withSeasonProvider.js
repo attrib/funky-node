@@ -11,6 +11,8 @@ const withSeasonProvider = Component => {
         selectedSeason: {
           id: 'nfgiPoF2rtTvBSD1IGVS',
           name: '2020',
+          startDate: new Date('2020-01-01'),
+          endDate: new Date('2021-01-01'),
         },
         changeSeason: this.onClick
       }
