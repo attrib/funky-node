@@ -6,6 +6,7 @@ import Funkies from '../Results/Funkies'
 import { GiTwoCoins } from 'react-icons/gi'
 import * as ROUTES from '../../constants/routes'
 import { Link } from 'react-router-dom'
+import withSeason from '../Season/withSeason'
 
 class Player extends Component {
 
@@ -16,8 +17,10 @@ class Player extends Component {
       loading: false,
       player: null,
       recentResults: null,
+      recentResultsSeasonPrefix: null,
       playerRankings: null,
       stats: null,
+      rankingSeasonPrefix: null,
     }
 
     if (props.location.state && props.location.state.player) {
@@ -46,8 +49,8 @@ class Player extends Component {
         })
     }
 
-    if (!this.state.recentResults || idChanged) {
-      this.props.firebase.resultsByPlayerId(playerID)
+    if (!this.state.recentResults || idChanged || this.state.recentResultsSeasonPrefix !== this.props.seasonPrefix) {
+      this.props.firebase.resultsByPlayerId(playerID, this.props.selectedSeason)
         .then(snapshot => {
           let results = []
           snapshot.forEach(document => {
@@ -62,21 +65,23 @@ class Player extends Component {
         .then((results) => {
           this.setState({
             recentResults: results,
+            recentResultsSeasonPrefix: props.seasonPrefix,
           })
         })
     }
 
-    if (!this.state.stats || idChanged) {
-      this.props.firebase.stats(playerID)
+    if (!this.state.stats || idChanged || this.state.rankingSeasonPrefix !== this.props.seasonPrefix) {
+      this.props.firebase.stats(playerID, this.props.seasonPrefix)
         .then((stats) => {
           this.setState({
-            stats: stats
+            stats: stats,
+            rankingSeasonPrefix: props.seasonPrefix,
           })
           let promises = []
           Object.keys(stats.games).forEach((gameID) => {
-            promises.push(this.props.firebase.rankingWithGame(gameID))
+            promises.push(this.props.firebase.rankingWithGame(gameID, this.props.seasonPrefix))
           })
-          promises.push(this.props.firebase.rankingWithGame('all'))
+          promises.push(this.props.firebase.rankingWithGame('all', this.props.seasonPrefix))
           return Promise.all(promises)
         })
         .then((rankings) => {
@@ -103,6 +108,7 @@ class Player extends Component {
             if (a.funkies < b.funkies) return 1
             return 0
           })
+          playerRankings.loadedSeasonPrefix = this.props.seasonPrefix
           this.setState({playerRankings})
         })
     }
@@ -190,4 +196,4 @@ class Player extends Component {
 
 }
 
-export default withFirebase(Player)
+export default withFirebase(withSeason(Player))

@@ -131,7 +131,7 @@ class Firebase {
 
   resultsByGameId = (gameID, season) => this.resultsCollection().where('gameID', '==', gameID).where('date', '>=', season.startDate).where('date', '<', season.endDate).get()
 
-  resultsByPlayerId = (playerID) => this.resultsCollection().where('playerIDs', 'array-contains', playerID).get()
+  resultsByPlayerId = (playerID, season) => this.resultsCollection().where('playerIDs', 'array-contains', playerID).where('date', '>=', season.startDate).where('date', '<', season.endDate).get()
 
   result = (id) => this.db.collection('results').doc(id)
 
@@ -210,9 +210,16 @@ class Firebase {
    * ranking API
    */
 
-  rankingWithGame = name => this.db.collection('ranking').doc(name).get()
+  rankingWithGame = (name, prefix = '') => this.db.collection(`${prefix}/ranking`).doc(name).get()
     .then((ranking) => {
       const data = ranking.data()
+      if (!data) {
+        return {
+          players: [],
+          game: null,
+          id: null,
+        }
+      }
       delete data.played
       let players = []
       Object.keys(data).forEach((player) => {
