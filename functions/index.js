@@ -49,6 +49,9 @@ exports.updateResults = functions.firestore
         seasonIds.push('');
         return updateStatsFromResults(firestore, data, oldData, false, false, seasonIds)
       })
+      .then((updatedData) => {
+        return change.after.ref.set(updatedData, {merge: true})
+      })
   });
 
 exports.updateStats = functions.firestore

@@ -49,7 +49,7 @@ firestore.doc('users/0SM2ksh1V2MZ8ZYDZ704ZnVrrah1')
   })
   .then(() => {
     return firestore.doc('games/testgameScoreTeam').set({
-      authorID: 'nfgiPoF2rtTvBSD1IGVS',
+      authorID: '0SM2ksh1V2MZ8ZYDZ704ZnVrrah1',
       description: 'test description',
       image: null,
       liveGameWidget: 'SimpleTable',
@@ -59,7 +59,7 @@ firestore.doc('users/0SM2ksh1V2MZ8ZYDZ704ZnVrrah1')
   })
   .then(() => {
     return firestore.doc('results/result01').set({
-      authorID: 'nfgiPoF2rtTvBSD1IGVS',
+      authorID: '0SM2ksh1V2MZ8ZYDZ704ZnVrrah1',
       date: new Date(),
       game: 'testgameScoreTeam',
       gameID: 'testgameScoreTeam',
@@ -76,7 +76,7 @@ firestore.doc('users/0SM2ksh1V2MZ8ZYDZ704ZnVrrah1')
           score: 100,
         }
       ]
-    }, {merge: true})
+    })
   })
   .catch((error) => {
     console.log(error)

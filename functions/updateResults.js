@@ -79,7 +79,7 @@ function updateStatsFromResults (firestore, data, oldData, forceResultUpdate = f
   if (!updatedData && forceStatsRankingUpdate) {
     updatedData = data
   }
-  if (!updatedData) return new Promise((resolve, reject) => resolve({}));
+  if (!updatedData) return new Promise((resolve, reject) => resolve(data));
   seasonPrefixes.forEach((seasonPrefix) => {
     updatedData.scores.forEach((score, i) => {
       score.players.forEach((player, j) => {
