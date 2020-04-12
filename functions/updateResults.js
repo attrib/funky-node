@@ -6,7 +6,16 @@ function updateResults(data, force = false) {
   // This is crucial to prevent infinite loops.
   if (!force && (!data || data.playerIDs)) return null;
 
-  const origData = JSON.parse(JSON.stringify(data));
+  // Clone of scores... (JSON.stringify runs in error, because of circular structure - probably inside doc ref)
+  const origData = {
+    scores: []
+  }
+  data.scores.forEach((score, i) => {
+    origData.scores[i] = {
+      ...score
+    }
+  })
+
   const countPlayers = data.scores.reduce((acc, value) => acc + value.players.length, 0);
   let minScore = data.scores.reduce((acc, value) => (acc.score > value.score) ? value : acc);
   let normalizedScore = data.scores;
