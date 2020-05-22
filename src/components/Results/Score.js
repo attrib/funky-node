@@ -2,7 +2,7 @@ import Funkies from './Funkies'
 import PlayerNames from '../Player/PlayerNames'
 import React from 'react'
 
-const formatter = new Intl.NumberFormat('de-DE', { maximumSignificantDigits: 2 })
+const formatter = new Intl.NumberFormat('de-DE')
 
 const Score = ({result, funkies, winners, losers}) => {
   funkies = !!funkies
