@@ -29,12 +29,18 @@ class Player extends Component {
   }
 
   componentDidMount () {
-    this.componentWillReceiveProps(this.props)
+    this.updatePlayer(this.props)
   }
 
-  componentWillReceiveProps (props) {
+  componentDidUpdate (prevProps, prevState, snapshot) {
+    if (prevProps !== this.props) {
+      this.updatePlayer(this.props)
+    }
+  }
+
+  updatePlayer = (props) => {
     const playerID = props.match.params.id
-    const idChanged = this.state.player.id !== playerID
+    const idChanged = !this.state.player || this.state.player.id !== playerID
     if (!this.state.player || idChanged) {
       this.setState({loading: true})
       this.props.firebase.player(playerID).get()
@@ -122,12 +128,13 @@ class Player extends Component {
     }
     return (
       <div>
+        {(player) &&
         <Jumbotron>
           <Container>
             <Row>
               <Col><h1>{player.nick}</h1></Col>
             </Row>
-            { stats && (
+            {stats && (
               <>
                 <Row>
                   <Col>Avg:</Col>
@@ -143,12 +150,13 @@ class Player extends Component {
                 </Row>
                 <Row>
                   <Col>Games won:</Col>
-                  <Col>{stats.won} ({(stats.won/stats.played*100).toFixed(0)}%)</Col>
+                  <Col>{stats.won} ({(stats.won / stats.played * 100).toFixed(0)}%)</Col>
                 </Row>
               </>
             )}
           </Container>
         </Jumbotron>
+        }
         <Container>
           { loading && <div>Loading...</div> }
           {(!loading && player) &&

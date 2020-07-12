@@ -7,7 +7,7 @@ const firestore = admin.firestore()
 const updateStatsFromResults = require('./updateResults').updateStatsFromResults
 const seasons = []
 const forceUpdateFunkiesPerResult = false
-const wait = 250
+const wait = 1000
 
 const DateFormat = new Intl.DateTimeFormat('de-DE', {
   year: 'numeric',

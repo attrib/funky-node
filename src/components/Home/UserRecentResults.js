@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { compose } from 'recompose'
 import { withFirebase } from '../Firebase'
 import RecentResults from '../Results/RecentResults'
+import withSeason from '../Season/withSeason'
 
 class UserRecentResults extends Component {
 
@@ -15,12 +16,21 @@ class UserRecentResults extends Component {
   }
 
   componentDidMount () {
-    if (this.state.results) {
+    this.updateResults()
+  }
+
+  componentDidUpdate () {
+    this.updateResults()
+  }
+
+  updateResults = () => {
+    if ((this.state.results && this.props.seasonPrefix === this.state.loadedSeasonPrefix) || this.state.loading) {
       return
     }
+
     this.setState({loading: true})
     let promises = [];
-    Object.keys(this.props.user.players).forEach((playerID) => promises.push(this.props.firebase.resultsByPlayerId(playerID)))
+    Object.keys(this.props.user.players).forEach((playerID) => promises.push(this.props.firebase.resultsByPlayerId(playerID, this.props.selectedSeason)))
     Promise.all(promises)
       .then((snapshotsList) => {
         const results = []
@@ -37,6 +47,7 @@ class UserRecentResults extends Component {
       .then((results) => {
         this.setState({
           results,
+          loadedSeasonPrefix: this.props.seasonPrefix,
           loading: false
         })
       })
@@ -54,5 +65,6 @@ class UserRecentResults extends Component {
 }
 
 export default compose(
-  withFirebase
+  withFirebase,
+  withSeason
 )(UserRecentResults)
