@@ -2,10 +2,12 @@ process.env.GOOGLE_APPLICATION_CREDENTIALS = 'account.json'
 const admin = require('firebase-admin')
 admin.initializeApp()
 const firestore = admin.firestore()
+//firestore.settings({ host: "localhost:8080", ssl: false });
+
 const updateStatsFromResults = require('./updateResults').updateStatsFromResults
 const seasons = []
 const forceUpdateFunkiesPerResult = false
-const wait = 1000
+const wait = 250
 
 const DateFormat = new Intl.DateTimeFormat('de-DE', {
   year: 'numeric',

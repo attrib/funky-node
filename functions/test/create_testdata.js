@@ -78,6 +78,27 @@ firestore.doc('users/0SM2ksh1V2MZ8ZYDZ704ZnVrrah1')
       ]
     })
   })
+  .then(() => {
+    return firestore.collection('results').add({
+      authorID: '0SM2ksh1V2MZ8ZYDZ704ZnVrrah1',
+      date: new Date(),
+      game: 'testgameScoreTeam',
+      gameID: 'testgameScoreTeam',
+      image: null,
+      location: null,
+      notes: 'test random add',
+      scores: [
+        {
+          players: [firestore.doc('players/testuser01')],
+          score: Math.floor(Math.random() * (1000 - 100)) + 100,
+        },
+        {
+          players: [firestore.doc('players/testuser02')],
+          score: Math.floor(Math.random() * 500),
+        }
+      ]
+    })
+  })
   .catch((error) => {
     console.log(error)
   })

@@ -2,6 +2,8 @@ process.env.GOOGLE_APPLICATION_CREDENTIALS = 'account.json'
 const admin = require('firebase-admin')
 admin.initializeApp()
 const firestore = admin.firestore()
+//firestore.settings({ host: "localhost:8080", ssl: false });
+
 const updateStatsFromResults = require('./updateResults').updateStatsFromResults
 
 const fs = require('fs')
@@ -18,9 +20,10 @@ fs.readFile('funkyOld.sql', (err, data) => {
     return
   }
   const regexp = RegExp('INSERT INTO `(.*)` VALUES (.*);','gi');
-  const matches = data.toString('utf8').matchAll(regexp);
+  data = data.toString('utf8');
+  let match;
 
-  for (const match of matches) {
+  while ((match = regexp.exec(data)) !== null) {
     const tableName = match[1];
     tables[tableName] = {};
     const entries = match[2].substr(1, match[2].length-2).split('),(')
@@ -101,16 +104,7 @@ fs.readFile('funkyOld.sql', (err, data) => {
           result.scores = newScores
         }
 
-        promises.push(new Promise((resolve, reject) => {
-          setTimeout(() => {
-            resolve(result)
-          }, i * 1500)
-        })
-          .then((result) => {
-            console.log(result)
-            return firestore.collection('results').add(result)
-          })
-        )
+        promises.push(firestore.collection('results').add(result))
         i++
       })
       return Promise.all(promises)

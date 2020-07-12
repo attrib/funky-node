@@ -60,9 +60,9 @@ function updateResults(data, force = false) {
 }
 
 function updateStatsFromResults (firestore, data, oldData, forceResultUpdate = false, forceStatsRankingUpdate = false, seasonPrefixes = []) {
-  let promises = [];
   // delete result
   if (data === null) {
+    let promises = [];
     seasonPrefixes.forEach((seasonPrefix) => {
       oldData.scores.forEach((score) => {
         score.players.forEach((player) => {
@@ -89,19 +89,23 @@ function updateStatsFromResults (firestore, data, oldData, forceResultUpdate = f
     updatedData = data
   }
   if (!updatedData) return new Promise((resolve, reject) => resolve(data));
-  seasonPrefixes.forEach((seasonPrefix) => {
-    updatedData.scores.forEach((score, i) => {
-      score.players.forEach((player, j) => {
-        promises.push(firestore.doc(`${seasonPrefix}/stats/${player.id}`).get())
+
+  return firestore.runTransaction((t) => {
+
+    const snapshots = [];
+    seasonPrefixes.forEach((seasonPrefix) => {
+      updatedData.scores.forEach((score, i) => {
+        score.players.forEach((player, j) => {
+          snapshots.push(t.get(firestore.doc(`${seasonPrefix}/stats/${player.id}`)))
+        })
       })
     })
-  })
-  return Promise.all(promises)
-    .then((snapshots) => {
-      let promises = []
-      snapshots.forEach((snapshot) => {
-        const playerID = snapshot.id
-        if (snapshot.exists) {
+
+    return Promise.all(snapshots)
+      .then(snapshots => {
+        let promises = [];
+        snapshots.forEach((snapshot) => {
+          const playerID = snapshot.id
           updatedData.scores.forEach((score, i) => {
             score.players.forEach((player, j) => {
               if (player.id === playerID) {
@@ -112,48 +116,40 @@ function updateStatsFromResults (firestore, data, oldData, forceResultUpdate = f
                   played: admin.firestore.FieldValue.increment(oldData ? 0 : 1),
                   sum: admin.firestore.FieldValue.increment(funkies),
                   gameIDs: admin.firestore.FieldValue.arrayUnion(data.gameID),
-                  [`games.${data.gameID}.won`]: admin.firestore.FieldValue.increment(won),
-                  [`games.${data.gameID}.played`]: admin.firestore.FieldValue.increment(oldData ? 0 : 1),
-                  [`games.${data.gameID}.sum`]: admin.firestore.FieldValue.increment(funkies),
-                }
-                promises.push(snapshot.ref.update(newData))
-              }
-            })
-          })
-        }
-        else {
-          updatedData.scores.forEach((score, i) => {
-            score.players.forEach((player, j) => {
-              if (player.id === playerID) {
-                promises.push(snapshot.ref.set({
-                  won: score.won,
-                  played: 1,
-                  sum: score.funkies,
-                  gameIDs: admin.firestore.FieldValue.arrayUnion(data.gameID),
                   games: {
                     [data.gameID]: {
-                      won: score.won,
-                      played: 1,
-                      sum: score.funkies,
-                    },
-                  },
-                }))
+                      won: admin.firestore.FieldValue.increment(won),
+                      played: admin.firestore.FieldValue.increment(oldData ? 0 : 1),
+                      sum: admin.firestore.FieldValue.increment(funkies),
+                    }
+                  }
+                }
+                promises.push(t.set(snapshot.ref, newData, {merge: true}))
               }
             })
           })
-        }
-      })
-      if (!oldData) {
-        seasonPrefixes.forEach((seasonPrefix) => {
-          promises.push(firestore.doc(`${seasonPrefix}/ranking/all`).set({played: admin.firestore.FieldValue.increment(1)}, {merge: true}))
-          promises.push(firestore.doc(`${seasonPrefix}/ranking/${data.gameID}`).set({played: admin.firestore.FieldValue.increment(1)}, {merge: true}))
         })
-      }
-      return Promise.all(promises)
-    })
+        return Promise.all(promises)
+      })
+      .then(() => {
+        let promises = [];
+
+        if (!oldData) {
+          seasonPrefixes.forEach((seasonPrefix) => {
+            promises.push(t.set(firestore.doc(`${seasonPrefix}/ranking/all`), {played: admin.firestore.FieldValue.increment(1)}, {merge: true}))
+            promises.push(t.set(firestore.doc(`${seasonPrefix}/ranking/${data.gameID}`), {played: admin.firestore.FieldValue.increment(1)}, {merge: true}))
+          })
+        }
+
+        return Promise.all(promises)
+      })
+  })
     .then(() => {
       return updatedData
-    });
+    })
+    .catch((e) => {
+      console.log(e)
+    })
 }
 
 
