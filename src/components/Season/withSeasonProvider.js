@@ -9,10 +9,10 @@ const withSeasonProvider = Component => {
 
       this.state = {
         selectedSeason: {
-          id: 'nfgiPoF2rtTvBSD1IGVS',
-          name: '2020',
-          startDate: new Date('2020-01-01'),
-          endDate: new Date('2021-01-01'),
+          id: '9eQnEWk5i2V9GJrOxFD6',
+          name: '2021',
+          startDate: new Date('2021-01-01'),
+          endDate: new Date('2021-12-31'),
         },
         changeSeason: this.onClick
       }

@@ -17,7 +17,7 @@ class Firebase {
     app.initializeApp(config)
 
     if (process.env.NODE_ENV !== 'production') {
-      app.firestore().settings({ host: "localhost:8080", ssl: false });
+//      app.firestore().settings({ host: "localhost:8080", ssl: false });
     }
     else {
       app.firestore().enablePersistence({synchronizeTabs: true})
