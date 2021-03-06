@@ -13,11 +13,11 @@ const DateFormat = new Intl.DateTimeFormat('de-DE', {
 })
 
 const FormattedDate = ({date}) => {
-  return DateFormat.format(date.toDate())
+  return DateFormat.format(date)
 }
 
 const FormattedDateTime = ({date}) => {
-  return DateTimeFormat.format(date.toDate())
+  return DateTimeFormat.format(date)
 }
 
 

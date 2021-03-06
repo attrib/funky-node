@@ -7,6 +7,8 @@
     "bootstrap": "^4.4.1",
     "firebase": "^7.13.2",
     "markdown-it": "^10.0.0",
+    "mobx": "^6.1.7",
+    "mobx-react": "^7.1.0",
     "moment": "^2.24.0",
     "react": "^16.13.1",
     "react-autosuggest": "^10.0.0",

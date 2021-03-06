@@ -1,0 +1,35 @@
+###
+# Start
+###
+GET {{host}}/
+Accept: application/json
+
+###
+# Get Games
+###
+GET {{host}}/game?order=asc
+Accept: application/json
+
+###
+# Get Game
+###
+GET {{host}}/game/462
+Accept: application/json
+
+###
+# Get Players
+###
+GET {{host}}/player
+Accept: application/json
+
+###
+# Get Results
+###
+GET {{host}}/result?limit=10&game=462
+Accept: application/json
+
+###
+# Get Ranking
+###
+GET {{host}}/ranking
+Accept: application/json

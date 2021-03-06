@@ -11,6 +11,10 @@ import RecentResults from '../Results/RecentResults'
 import { SelectList } from 'react-widgets'
 import RankingTable from '../Ranking/RankingTable'
 import { withSeason } from '../Season/withSeason'
+import { observer } from "mobx-react";
+import GameStore from "../../stores/GameStore";
+import ResultStore from "../../stores/ResultStore";
+import RankingStore from "../../stores/RankingStore";
 
 const md = new MarkdownIt()
 const scoreWidgetForms = [
@@ -62,28 +66,19 @@ class Game extends Component {
     const gameID = this.props.match.params.id
 
     this.setState({loading: true})
-    this.props.firebase
-      .game(gameID)
-      .get()
-      .then(doc => {
-        this.setState({
-          game: {
-            id: doc.id,
-            ...doc.data(),
-          },
-          loading: false,
-        })
-      })
+    GameStore.getGame(gameID)
+      .then(game => this.setState({game, loading: false}))
+      .catch(error => this.setState({error: error, loading: false}))
+    ResultStore.getRecentResults({game: gameID})
+    RankingStore.getRanking({game: gameID})
+    // this.updateRecentResults()
 
-
-    this.updateRecentResults()
-
-    this.updateRankings()
+    // this.updateRankings()
   }
 
   componentDidUpdate (prevProps, prevState, snapshot) {
-    this.updateRecentResults()
-    this.updateRankings()
+    // this.updateRecentResults()
+    // this.updateRankings()
   }
 
   updateRecentResults = () => {
@@ -93,25 +88,26 @@ class Game extends Component {
 
     const gameID = this.props.match.params.id
 
-    this.props.firebase
-      .resultsByGameId(gameID, this.props.selectedSeason)
-      .then(snapshot => {
-        let results = []
-        snapshot.forEach(document => {
-          let data = document.data();
-          results.push({
-            ...data,
-            id: document.id,
-          })
-        })
-        return this.props.firebase.resultsResolvePlayers(results)
-      })
-      .then((results) => {
-        this.setState({
-          recentResults: results,
-          recentResultsSeasonPrefix: this.props.seasonPrefix,
-        })
-      })
+    ResultStore.getRecentResults({game: gameID})
+    // this.props.firebase
+    //   .resultsByGameId(gameID, this.props.selectedSeason)
+    //   .then(snapshot => {
+    //     let results = []
+    //     snapshot.forEach(document => {
+    //       let data = document.data();
+    //       results.push({
+    //         ...data,
+    //         id: document.id,
+    //       })
+    //     })
+    //     return this.props.firebase.resultsResolvePlayers(results)
+    //   })
+    //   .then((results) => {
+    //     this.setState({
+    //       recentResults: results,
+    //       recentResultsSeasonPrefix: this.props.seasonPrefix,
+    //     })
+    //   })
   }
 
   updateRankings = () => {
@@ -268,11 +264,11 @@ class Game extends Component {
                     <Row>
                       <Col>
                         <h2>Ranking</h2>
-                        { ranking && <RankingTable ranking={ranking} />}
+                        { RankingStore.data && <RankingTable ranking={RankingStore.data} />}
                       </Col>
                       <Col>
                         <h2>Recent Results</h2>
-                        { recentResults && <RecentResults results={recentResults} />}
+                        { ResultStore.data && <RecentResults results={ResultStore.data} />}
                       </Col>
                     </Row>
                   )}
@@ -287,8 +283,8 @@ class Game extends Component {
 
 }
 
-export default compose(
+export default observer(compose(
   withFirebase,
   withRouter,
   withSeason
-)(Game)
+)(Game))

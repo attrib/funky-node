@@ -10,7 +10,7 @@ class RankingTable extends Component {
   constructor (props) {
     super(props)
 
-    this.sort(props.ranking, 'funkyDiff')
+    //this.sort(props.ranking, 'funkyDiff')
     this.state = {
       ranking: props.ranking,
       sort: 'funkyDiff',
@@ -18,12 +18,12 @@ class RankingTable extends Component {
   }
 
   componentDidUpdate (prevProps, prevState, snapshot) {
-    if (!prevState.ranking || prevState.ranking.loadedSeasonPrefix !== this.props.ranking.loadedSeasonPrefix) {
-      this.sort(this.props.ranking, 'funkyDiff')
-      this.setState({
-        ranking: this.props.ranking,
-      })
-    }
+    // if (!prevState.ranking || prevState.ranking.loadedSeasonPrefix !== this.props.ranking.loadedSeasonPrefix) {
+    //   this.sort(this.props.ranking, 'funkyDiff')
+    //   this.setState({
+    //     ranking: this.props.ranking,
+    //   })
+    // }
   }
 
   sort = (ranking, field) => {
@@ -57,7 +57,7 @@ class RankingTable extends Component {
         </tr>
         </thead>
         <tbody>
-        {ranking.players.map((player, i) => (
+        {this.props.ranking.map((player, i) => (
           <tr key={player.id}>
             <td>{i+1}</td>
             <td><PlayerNames players={[player]}/></td>
