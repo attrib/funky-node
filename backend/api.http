@@ -29,6 +29,13 @@ GET {{host}}/result?limit=10&game=462
 Accept: application/json
 
 ###
+# Get Results by id
+###
+GET {{host}}/result/1233
+Accept: application/json
+
+
+###
 # Get Ranking
 ###
 GET {{host}}/ranking

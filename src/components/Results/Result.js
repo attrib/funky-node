@@ -9,6 +9,7 @@ import { compose } from 'recompose'
 import Score from './Score'
 import GameLink from '../Games/GameLink'
 import { FormattedDateTime } from '../Utils/FormattedDate'
+import BackendService from "../../services/BackendService";
 
 class Result extends Component {
 
@@ -43,6 +44,7 @@ class Result extends Component {
       edit: edit,
       result: result,
     }
+    this.resultSerivce = new BackendService('result')
   }
 
   componentDidMount () {
@@ -50,21 +52,15 @@ class Result extends Component {
       return
     }
     this.setState({loading: true})
-    this.props.firebase.result(this.props.match.params.id)
-      .get()
-      .then((snapshot) => {
-        let results = []
-        results.push({
-          ...snapshot.data(),
-          id: snapshot.id
-        })
-        return this.props.firebase.resultsResolvePlayers(results)
-      })
-      .then((results) => {
+    this.resultSerivce.getId(this.props.match.params.id)
+      .then((result) => {
         this.setState({
           loading: false,
-          result: results[0]
+          result
         })
+      })
+      .catch((err) => {
+        console.log(err)
       })
   }
 
