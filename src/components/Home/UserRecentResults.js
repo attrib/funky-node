@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { compose } from 'recompose'
 import { withFirebase } from '../Firebase'
 import RecentResults from '../Results/RecentResults'
-import withSeason from '../Season/withSeason'
 
 class UserRecentResults extends Component {
 
@@ -66,5 +65,4 @@ class UserRecentResults extends Component {
 
 export default compose(
   withFirebase,
-  withSeason
 )(UserRecentResults)

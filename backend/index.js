@@ -53,9 +53,9 @@ app.get('/player/:id', (req, res) => {
 })
 
 function getResult(res, filter, parameters, limit) {
-    const query = 'MATCH (result:Result), (result)-[:GAME]->(game:Game), (player:Player)--(team:Team)-[score:SCORED]-(result) ' +
-      'WITH result, game, collect(player.nick) AS names, collect(ID(player)) AS playerIds, collect(team.hash) AS team, collect(score.score) AS score, collect(score.funkies) AS funkies ' +
-      (filter.length > 0 ? 'WHERE ' + filter.join(',') + ' ' : '') +
+    const query = 'MATCH (result:Result)--(tag:Tag), (result)-[:GAME]->(game:Game), (player:Player)--(team:Team)-[score:SCORED]-(result) ' +
+      'WITH result, game, collect(ID(tag)) AS tagIds, collect(player.nick) AS names, collect(ID(player)) AS playerIds, collect(team.hash) AS team, collect(score.score) AS score, collect(score.funkies) AS funkies ' +
+      (filter.length > 0 ? 'WHERE ' + filter.join(' AND ') + ' ' : '') +
       'RETURN result, game.name AS game, ID(game) AS gameID, names, playerIds, team, score, funkies ORDER BY result.date DESC' + limit;
     return runQuery(res, query, parameters).then((results) => {
         return results.map((result) => {
@@ -97,6 +97,10 @@ app.get('/result', (req, res) => {
         filter.push('$playerID IN playerIds')
         parameters.playerID = parseInt(req.query.player);
     }
+    if (req.query.tag && req.query.tag != 0) {
+        filter.push('$tagID IN tagIds')
+        parameters.tagID = parseInt(req.query.tag);
+    }
     getResult(res, filter, parameters, limit)
       .then((result) => res.send(result))
 })
@@ -128,14 +132,27 @@ app.get('/ranking', (req, res) => {
         filter.push('ID(player) = $playerID')
         parameters.playerID = parseInt(req.query.player);
     }
+    if (req.query.tag && req.query.tag != 0) {
+        filter.push('ID(tag) = $tagID')
+        parameters.tagID = parseInt(req.query.tag);
+    }
     const rankBy = req.query.by === 'game' ? 'ID(game) AS id, game.name AS name' : 'ID(player) AS id, player.nick AS nick';
-    const query = 'MATCH (player:Player)--(:Team)-[score:SCORED]-(:Result)--(game:Game) ' +
-      (filter.length > 0 ? 'WHERE ' + filter.join(',') + ' ' : '') +
+    const query = 'MATCH (player:Player)--(:Team)-[score:SCORED]-(result:Result)--(game:Game), (result)--(tag:Tag) ' +
+      (filter.length > 0 ? 'WHERE ' + filter.join(' AND ') + ' ' : '') +
       'RETURN ' + rankBy + ', AVG(score.funkies) AS funkies, SUM(score.funkies)-COUNT(score) AS funkyDiff, SUM(score.won) AS won, COUNT(score) AS played, (SUM(score.won)/COUNT(score)*100) AS wonPercentage ' +
       'ORDER BY ' + order + ' DESC';
     runQuery(res, query, parameters)
       .then((result) => {
           res.send(result)
+      })
+})
+
+app.get('/tag', (req, res) => {
+    const parameters = {}
+    const query = "MATCH (tag:Tag) RETURN tag ORDER BY tag.name"
+    runQuery(res, query, parameters)
+      .then((result) => {
+          res.send(result.map(record => record.tag))
       })
 })
 

@@ -6,6 +6,8 @@ import Score from './Score'
 import GameLink from '../Games/GameLink'
 import {FormattedDateTime} from '../Utils/FormattedDate'
 import BackendService from "../../services/BackendService";
+import {reaction} from "mobx";
+import SeasonStore from "../../stores/SeasonStore";
 
 class RecentResults extends Component {
 
@@ -28,10 +30,15 @@ class RecentResults extends Component {
 
   componentDidMount() {
     this.loadResults()
+    reaction(
+      () => SeasonStore.selectedSeason,
+      () => {
+        this.loadResults()
+      })
   }
 
   loadResults() {
-    this.resultService.get({...this.props.filter}).then((results) => {
+    this.resultService.get({...this.props.filter, tag: SeasonStore.selectedSeason.id}).then((results) => {
       this.setState({results})
     })
   }

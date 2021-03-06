@@ -6,6 +6,8 @@ import { GiTwoCoins } from 'react-icons/gi'
 import PlayerNames from '../Player/PlayerNames'
 import BackendService from "../../services/BackendService";
 import GameLink from "../Games/GameLink";
+import {reaction} from "mobx";
+import SeasonStore from "../../stores/SeasonStore";
 
 class RankingTable extends Component {
 
@@ -21,6 +23,11 @@ class RankingTable extends Component {
       sort: 'funkyDiff',
     }
     this.rankingService = new BackendService('ranking')
+    reaction(
+      () => SeasonStore.selectedSeason,
+      () => {
+        this.loadRankings(this.state.sort)
+      })
   }
 
   componentDidMount() {
@@ -28,7 +35,7 @@ class RankingTable extends Component {
   }
 
   loadRankings(sort) {
-    this.rankingService.get({...this.props.filter, sort: sort}).then((ranking) => {
+    this.rankingService.get({...this.props.filter, sort: sort, tag: SeasonStore.selectedSeason.id}).then((ranking) => {
       this.setState({ranking, sort})
     })
   }

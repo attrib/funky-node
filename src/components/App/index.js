@@ -21,7 +21,6 @@ import Ranking from '../Ranking'
 import Player from '../Player'
 import LiveGames from '../LiveGames'
 import LiveGame from '../LiveGames/LiveGame'
-import withSeasonProvider from '../Season/withSeasonProvider'
 
 Moment.locale('de')
 momentLocalizer()
@@ -51,4 +50,4 @@ const App = () => (
   </Router>
 )
 
-export default withAuthentication(withSeasonProvider(App))
+export default withAuthentication(App)

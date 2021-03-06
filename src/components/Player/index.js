@@ -4,9 +4,10 @@ import { withFirebase } from '../Firebase'
 import RecentResults from '../Results/RecentResults'
 import Funkies from '../Results/Funkies'
 import { GiTwoCoins } from 'react-icons/gi'
-import withSeason from '../Season/withSeason'
 import BackendService from "../../services/BackendService";
 import RankingTable from "../Ranking/RankingTable";
+import {reaction} from "mobx";
+import SeasonStore from "../../stores/SeasonStore";
 
 class Player extends Component {
 
@@ -32,6 +33,11 @@ class Player extends Component {
 
   componentDidMount () {
     this.updatePlayer(this.props)
+    reaction(
+      () => SeasonStore.selectedSeason,
+      () => {
+        this.updateStats()
+      })
   }
 
   componentDidUpdate (prevProps, prevState, snapshot) {
@@ -55,16 +61,20 @@ class Player extends Component {
         .catch((err) => {
           console.log(err)
         })
-      this.rankingService.get({player: playerID})
-        .then((stats) => {
-          this.setState({
-            stats: stats.pop()
-          })
-        })
-        .catch((err) => {
-          console.log(err)
-        })
+      this.updateStats()
     }
+  }
+
+  updateStats () {
+    this.rankingService.get({player: this.state.player.id, tag: SeasonStore.selectedSeason.id})
+      .then((stats) => {
+        this.setState({
+          stats: stats.pop()
+        })
+      })
+      .catch((err) => {
+        console.log(err)
+      })
   }
 
   render () {
@@ -121,4 +131,4 @@ class Player extends Component {
 
 }
 
-export default withFirebase(withSeason(Player))
+export default withFirebase(Player)

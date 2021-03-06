@@ -10,7 +10,6 @@ import { compose } from 'recompose'
 import RecentResults from '../Results/RecentResults'
 import { SelectList } from 'react-widgets'
 import RankingTable from '../Ranking/RankingTable'
-import { withSeason } from '../Season/withSeason'
 import { observer } from "mobx-react";
 import GameStore from "../../stores/GameStore";
 
@@ -201,5 +200,4 @@ class Game extends Component {
 export default observer(compose(
   withFirebase,
   withRouter,
-  withSeason
 )(Game))
