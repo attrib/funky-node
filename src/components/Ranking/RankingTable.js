@@ -4,26 +4,32 @@ import { Table } from 'reactstrap'
 import { FaSortDown } from 'react-icons/fa'
 import { GiTwoCoins } from 'react-icons/gi'
 import PlayerNames from '../Player/PlayerNames'
+import BackendService from "../../services/BackendService";
 
 class RankingTable extends Component {
+
+  static defaultProps = {
+    filter: {}
+  }
 
   constructor (props) {
     super(props)
 
-    //this.sort(props.ranking, 'funkyDiff')
     this.state = {
-      ranking: props.ranking,
+      ranking: [],
       sort: 'funkyDiff',
     }
+    this.rankingService = new BackendService('ranking')
   }
 
-  componentDidUpdate (prevProps, prevState, snapshot) {
-    // if (!prevState.ranking || prevState.ranking.loadedSeasonPrefix !== this.props.ranking.loadedSeasonPrefix) {
-    //   this.sort(this.props.ranking, 'funkyDiff')
-    //   this.setState({
-    //     ranking: this.props.ranking,
-    //   })
-    // }
+  componentDidMount() {
+    this.loadRankings(this.state.sort)
+  }
+
+  loadRankings(sort) {
+    this.rankingService.get({...this.props.filter, sort: sort}).then((ranking) => {
+      this.setState({ranking, sort})
+    })
   }
 
   sort = (ranking, field) => {
@@ -38,9 +44,7 @@ class RankingTable extends Component {
     if (this.state.sort === field) {
       return
     }
-    let ranking = this.state.ranking
-    this.sort(ranking, field)
-    this.setState({ranking, sort: field})
+    this.loadRankings(field)
   }
 
   render () {
@@ -57,7 +61,7 @@ class RankingTable extends Component {
         </tr>
         </thead>
         <tbody>
-        {this.props.ranking.map((player, i) => (
+        {ranking.map((player, i) => (
           <tr key={player.id}>
             <td>{i+1}</td>
             <td><PlayerNames players={[player]}/></td>

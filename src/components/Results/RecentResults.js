@@ -5,11 +5,40 @@ import * as ROUTES from '../../constants/routes'
 import Score from './Score'
 import GameLink from '../Games/GameLink'
 import {FormattedDateTime} from '../Utils/FormattedDate'
+import BackendService from "../../services/BackendService";
 
 class RecentResults extends Component {
 
+  static defaultProps = {
+    filter: {
+      limit: 100,
+    },
+    showGames: false,
+    showNotes: false,
+  }
+
+  constructor (props) {
+    super(props)
+
+    this.state = {
+      results: [],
+    }
+    this.resultService = new BackendService('result')
+  }
+
+  componentDidMount() {
+    this.loadResults()
+  }
+
+  loadResults() {
+    const urlParams = new URLSearchParams(Object.entries({...this.props.filter}));
+    this.resultService.get(urlParams).then((results) => {
+      this.setState({results})
+    })
+  }
+
   render() {
-    const { results } = this.props
+    const { results } = this.state
     if (results.length === 0) return (<p>No results yet</p>)
     return (
       <Table>

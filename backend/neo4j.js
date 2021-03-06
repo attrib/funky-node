@@ -33,7 +33,7 @@ function convertTypes(value) {
  * @param {Response} response
  * @param {string} query
  * @param {object} parameter
- * @returns {Promise<void>}
+ * @returns {Promise<array>}
  */
 async function runQuery(response, query, parameter = {}) {
   const session = driver.session()

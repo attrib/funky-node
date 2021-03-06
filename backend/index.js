@@ -58,7 +58,6 @@ app.get('/result', (req, res) => {
       'RETURN DISTINCT result, game.name AS game, ID(game) AS gameID, names, playerIds, team, score, funkies ORDER BY result.date DESC' + limit;
     runQuery(res, query, parameters).then((results) => {
         res.send(results.map((result) => {
-            console.log(result)
             const scores = {}
             result.team.forEach((team, index) => {
                 if (!scores[team]) {
@@ -82,13 +81,16 @@ app.get('/result', (req, res) => {
 
 app.get('/ranking', (req, res) => {
     const parameters = {}, filter = [];
+    const order = req.query.sort ? req.query.sort : 'funkyDiff'
     if (req.query.game) {
         filter.push('ID(game) = $gameID')
         parameters.gameID = parseInt(req.query.game);
     }
-    runQuery(res, 'MATCH (player:Player)--(:Team)-[score:SCORED]-(:Result)--(game:Game) ' +
+    const query = 'MATCH (player:Player)--(:Team)-[score:SCORED]-(:Result)--(game:Game) ' +
       (filter.length > 0 ? 'WHERE ' + filter.join(',') + ' ' : '') +
-      'RETURN ID(player) AS id, player.nick AS nick, AVG(score.funkies) AS funkies, SUM(score.funkies)-COUNT(score) AS funkyDiff, SUM(score.won) AS won, COUNT(score) AS played, SUM(score.won)/COUNT(score) AS wonPercentage ORDER BY funkyDiff DESC', parameters)
+      'RETURN ID(player) AS id, player.nick AS nick, AVG(score.funkies) AS funkies, SUM(score.funkies)-COUNT(score) AS funkyDiff, SUM(score.won) AS won, COUNT(score) AS played, (SUM(score.won)/COUNT(score)*100) AS wonPercentage ' +
+      'ORDER BY ' + order + ' DESC';
+    runQuery(res, query, parameters)
       .then((result) => {
           res.send(result)
       })

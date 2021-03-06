@@ -17,8 +17,7 @@ class GameStore {
                 page: 0,
                 order: this.order
             };
-            const urlParams = new URLSearchParams(Object.entries(params));
-            this.data = await this.gameService.get(urlParams)
+            this.data = await this.gameService.get(params)
         } catch (error) {
             this.data = [];
             this.status = "error";

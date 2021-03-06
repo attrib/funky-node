@@ -7,10 +7,11 @@ class BackendService {
     this.url = webApiUrl + entity
   }
 
-  get = async (urlParams) => {
+  get = async (urlParams = {}) => {
     const options = {
       method: "GET",
     }
+    urlParams = new URLSearchParams(Object.entries(urlParams));
     const request = new Request(this.url + "?" + urlParams, options);
     const response = await fetch(request);
     if (response.status === 200) {

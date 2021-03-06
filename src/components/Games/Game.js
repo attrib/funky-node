@@ -13,8 +13,6 @@ import RankingTable from '../Ranking/RankingTable'
 import { withSeason } from '../Season/withSeason'
 import { observer } from "mobx-react";
 import GameStore from "../../stores/GameStore";
-import ResultStore from "../../stores/ResultStore";
-import RankingStore from "../../stores/RankingStore";
 
 const md = new MarkdownIt()
 const scoreWidgetForms = [
@@ -51,11 +49,7 @@ class Game extends Component {
       edit: edit,
       game: game,
       error: null,
-      recentResults: [],
-      recentResultsSeasonPrefix: null,
       scores: [],
-      ranking: null,
-      rankingSeasonPrefix: null,
     }
   }
 
@@ -69,85 +63,6 @@ class Game extends Component {
     GameStore.getGame(gameID)
       .then(game => this.setState({game, loading: false}))
       .catch(error => this.setState({error: error, loading: false}))
-    ResultStore.getRecentResults({game: gameID})
-    RankingStore.getRanking({game: gameID})
-    // this.updateRecentResults()
-
-    // this.updateRankings()
-  }
-
-  componentDidUpdate (prevProps, prevState, snapshot) {
-    // this.updateRecentResults()
-    // this.updateRankings()
-  }
-
-  updateRecentResults = () => {
-    if (this.state.recentResultsSeasonPrefix === this.props.seasonPrefix) {
-      return
-    }
-
-    const gameID = this.props.match.params.id
-
-    ResultStore.getRecentResults({game: gameID})
-    // this.props.firebase
-    //   .resultsByGameId(gameID, this.props.selectedSeason)
-    //   .then(snapshot => {
-    //     let results = []
-    //     snapshot.forEach(document => {
-    //       let data = document.data();
-    //       results.push({
-    //         ...data,
-    //         id: document.id,
-    //       })
-    //     })
-    //     return this.props.firebase.resultsResolvePlayers(results)
-    //   })
-    //   .then((results) => {
-    //     this.setState({
-    //       recentResults: results,
-    //       recentResultsSeasonPrefix: this.props.seasonPrefix,
-    //     })
-    //   })
-  }
-
-  updateRankings = () => {
-    if (this.state.loading || this.state.rankingSeasonPrefix === this.props.seasonPrefix) {
-      return
-    }
-
-    const gameID = this.props.match.params.id
-
-    this.props.firebase.ranking(gameID, this.props.seasonPrefix)
-      .then(ranking => {
-        let promises = []
-        ranking.players.forEach((player) => {
-          promises.push(this.props.firebase.stats(player.id, this.props.seasonPrefix))
-        })
-        return Promise.all(promises)
-          .then((stats) => {
-            ranking.players = ranking.players.map((player) => {
-              stats.forEach((stat) => {
-                if (stat.id === player.id) {
-                  player.stats = stat.games[gameID]
-                  player.funkyDiff = stat.games[gameID].sum - stat.games[gameID].played + 1
-                  player.won = stat.games[gameID].won
-                  player.played = stat.games[gameID].played
-                  player.wonPercentage = stat.games[gameID].won / stat.games[gameID].played * 100
-                }
-              })
-              return player
-            })
-            return ranking
-          })
-      })
-      .then((ranking) => {
-        ranking.loadedSeasonPrefix = this.props.seasonPrefix
-        this.setState({
-          ranking,
-          loading: false,
-          rankingSeasonPrefix: this.props.seasonPrefix,
-        })
-      })
   }
 
   onChange = (event) => {
@@ -216,7 +131,7 @@ class Game extends Component {
   }
 
   render () {
-    const {game, loading, edit, error, recentResults, ranking} = this.state
+    const {game, loading, edit, error} = this.state
     return (
       <AuthUserContext.Consumer>
         {authUser => (
@@ -264,11 +179,11 @@ class Game extends Component {
                     <Row>
                       <Col>
                         <h2>Ranking</h2>
-                        { RankingStore.data && <RankingTable ranking={RankingStore.data} />}
+                        <RankingTable filter={{game: game.id}} />
                       </Col>
                       <Col>
                         <h2>Recent Results</h2>
-                        { ResultStore.data && <RecentResults results={ResultStore.data} />}
+                        <RecentResults filter={{game: game.id}} />
                       </Col>
                     </Row>
                   )}
