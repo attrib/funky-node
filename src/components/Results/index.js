@@ -8,7 +8,7 @@ class Results extends Component {
     return (
       <div>
         <Container>
-          <RecentResults filter={{}} showGames showNotes/>
+          <RecentResults showGames showNotes/>
         </Container>
       </div>
     )

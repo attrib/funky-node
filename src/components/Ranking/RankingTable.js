@@ -5,6 +5,7 @@ import { FaSortDown } from 'react-icons/fa'
 import { GiTwoCoins } from 'react-icons/gi'
 import PlayerNames from '../Player/PlayerNames'
 import BackendService from "../../services/BackendService";
+import GameLink from "../Games/GameLink";
 
 class RankingTable extends Component {
 
@@ -49,12 +50,13 @@ class RankingTable extends Component {
 
   render () {
     const {ranking, sort} = this.state
+    const rankByPlayer = (!(this.props.filter.by && this.props.filter.by === 'game'));
     return (
       <Table hover>
         <thead>
         <tr>
-          <th>#</th>
-          <th>Player</th>
+          {rankByPlayer && <th>#</th>}
+          <th>{rankByPlayer ? 'Player' : 'Game'}</th>
           <th onClick={() => this.onSort('funkies')}>Average{sort === 'funkies' && <FaSortDown />}</th>
           <th onClick={() => this.onSort('funkyDiff')}>Credit{sort === 'funkyDiff' && <FaSortDown />}</th>
           <th onClick={() => this.onSort('wonPercentage')}>Won{sort === 'wonPercentage' && <FaSortDown />}</th>
@@ -63,8 +65,8 @@ class RankingTable extends Component {
         <tbody>
         {ranking.map((player, i) => (
           <tr key={player.id}>
-            <td>{i+1}</td>
-            <td><PlayerNames players={[player]}/></td>
+            {rankByPlayer && <td>{i+1}</td>}
+            <td>{rankByPlayer ? <PlayerNames players={[player]}/> : <GameLink game={player}/>}</td>
             <td>{player.funkies.toFixed(2).replace('.', ',')} <GiTwoCoins style={{color: 'yellowgreen'}}/></td>
             <td><Funkies funkies={player.funkyDiff} /></td>
             <td>{player.won} / {player.played} ({player.wonPercentage.toFixed(0)}%)</td>

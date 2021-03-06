@@ -39,11 +39,24 @@ app.get('/player', (req, res) => {
     })
 })
 
+app.get('/player/:id', (req, res) => {
+    const id = neo4j.types.Integer.fromString(req.params.id);
+    runQuery(res, 'MATCH (player:Player) WHERE ID(player) = $id  RETURN player', {id}).then((result) => {
+        if (result.length === 1) {
+            res.send(result.pop().player)
+        }
+        else {
+            res.statusCode = 404;
+            res.send({error: 'Not found'})
+        }
+    })
+})
+
 function getResult(res, filter, parameters, limit) {
     const query = 'MATCH (result:Result), (result)-[:GAME]->(game:Game), (player:Player)--(team:Team)-[score:SCORED]-(result) ' +
       'WITH result, game, collect(player.nick) AS names, collect(ID(player)) AS playerIds, collect(team.hash) AS team, collect(score.score) AS score, collect(score.funkies) AS funkies ' +
       (filter.length > 0 ? 'WHERE ' + filter.join(',') + ' ' : '') +
-      'RETURN DISTINCT result, game.name AS game, ID(game) AS gameID, names, playerIds, team, score, funkies ORDER BY result.date DESC' + limit;
+      'RETURN result, game.name AS game, ID(game) AS gameID, names, playerIds, team, score, funkies ORDER BY result.date DESC' + limit;
     return runQuery(res, query, parameters).then((results) => {
         return results.map((result) => {
             const scores = {}
@@ -80,6 +93,10 @@ app.get('/result', (req, res) => {
         filter.push('ID(game) = $gameID')
         parameters.gameID = parseInt(req.query.game);
     }
+    if (req.query.player) {
+        filter.push('$playerID IN playerIds')
+        parameters.playerID = parseInt(req.query.player);
+    }
     getResult(res, filter, parameters, limit)
       .then((result) => res.send(result))
 })
@@ -107,9 +124,14 @@ app.get('/ranking', (req, res) => {
         filter.push('ID(game) = $gameID')
         parameters.gameID = parseInt(req.query.game);
     }
+    if (req.query.player) {
+        filter.push('ID(player) = $playerID')
+        parameters.playerID = parseInt(req.query.player);
+    }
+    const rankBy = req.query.by === 'game' ? 'ID(game) AS id, game.name AS name' : 'ID(player) AS id, player.nick AS nick';
     const query = 'MATCH (player:Player)--(:Team)-[score:SCORED]-(:Result)--(game:Game) ' +
       (filter.length > 0 ? 'WHERE ' + filter.join(',') + ' ' : '') +
-      'RETURN ID(player) AS id, player.nick AS nick, AVG(score.funkies) AS funkies, SUM(score.funkies)-COUNT(score) AS funkyDiff, SUM(score.won) AS won, COUNT(score) AS played, (SUM(score.won)/COUNT(score)*100) AS wonPercentage ' +
+      'RETURN ' + rankBy + ', AVG(score.funkies) AS funkies, SUM(score.funkies)-COUNT(score) AS funkyDiff, SUM(score.won) AS won, COUNT(score) AS played, (SUM(score.won)/COUNT(score)*100) AS wonPercentage ' +
       'ORDER BY ' + order + ' DESC';
     runQuery(res, query, parameters)
       .then((result) => {

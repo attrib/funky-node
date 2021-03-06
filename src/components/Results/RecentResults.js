@@ -31,8 +31,7 @@ class RecentResults extends Component {
   }
 
   loadResults() {
-    const urlParams = new URLSearchParams(Object.entries({...this.props.filter}));
-    this.resultService.get(urlParams).then((results) => {
+    this.resultService.get({...this.props.filter}).then((results) => {
       this.setState({results})
     })
   }
