@@ -7,10 +7,12 @@ const
   jwt = require('jsonwebtoken'),
   dotenv = require("dotenv"),
   bcrypt = require('bcrypt'),
-  bodyParser = require('body-parser')
+  bodyParser = require('body-parser'),
+  MarkdownIt = require('markdown-it')
 
 dotenv.config()
 
+const md = new MarkdownIt()
 const app = express()
 const port = process.env.PORT,
   access_token_secret = process.env.ACCESS_TOKEN_SECRET
@@ -60,10 +62,16 @@ app.get('/', (req, res) => {
   res.redirect('https://funky-clan.de/', 301);
 })
 
+
+function prepareGame(game) {
+  game.description = md.render(game.description_markdown)
+  return game
+}
+
 app.get('/game', (req, res) => {
   let order = req.query.order === 'desc' ? 'desc' : 'asc';
   runQuery(res, 'MATCH (g:Game) RETURN g ORDER BY toLower(g.name) ' + order).then((result) => {
-    res.send(result.map((result) => result.g))
+    res.send(result.map((result) => prepareGame(result.g)))
   })
 })
 
@@ -71,7 +79,46 @@ app.get('/game/:id', (req, res) => {
   const id = neo4j.types.Integer.fromString(req.params.id);
   runQuery(res, 'MATCH (g:Game) WHERE ID(g) = $id RETURN g', {id}).then((result) => {
     if (result.length === 1) {
-      res.send(result.pop().g)
+      res.send(prepareGame(result.pop().g))
+    } else {
+      res.status(404);
+      res.send({error: 'Not found'})
+    }
+  })
+})
+
+app.post('/game', acl('admin'), (req, res) => {
+  const parameters = {
+    name: req.body.name,
+    description_markdown: req.body.description_markdown,
+    scoreWidget: req.body.scoreWidget,
+  }
+  const query = 'MERGE (g:Game {name: $name, description_markdown: $description_markdown, scoreWidget: $scoreWidget}) RETURN g'
+  runQuery(res, query, parameters)
+    .then((result) => {
+      res.send(prepareGame(result.pop().g))
+    })
+})
+
+app.patch('/game/:id', acl('admin'), (req, res) => {
+  const id = neo4j.types.Integer.fromString(req.params.id),
+    set = [],
+    parameters = {id}
+  Object.keys(req.body).forEach((key) => {
+    if (['name', 'description_markdown', 'scoreWidget'].includes(key)) {
+      set.push(`SET g.${key} = $${key}`)
+      parameters[key] = req.body[key]
+    }
+  })
+  if (set.length === 0) {
+    res.status(400)
+    res.send({error: 'Nothing to update?'})
+    return
+  }
+  const query = 'MATCH (g:Game) WHERE ID(g) = $id ' + set.join(' ') + ' RETURN g'
+  runQuery(res, query, parameters).then((result) => {
+    if (result.length === 1) {
+      res.send(prepareGame(result.pop().g))
     } else {
       res.status(404);
       res.send({error: 'Not found'})

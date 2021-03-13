@@ -30,10 +30,9 @@ class SignUpForm extends Component {
       .then((authUser) => {
         return authService.login(username, passwordOne)
       })
-      .then((loggedIn) => {
+      .then(() => {
         this.setState({...INITIAL_STATE})
-        console.log('loggedIn', loggedIn)
-        //this.props.history.push(ROUTES.HOME)
+        this.props.history.push(ROUTES.HOME)
       })
       .catch((error) => {
         console.log(error)

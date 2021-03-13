@@ -2,15 +2,14 @@ import React, { Component } from 'react'
 import { Alert, Button, ButtonGroup, Col, Container, Form, FormGroup, Input, Label, Row } from 'reactstrap'
 import MarkdownIt from 'markdown-it'
 import * as ROUTES from '../../constants/routes'
-import * as ROLES from '../../constants/roles'
 import { withRouter } from 'react-router-dom'
 import { compose } from 'recompose'
 import RecentResults from '../Results/RecentResults'
 import { SelectList } from 'react-widgets'
 import RankingTable from '../Ranking/RankingTable'
 import { observer } from "mobx-react";
-import GameStore from "../../stores/GameStore";
 import SessionStore from "../../stores/SessionStore";
+import BackendService from "../../services/BackendService";
 
 const md = new MarkdownIt()
 const scoreWidgetForms = [
@@ -49,6 +48,7 @@ class Game extends Component {
       error: null,
       scores: [],
     }
+    this.gameService = new BackendService('game')
   }
 
   componentDidMount () {
@@ -58,7 +58,7 @@ class Game extends Component {
     const gameID = this.props.match.params.id
 
     this.setState({loading: true})
-    GameStore.getGame(gameID)
+    this.gameService.getId(gameID)
       .then(game => this.setState({game, loading: false}))
       .catch(error => this.setState({error: error, loading: false}))
   }
@@ -82,29 +82,20 @@ class Game extends Component {
   }
 
   onDelete = () => {
-    this.props.firebase.game(this.state.game.id).delete()
+    this.gameService.delete(this.state.game.id)
       .then(() => this.props.history.push(`${ROUTES.GAMES}`))
       .catch((error) => this.setState({error: error.message}))
   }
 
-  onSave = (authUser) => {
+  onSave = () => {
     const game = this.state.game
-    const id = game.id
-    if (id) {
-      this.props.firebase.game(id).set({
-        ...game,
-        description: md.render(game.description_markdown),
-      }, {merge: true})
-        .then(() => this.successSave(authUser))
+    if (game.id) {
+      this.gameService.patch(game.id, game)
+        .then((game) => this.successSave(game))
         .catch((error) => this.setState({error: error.message}))
     } else {
-      delete game.id
-      this.props.firebase.gameAdd({
-        ...game,
-        authorID: authUser.uid,
-        description: md.render(game.description_markdown),
-      })
-        .then((game) => {this.props.history.push(`${ROUTES.GAMES}/${game.id}`); this.successSave(authUser, game.id); })
+      this.gameService.post(game)
+        .then((game) => {this.props.history.push(`${ROUTES.GAMES}/${game.id}`); this.successSave(game); })
         .catch((error) => this.setState({error: error.message}))
     }
   }
@@ -115,22 +106,16 @@ class Game extends Component {
     })
   }
 
-  successSave = (authUser, id) => {
-    const game = this.state.game
-    if (id) {
-      game.id = id
-    }
-    game.authorID = authUser.uid
-    game.description = md.render(game.description_markdown)
+  successSave = (game) => {
     this.setState({
       edit: false,
+      error: null,
       game: game
     })
   }
 
   render () {
     const {game, loading, edit, error} = this.state
-    const authUser = SessionStore.user
     return (
       <div>
         <Container>
@@ -144,7 +129,7 @@ class Game extends Component {
                   <p dangerouslySetInnerHTML={{__html: game.description}}/>
                   <ButtonGroup>
                     {SessionStore.isApproved && <Button onClick={this.onAddResult}>Add Result</Button>}
-                    {(SessionStore.isAdmin || (SessionStore.loggedIn && SessionStore.user.id === game.authorID)) && <Button onClick={this.onEditToggle}>Edit</Button>}
+                    {(SessionStore.isAdmin) && <Button onClick={this.onEditToggle}>Edit</Button>}
                   </ButtonGroup>
                 </>
               )}
@@ -165,10 +150,10 @@ class Game extends Component {
                   </FormGroup>
                   {error && <Alert color="danger">{error}</Alert>}
                   <ButtonGroup>
-                    {authUser && game.id && authUser.uid === game.authorID &&
+                    {SessionStore.isAdmin &&
                     <Button color="danger" type="submit" onClick={this.onDelete}>Delete</Button>}
-                    {authUser &&
-                    <Button color="primary" type="submit" onClick={() => this.onSave(authUser)}>Save</Button>}
+                    {SessionStore.isAdmin &&
+                    <Button color="primary" type="submit" onClick={() => this.onSave()}>Save</Button>}
                   </ButtonGroup>
                 </Form>
               )}

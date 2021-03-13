@@ -3,7 +3,7 @@ import GameList from './GameList'
 import { Container } from 'reactstrap'
 import { observer } from 'mobx-react';
 import './games.scss'
-import GameStore from "../../stores/GameStore";
+import BackendService from "../../services/BackendService";
 
 class Games extends Component {
 
@@ -12,27 +12,40 @@ class Games extends Component {
 
     this.state = {
       loading: false,
+      games: [],
+      error: false
     }
+    this.gameService = new BackendService('game')
   }
 
   componentDidMount () {
-    this.refreshList();
-  }
-
-  refreshList() {
     this.setState({loading: true})
-    GameStore.getGames().then(() => {
-      this.setState({loading: false})
-    })
+    this.gameService.get()
+      .then((games) => {
+        this.setState({
+          games,
+          loading: false,
+          error: false
+        })
+      })
+      .catch((error) => {
+        console.log(error)
+        this.setState({
+          error: error,
+          loading: false,
+        })
+      })
+
   }
 
   render () {
+    const {loading, error, games} = this.state
     return (
       <div>
         <Container>
-          {this.state.loading && <div>Loading ...</div>}
-          {GameStore.status === 'error' && <div>Error requesting data</div>}
-          {GameStore.status !== 'error' && <GameList games={GameStore.data}/>}
+          {loading && <div>Loading ...</div>}
+          {error && <div>Error requesting data</div>}
+          {games.length > 0 && <GameList games={games}/>}
         </Container>
       </div>
     )
