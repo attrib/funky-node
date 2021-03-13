@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { Button, Card, CardBody, CardFooter, CardImg, CardText, CardTitle, Col, Row } from 'reactstrap'
 import * as ROUTES from '../../constants/routes'
 import { withRouter } from 'react-router-dom'
-import * as ROLES from '../../constants/roles'
 import SessionStore from "../../stores/SessionStore";
 
 class GameList extends Component {
@@ -12,10 +11,9 @@ class GameList extends Component {
   }
 
   render () {
-    const authUser = SessionStore.user
     return (
       <>
-        {(authUser && authUser.roles[ROLES.ADMIN] === ROLES.ADMIN) && <Button color="link" onClick={() => this.openGameDetails('new')}>Create Game</Button>}
+        {(SessionStore.isAdmin) && <Button color="link" onClick={() => this.openGameDetails('new')}>Create Game</Button>}
         <Row className="games">
           {
             this.props.games.map(game => (

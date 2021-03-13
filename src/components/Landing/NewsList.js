@@ -41,11 +41,10 @@ class NewsList extends Component {
 
   render () {
     const {news, loading} = this.state
-    const authUser = SessionStore.user
     return (
       <div>
         {loading && <div>Loading ...</div>}
-        {(authUser && authUser.roles[ROLES.ADMIN] === ROLES.ADMIN) && <Button color="link" onClick={this.addEmptyNews}>Create News</Button>}
+        {SessionStore.isAdmin && <Button color="link" onClick={this.addEmptyNews}>Create News</Button>}
         {
           news.map(news => (
             <div key={news.id}>

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import * as ROUTES from '../../constants/routes'
 import React, { Component } from 'react'
 import { Table } from 'reactstrap'
+import BackendService from "../../services/BackendService";
 
 class UserList extends Component {
   constructor (props) {
@@ -11,23 +12,22 @@ class UserList extends Component {
       loading: false,
       users: [],
     }
+    this.userService = new BackendService('user')
   }
 
   componentDidMount () {
     this.setState({loading: true})
 
-    this.unsubscribe = this.props.firebase.users((usersList) => {
-      this.setState({
-        users: usersList.docs,
-        loading: false,
+    this.userService.get()
+      .then((users) => {
+        this.setState({
+          users: users,
+          loading: false,
+        })
       })
-    }, (error) => {
-      console.log(error)
-    })
-  }
-
-  componentWillUnmount () {
-    this.unsubscribe()
+      .catch((error) => {
+        console.log(error)
+      })
   }
 
   render () {
@@ -49,12 +49,11 @@ class UserList extends Component {
           </thead>
           <tbody>
           {users.map(user => {
-            const userData = user.data()
             return (
             <tr key={user.id}>
               <td>{user.id}</td>
-              <td>{userData.username}</td>
-              <td><Roles roles={userData.roles}/></td>
+              <td>{user.username}</td>
+              <td><Roles roles={user.roles}/></td>
               <td>
                 <Link
                   to={{
@@ -75,7 +74,7 @@ class UserList extends Component {
 
 const Roles = ({roles}) => (
   <ul>
-    {Object.keys(roles).map(role => (
+    {roles.map(role => (
       <li key={role}>{role}</li>
     ))}
   </ul>

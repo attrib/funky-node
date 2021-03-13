@@ -257,6 +257,10 @@ app.patch('/user/:id', acl('self'), (req, res) => {
     set.push('SET user.password = $password');
     parameters.password = bcrypt.hashSync(req.body.password, 10)
   }
+  if (req.body.deleteLinkedPlayer) {
+    set.push(`MATCH (user)-[delRel:IS]->(delPlayer:Player {nick: $delNick}) DELETE delRel`)
+    parameters[`delNick`] = req.body.deleteLinkedPlayer
+  }
   if (req.body.players && req.body.players.length > 0) {
     let pId = 0
     req.body.players.forEach((player) => {
@@ -266,9 +270,13 @@ app.patch('/user/:id', acl('self'), (req, res) => {
       pId++
     })
   }
-  if (req.body.deleteLinkedPlayer) {
-    set.push(`MATCH (user)-[delRel:IS]->(delPlayer:Player {nick: $delNick}) DELETE delRel`)
-    parameters[`delNick`] = req.body.deleteLinkedPlayer
+  if (req.body.rolesDelete) {
+    let rDId = 0
+    req.body.rolesDelete.forEach((role) => {
+      set.push(`MATCH (user)-[delRelRole${rDId}:MEMBER]->(roleDel${rDId}:Role {name: $roleDel${rDId}}) DELETE delRelRole${rDId}`)
+      parameters[`roleDel${rDId}`] = role
+      rDId++
+    })
   }
   if (req.user.roles.includes('ADMIN') && req.body.roles && req.body.roles.length > 0) {
     let rId = 0

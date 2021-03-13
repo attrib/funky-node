@@ -1,4 +1,5 @@
 import {makeAutoObservable} from "mobx";
+import {ADMIN, APPROVED} from "../constants/roles";
 
 class SessionStore {
 
@@ -51,6 +52,14 @@ class SessionStore {
       return this.user.players.map(player => player.id)
     }
     return []
+  }
+
+  get isApproved() {
+    return this.loggedIn && (this.user.roles.includes(APPROVED) || this.user.roles.includes(ADMIN))
+  }
+
+  get isAdmin() {
+    return this.loggedIn && this.user.roles.includes(ADMIN)
   }
 
 }

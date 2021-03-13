@@ -143,8 +143,8 @@ class Game extends Component {
                 <>
                   <p dangerouslySetInnerHTML={{__html: game.description}}/>
                   <ButtonGroup>
-                    {authUser && authUser.roles[ROLES.APPROVED] && <Button onClick={this.onAddResult}>Add Result</Button>}
-                    {authUser && authUser.uid === game.authorID && <Button onClick={this.onEditToggle}>Edit</Button>}
+                    {SessionStore.isApproved && <Button onClick={this.onAddResult}>Add Result</Button>}
+                    {(SessionStore.isAdmin || (SessionStore.loggedIn && SessionStore.user.id === game.authorID)) && <Button onClick={this.onEditToggle}>Edit</Button>}
                   </ButtonGroup>
                 </>
               )}

@@ -36,12 +36,11 @@ class LiveGames extends Component{
 
   render () {
     const { loading, liveGames } = this.state
-    const authUser = SessionStore.user
     return (
       <div>
         <Container>
           { !loading && (
-            (authUser && (authUser.roles[ROLES.ADMIN] === ROLES.ADMIN || authUser.roles[ROLES.APPROVED] === ROLES.APPROVED)) && <Link to={ROUTES.LIVE_GAME.replace(':id', 'new')}>Create live game</Link>
+            (SessionStore.isAdmin) && <Link to={ROUTES.LIVE_GAME.replace(':id', 'new')}>Create live game</Link>
           )}
           { loading && <div>Loading..</div>}
           { (!loading && (!liveGames || liveGames.length === 0)) && <div>No running live games</div> }
