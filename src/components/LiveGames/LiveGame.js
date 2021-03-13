@@ -1,14 +1,13 @@
 import React, { Component } from 'react'
-import { withFirebase } from '../Firebase'
 import * as ROUTES from '../../constants/routes'
 import { compose } from 'recompose'
 import { withRouter } from 'react-router-dom'
 import { Button, Col, Container, Row } from 'reactstrap'
-import AuthUserContext from '../Session/context'
 import { FormattedDateTime } from '../Utils/FormattedDate'
 import GameLink from '../Games/GameLink'
 import Score from '../Results/Score'
 import LiveGameForm from './LiveGameForm'
+import SessionStore from "../../stores/SessionStore";
 
 class LiveGame extends Component{
 
@@ -89,59 +88,55 @@ class LiveGame extends Component{
 
   render () {
     const { liveGame, loading, edit } = this.state
+    const authUser = SessionStore.user
     if (loading || !liveGame) return (<div><Container>Loading ...</Container></div>)
     return (
-      <AuthUserContext.Consumer>
-        {authUser => (
-          <div>
-            <Container>
-              <h1>Live Game</h1>
-              { !edit && (<>
-                <Row>
-                  <Col sm={2}>started</Col>
-                  <Col>
-                    <FormattedDateTime date={liveGame.date} />
-                  </Col>
-                </Row>
-                <Row>
-                  <Col sm={2}>last updated</Col>
-                  <Col>
-                    <FormattedDateTime date={liveGame.lastUpdatedDate} />
-                  </Col>
-                </Row>
-                <Row>
-                  <Col sm={2}>Game</Col>
-                  <Col><GameLink game={liveGame.game}/></Col>
-                </Row>
-                <Row>
-                  <Col sm={2}>Winner</Col>
-                  <Col><Score winners result={liveGame} funkies={true} /></Col>
-                </Row>
-                <Row>
-                  <Col sm={2}>Score</Col>
-                  <Col><Score losers result={liveGame} funkies={true}/></Col>
-                </Row>
-                <Row>
-                  <Col sm={2}>Notes</Col>
-                  <Col>{liveGame.notes}</Col>
-                </Row>
-                <Row>
-                  <Col sm={{size: 3, offset: 9}}>
-                    {(authUser && (authUser.uid === liveGame.authorID || authUser.playerIDs.filter((id) => liveGame.playerIDs.indexOf(id) !== -1))) && <Button onClick={this.onEditToggle}>Edit</Button>}
-                  </Col>
-                </Row>
-              </>)}
-              { edit && <LiveGameForm user={authUser} liveGame={liveGame} onSave={this.onSave} onDelete={this.onDelete} onPublish={this.onPublish}/>}
-            </Container>
-          </div>
-        )}
-      </AuthUserContext.Consumer>
+      <div>
+        <Container>
+          <h1>Live Game</h1>
+          { !edit && (<>
+            <Row>
+              <Col sm={2}>started</Col>
+              <Col>
+                <FormattedDateTime date={liveGame.date} />
+              </Col>
+            </Row>
+            <Row>
+              <Col sm={2}>last updated</Col>
+              <Col>
+                <FormattedDateTime date={liveGame.lastUpdatedDate} />
+              </Col>
+            </Row>
+            <Row>
+              <Col sm={2}>Game</Col>
+              <Col><GameLink game={liveGame.game}/></Col>
+            </Row>
+            <Row>
+              <Col sm={2}>Winner</Col>
+              <Col><Score winners result={liveGame} funkies={true} /></Col>
+            </Row>
+            <Row>
+              <Col sm={2}>Score</Col>
+              <Col><Score losers result={liveGame} funkies={true}/></Col>
+            </Row>
+            <Row>
+              <Col sm={2}>Notes</Col>
+              <Col>{liveGame.notes}</Col>
+            </Row>
+            <Row>
+              <Col sm={{size: 3, offset: 9}}>
+                {(authUser && (authUser.uid === liveGame.authorID || authUser.playerIDs.filter((id) => liveGame.playerIDs.indexOf(id) !== -1))) && <Button onClick={this.onEditToggle}>Edit</Button>}
+              </Col>
+            </Row>
+          </>)}
+          { edit && <LiveGameForm user={authUser} liveGame={liveGame} onSave={this.onSave} onDelete={this.onDelete} onPublish={this.onPublish}/>}
+        </Container>
+      </div>
     )
   }
 
 }
 
 export default compose(
-  withFirebase,
   withRouter,
 )(LiveGame)

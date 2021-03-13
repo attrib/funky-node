@@ -1,6 +1,4 @@
 import React, { Component } from 'react'
-import { withFirebase } from '../Firebase'
-import AuthUserContext from '../Session/context'
 import { Button, Col, Container, Row } from 'reactstrap'
 import * as ROUTES from '../../constants/routes'
 import { withRouter } from 'react-router-dom'
@@ -10,6 +8,7 @@ import Score from './Score'
 import GameLink from '../Games/GameLink'
 import { FormattedDateTime } from '../Utils/FormattedDate'
 import BackendService from "../../services/BackendService";
+import SessionStore from "../../stores/SessionStore";
 
 class Result extends Component {
 
@@ -86,61 +85,57 @@ class Result extends Component {
 
   render() {
     const { result, loading, edit } = this.state
+    const authUser = SessionStore.user
     if (loading || !result) return (<div><Container>Loading ...</Container></div>)
     return (
-      <AuthUserContext.Consumer>
-        {authUser => (
-          <div>
-            <Container>
-              <h1>Result</h1>
-              { !edit && (<>
-                <Row>
-                  <Col sm={2}>Date</Col>
-                  <Col>
-                    <FormattedDateTime date={result.date} />
-                  </Col>
-                </Row>
-                <Row>
-                  <Col sm={2}>Game</Col>
-                  <Col><GameLink game={result.game}/></Col>
-                </Row>
-                <Row>
-                  <Col sm={2}>Winner</Col>
-                  <Col><Score winners result={result} funkies={true} /></Col>
-                </Row>
-                <Row>
-                  <Col sm={2}>Score</Col>
-                  <Col><Score losers result={result} funkies={true}/></Col>
-                </Row>
-                <Row>
-                  <Col sm={2}>Notes</Col>
-                  <Col>{result.notes}</Col>
-                </Row>
-                {result.image && <Row>
-                  <Col sm={2}>Image</Col>
-                  <Col>{result.image}</Col>
-                </Row>}
-                {result.location && <Row>
-                  <Col sm={2}>Location</Col>
-                  <Col>{result.location}</Col>
-                </Row>}
-                <Row>
-                  <Col sm={{size: 3, offset: 9}}>
-                    {authUser && authUser.uid === result.authorID && <Button onClick={this.onEditToggle}>Edit</Button>}
-                  </Col>
-                </Row>
-              </>)}
-              { edit && <ResultForm user={authUser} result={result} onSave={this.onSave} onDelete={this.onDelete} />}
-            </Container>
-          </div>
-        )}
-      </AuthUserContext.Consumer>
+      <div>
+        <Container>
+          <h1>Result</h1>
+          { !edit && (<>
+            <Row>
+              <Col sm={2}>Date</Col>
+              <Col>
+                <FormattedDateTime date={result.date} />
+              </Col>
+            </Row>
+            <Row>
+              <Col sm={2}>Game</Col>
+              <Col><GameLink game={result.game}/></Col>
+            </Row>
+            <Row>
+              <Col sm={2}>Winner</Col>
+              <Col><Score winners result={result} funkies={true} /></Col>
+            </Row>
+            <Row>
+              <Col sm={2}>Score</Col>
+              <Col><Score losers result={result} funkies={true}/></Col>
+            </Row>
+            <Row>
+              <Col sm={2}>Notes</Col>
+              <Col>{result.notes}</Col>
+            </Row>
+            {result.image && <Row>
+              <Col sm={2}>Image</Col>
+              <Col>{result.image}</Col>
+            </Row>}
+            {result.location && <Row>
+              <Col sm={2}>Location</Col>
+              <Col>{result.location}</Col>
+            </Row>}
+            <Row>
+              <Col sm={{size: 3, offset: 9}}>
+                {authUser && authUser.uid === result.authorID && <Button onClick={this.onEditToggle}>Edit</Button>}
+              </Col>
+            </Row>
+          </>)}
+          { edit && <ResultForm user={authUser} result={result} onSave={this.onSave} onDelete={this.onDelete} />}
+        </Container>
+      </div>
     )
   }
 
 }
 
 export default compose(
-  withFirebase,
   withRouter,
 )(Result)

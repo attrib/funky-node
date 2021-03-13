@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { Col, Container, Jumbotron, Row, Table } from 'reactstrap'
-import { withFirebase } from '../Firebase'
 import RecentResults from '../Results/RecentResults'
 import Funkies from '../Results/Funkies'
 import { GiTwoCoins } from 'react-icons/gi'
@@ -131,4 +130,4 @@ class Player extends Component {
 
 }
 
-export default withFirebase(Player)
+export default Player

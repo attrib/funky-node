@@ -1,12 +1,11 @@
 import React, { Component } from 'react'
 import { Row, Col, Button, Form, Input, FormGroup, Alert } from 'reactstrap'
-import { withFirebase } from '../Firebase'
-import AuthUserContext from '../Session/context'
 import MarkdownIt from 'markdown-it'
 import * as ROUTES from '../../constants/routes'
 import { withRouter } from 'react-router-dom'
 import { compose } from 'recompose'
 import { FormattedDate } from '../Utils/FormattedDate'
+import SessionStore from "../../stores/SessionStore";
 const md = new MarkdownIt()
 
 class NewsItem extends Component {
@@ -74,52 +73,48 @@ class NewsItem extends Component {
 
   render() {
     const { Title, Date, Content, Markdown, edit, error, authorID } = this.state;
+    const authUser = SessionStore.user
     let rows = Markdown.split('\n').length + 2
     return (
-      <AuthUserContext.Consumer>
-        {authUser => (
-          <Row className="news">
-            <Col className="news-entry">
-              <h2>{Title}</h2>
-              <div className="date"><FormattedDate date={Date} /></div>
-              {
-                !edit && (
-                  <>
-                    <div dangerouslySetInnerHTML={{__html: Content}}/>
-                    { authUser && authUser.uid === authorID && <Button onClick={this.onEditToggle}>Edit</Button>}
-                  </>
-                )
-              }
-              {
-                edit && (
-                  <>
-                    <div dangerouslySetInnerHTML={{__html: md.render(Markdown)}}/>
-                    <Form onSubmit={(event) => event.preventDefault()}>
-                      <FormGroup>
-                        <Input type="text" value={Title} onChange={this.onChange} name="Title" placeholder="Title"/>
-                      </FormGroup>
-                      <FormGroup>
-                        <Input type="textarea" value={Markdown} onChange={this.onChange} name="Markdown" placeholder="Markdown" rows={rows}/>
-                      </FormGroup>
-                      { error && <Alert color="danger">{error}</Alert>}
-                      <FormGroup>
-                        { authUser && this.state.id && authUser.uid === authorID && <Button color="danger" type="submit" onClick={this.onDelete}>Delete</Button> }
-                        { authUser && <Button color="primary" type="submit" onClick={() => this.onSave(authUser)}>Save</Button> }
-                      </FormGroup>
-                    </Form>
-                  </>
-                )
-              }
-            </Col>
-          </Row>
-        )}
-      </AuthUserContext.Consumer>
+      <Row className="news">
+        <Col className="news-entry">
+          <h2>{Title}</h2>
+          <div className="date"><FormattedDate date={Date} /></div>
+          {
+            !edit && (
+              <>
+                <div dangerouslySetInnerHTML={{__html: Content}}/>
+                { authUser && authUser.uid === authorID && <Button onClick={this.onEditToggle}>Edit</Button>}
+              </>
+            )
+          }
+          {
+            edit && (
+              <>
+                <div dangerouslySetInnerHTML={{__html: md.render(Markdown)}}/>
+                <Form onSubmit={(event) => event.preventDefault()}>
+                  <FormGroup>
+                    <Input type="text" value={Title} onChange={this.onChange} name="Title" placeholder="Title"/>
+                  </FormGroup>
+                  <FormGroup>
+                    <Input type="textarea" value={Markdown} onChange={this.onChange} name="Markdown" placeholder="Markdown" rows={rows}/>
+                  </FormGroup>
+                  { error && <Alert color="danger">{error}</Alert>}
+                  <FormGroup>
+                    { authUser && this.state.id && authUser.uid === authorID && <Button color="danger" type="submit" onClick={this.onDelete}>Delete</Button> }
+                    { authUser && <Button color="primary" type="submit" onClick={() => this.onSave(authUser)}>Save</Button> }
+                  </FormGroup>
+                </Form>
+              </>
+            )
+          }
+        </Col>
+      </Row>
     )
   }
 
 }
 
 export default compose(
-  withFirebase,
   withRouter
 )(NewsItem)

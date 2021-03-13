@@ -1,14 +1,13 @@
 import React, { Component } from 'react'
-import { withFirebase } from '../Firebase'
 import { Table, Container } from 'reactstrap'
 import GameLink from '../Games/GameLink'
 import { FormattedDateTime } from '../Utils/FormattedDate'
 import LiveGameLink from './LiveGameLink'
 import Score from '../Results/Score'
-import AuthUserContext from '../Session/context'
 import * as ROLES from '../../constants/roles'
 import * as ROUTES from '../../constants/routes'
 import { Link } from 'react-router-dom'
+import SessionStore from "../../stores/SessionStore";
 
 class LiveGames extends Component{
 
@@ -24,28 +23,25 @@ class LiveGames extends Component{
   componentDidMount () {
     if (!this.state.liveGames) {
       this.setState({loading: true})
-      this.unsubscribe = this.props.firebase
-        .liveGames((liveGames) => {
-          this.setState({liveGames, loading: false})
-        })
+      // this.unsubscribe = this.props.firebase
+      //   .liveGames((liveGames) => {
+      //     this.setState({liveGames, loading: false})
+      //   })
     }
   }
 
   componentWillUnmount () {
-    this.unsubscribe()
+    // this.unsubscribe()
   }
 
   render () {
     const { loading, liveGames } = this.state
+    const authUser = SessionStore.user
     return (
       <div>
         <Container>
           { !loading && (
-            <AuthUserContext.Consumer>
-              {authUser => (
-                (authUser && (authUser.roles[ROLES.ADMIN] === ROLES.ADMIN || authUser.roles[ROLES.APPROVED] === ROLES.APPROVED)) && <Link to={ROUTES.LIVE_GAME.replace(':id', 'new')}>Create live game</Link>
-              )}
-            </AuthUserContext.Consumer>
+            (authUser && (authUser.roles[ROLES.ADMIN] === ROLES.ADMIN || authUser.roles[ROLES.APPROVED] === ROLES.APPROVED)) && <Link to={ROUTES.LIVE_GAME.replace(':id', 'new')}>Create live game</Link>
           )}
           { loading && <div>Loading..</div>}
           { (!loading && (!liveGames || liveGames.length === 0)) && <div>No running live games</div> }
@@ -79,4 +75,4 @@ class LiveGames extends Component{
 
 }
 
-export default withFirebase(LiveGames)
+export default LiveGames

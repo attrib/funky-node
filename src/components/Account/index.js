@@ -1,26 +1,20 @@
 import React  from 'react'
 
 import PasswordChangeForm from './PasswordChange'
-import { AuthUserContext, withAuthorization } from '../Session'
 import { Container } from 'reactstrap'
-import LoginManagement from './LoginManagement'
 import LinkedPlayers from './LinkedPlayers'
+import SessionStore from "../../stores/SessionStore";
 
 const AccountPage = () => (
-  <AuthUserContext.Consumer>
-    {authUser => (
-      <div>
-        <Container>
-          <h1>{authUser.username}</h1>
-          <PasswordChangeForm/>
-          <LoginManagement authUser={authUser}/>
-          <LinkedPlayers user={authUser}/>
-        </Container>
-      </div>
-    )}
-  </AuthUserContext.Consumer>
+    <div>
+      <Container>
+        <h1>{SessionStore.user.username}</h1>
+        <PasswordChangeForm/>
+        <LinkedPlayers user={SessionStore.user}/>
+      </Container>
+    </div>
 )
 
 const condition = authUser => !!authUser
 
-export default withAuthorization(condition)(AccountPage)
+export default AccountPage

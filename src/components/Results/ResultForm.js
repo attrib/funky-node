@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import { withFirebase } from '../Firebase'
 import { Alert, Button, ButtonGroup, Col, Form, FormGroup, Input, Label } from 'reactstrap'
 import { DateTimePicker, DropdownList } from 'react-widgets'
 import 'react-widgets/lib/scss/react-widgets.scss'
@@ -239,4 +238,4 @@ class ResultForm extends Component {
 
 }
 
-export default withFirebase(ResultForm)
+export default ResultForm

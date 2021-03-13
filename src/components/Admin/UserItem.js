@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import { withFirebase } from '../Firebase'
 import { Button, Col, Row } from 'reactstrap'
 import { Multiselect } from 'react-widgets'
 import * as ROLES from '../../constants/roles'
@@ -99,4 +98,4 @@ class UserItem extends Component {
   }
 }
 
-export default withFirebase(UserItem)
+export default UserItem

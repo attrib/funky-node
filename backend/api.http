@@ -40,3 +40,39 @@ Accept: application/json
 ###
 GET {{host}}/ranking
 Accept: application/json
+
+###
+# Get user list
+###
+GET {{host}}/user
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+# Get user
+###
+GET {{host}}/user/3
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+# Get token
+###
+POST {{host}}/auth
+Content-Type: application/x-www-form-urlencoded
+
+username=attrib&password=test
+
+> {% client.global.set('token', response.body.token); %}
+
+###
+#
+###
+POST {{host}}/register
+Accept: application/json
+Content-Type: application/json
+
+{
+  "username": "attrib",
+  "password": "test"
+}

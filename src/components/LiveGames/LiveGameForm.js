@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { Alert, Button, ButtonGroup, Col, Form, FormGroup, Input, Label, Row, Spinner } from 'reactstrap'
 import { DateTimePicker, DropdownList } from 'react-widgets'
-import { withFirebase } from '../Firebase'
 import SimpleTableForm from './SimpleTableForm'
 import GameLink from '../Games/GameLink'
 import { FormattedDateTime } from '../Utils/FormattedDate'
@@ -305,4 +304,4 @@ class LiveGameForm extends Component {
 
 }
 
-export default withFirebase(LiveGameForm)
+export default LiveGameForm

@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 
-import { withFirebase } from '../Firebase'
 import { Form, FormGroup, Alert, Button, Input } from 'reactstrap'
 
 const INITIAL_STATE = {
@@ -71,4 +70,4 @@ class PasswordChangeForm extends Component {
   }
 }
 
-export default withFirebase(PasswordChangeForm)
+export default PasswordChangeForm

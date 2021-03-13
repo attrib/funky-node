@@ -5,8 +5,9 @@ import SignOutButton from '../SignOut'
 import * as ROUTES from '../../constants/routes'
 import * as ROLES from '../../constants/roles'
 import { Collapse, Nav, Navbar, NavbarBrand, NavbarToggler, NavItem, NavLink } from 'reactstrap'
-import { AuthUserContext } from '../Session'
 import SeasonSelector from '../Season/SeasonSelector'
+import SessionStore from "../../stores/SessionStore";
+import {observer} from "mobx-react";
 
 const NavigationAuth = ({authUser}) => (
   <>
@@ -28,7 +29,7 @@ const NavigationAuth = ({authUser}) => (
     <NavItem>
       <NavLink tag={RRNavLink} exact to={ROUTES.ACCOUNT} activeClassName="active">Account</NavLink>
     </NavItem>
-    {!!authUser.roles[ROLES.ADMIN] && (
+    {authUser.roles.includes(ROLES.ADMIN) && (
       <NavItem>
         <NavLink tag={RRNavLink} to={ROUTES.ADMIN} activeClassName="active">Admin</NavLink>
       </NavItem>
@@ -84,13 +85,11 @@ export class Navigation extends Component {
         <NavbarToggler onClick={this.toggle}/>
         <Collapse isOpen={this.state.isOpen} navbar>
           <Nav className="ml-auto" navbar>
-            <AuthUserContext.Consumer>
-              {authUser =>
-                authUser ? (
-                  <NavigationAuth authUser={authUser}/>
-                ) : <NavigationNonAuth/>
-              }
-            </AuthUserContext.Consumer>
+            {
+              SessionStore.loggedIn ? (
+                <NavigationAuth authUser={SessionStore.user}/>
+              ) : <NavigationNonAuth/>
+            }
           </Nav>
         </Collapse>
       </Navbar>
@@ -98,4 +97,4 @@ export class Navigation extends Component {
   }
 }
 
-export default Navigation
+export default observer(Navigation)

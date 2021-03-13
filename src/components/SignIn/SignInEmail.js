@@ -1,15 +1,14 @@
 import * as ROUTES from '../../constants/routes'
 import React, { Component } from 'react'
 import { compose } from 'recompose'
-import { withFirebase } from '../Firebase'
 import { withRouter } from 'react-router-dom'
 import { Form, Input, Button, FormGroup, Alert, Col, Row } from 'reactstrap'
-import SignInGoogle from './SignInGoogle'
 import { PasswordForgetLink } from '../Account/PasswordForget'
 import SignUpLink from '../SignUp/SignUpLink'
+import {authService} from "../../services/BackendService";
 
 const INITIAL_STATE = {
-  email: '',
+  username: '',
   password: '',
   error: null,
 }
@@ -23,10 +22,9 @@ class SignInEmail extends Component {
   }
 
   onSubmit = event => {
-    const {email, password} = this.state
+    const {username, password} = this.state
 
-    this.props.firebase
-      .doSignInWithEmailAndPassword(email, password)
+    authService.login(username, password)
       .then(() => {
         this.setState({...INITIAL_STATE})
         this.props.history.push(ROUTES.HOME)
@@ -43,20 +41,20 @@ class SignInEmail extends Component {
   }
 
   render () {
-    const {email, password, error} = this.state
+    const {username, password, error} = this.state
 
-    const isInvalid = password === '' || email === ''
+    const isInvalid = password === '' || username === ''
 
     return (
       <Form onSubmit={this.onSubmit} className="login">
         {error && <Alert>{error.message}</Alert>}
         <FormGroup>
           <Input
-            name="email"
-            value={email}
+            name="username"
+            value={username}
             onChange={this.onChange}
             type="text"
-            placeholder="Email Address"
+            placeholder="Username"
           />
         </FormGroup>
         <FormGroup>
@@ -67,14 +65,13 @@ class SignInEmail extends Component {
             type="password"
             placeholder="Password"
           />
-          <PasswordForgetLink/>
+          {/*<PasswordForgetLink/>*/}
         </FormGroup>
         <Row>
-          <Button disabled={isInvalid} type="submit" className="col-sm-12 col-md-3 offset-md-3">
+          <Button disabled={isInvalid} type="submit" className="col-sm-12 col-md-3 offset-md-4">
             Sign In
           </Button>
-          <SignInGoogle/>
-          <Col sm="12" md={{ size: 6, offset: 3 }}>
+          <Col sm="12" md={{ size: 6, offset: 4 }}>
             <SignUpLink/>
           </Col>
         </Row>
@@ -85,5 +82,4 @@ class SignInEmail extends Component {
 
 export default compose(
   withRouter,
-  withFirebase,
 )(SignInEmail)

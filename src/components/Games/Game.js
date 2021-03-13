@@ -1,8 +1,6 @@
 import React, { Component } from 'react'
 import { Alert, Button, ButtonGroup, Col, Container, Form, FormGroup, Input, Label, Row } from 'reactstrap'
 import MarkdownIt from 'markdown-it'
-import AuthUserContext from '../Session/context'
-import { withFirebase } from '../Firebase'
 import * as ROUTES from '../../constants/routes'
 import * as ROLES from '../../constants/roles'
 import { withRouter } from 'react-router-dom'
@@ -12,6 +10,7 @@ import { SelectList } from 'react-widgets'
 import RankingTable from '../Ranking/RankingTable'
 import { observer } from "mobx-react";
 import GameStore from "../../stores/GameStore";
+import SessionStore from "../../stores/SessionStore";
 
 const md = new MarkdownIt()
 const scoreWidgetForms = [
@@ -131,73 +130,69 @@ class Game extends Component {
 
   render () {
     const {game, loading, edit, error} = this.state
+    const authUser = SessionStore.user
     return (
-      <AuthUserContext.Consumer>
-        {authUser => (
-          <div>
-            <Container>
-              {loading && <div>Loading ...</div>}
-              {game && (
+      <div>
+        <Container>
+          {loading && <div>Loading ...</div>}
+          {game && (
+            <>
+              <h1>{game.name}</h1>
+              {game.image && <img src={game.image} alt={game.name}/>}
+              {!edit && (
                 <>
-                  <h1>{game.name}</h1>
-                  {game.image && <img src={game.image} alt={game.name}/>}
-                  {!edit && (
-                    <>
-                      <p dangerouslySetInnerHTML={{__html: game.description}}/>
-                      <ButtonGroup>
-                        {authUser && authUser.roles[ROLES.APPROVED] && <Button onClick={this.onAddResult}>Add Result</Button>}
-                        {authUser && authUser.uid === game.authorID && <Button onClick={this.onEditToggle}>Edit</Button>}
-                      </ButtonGroup>
-                    </>
-                  )}
-                  {edit && <p dangerouslySetInnerHTML={{__html: md.render(game.description_markdown)}}/>}
-                  {edit && (
-                    <Form onSubmit={(event) => event.preventDefault()}>
-                      <FormGroup>
-                        <Input type="text" value={game.name} onChange={this.onChange} name="name" placeholder="Name"/>
-                      </FormGroup>
-                      <FormGroup>
-                        <Input type="textarea" value={game.description_markdown} onChange={this.onChange}
-                               name="description_markdown"
-                               placeholder="description"/>
-                      </FormGroup>
-                      <FormGroup>
-                        <Label>Widget for result form</Label>
-                        <SelectList data={scoreWidgetForms} textField="label" valueField="id" value={game.scoreWidget} onChange={this.onChangeScoreWidget}/>
-                      </FormGroup>
-                      {error && <Alert color="danger">{error}</Alert>}
-                      <ButtonGroup>
-                        {authUser && game.id && authUser.uid === game.authorID &&
-                        <Button color="danger" type="submit" onClick={this.onDelete}>Delete</Button>}
-                        {authUser &&
-                        <Button color="primary" type="submit" onClick={() => this.onSave(authUser)}>Save</Button>}
-                      </ButtonGroup>
-                    </Form>
-                  )}
-                  {game.id && (
-                    <Row>
-                      <Col>
-                        <h2>Ranking</h2>
-                        <RankingTable filter={{game: game.id}} />
-                      </Col>
-                      <Col>
-                        <h2>Recent Results</h2>
-                        <RecentResults filter={{game: game.id}} />
-                      </Col>
-                    </Row>
-                  )}
+                  <p dangerouslySetInnerHTML={{__html: game.description}}/>
+                  <ButtonGroup>
+                    {authUser && authUser.roles[ROLES.APPROVED] && <Button onClick={this.onAddResult}>Add Result</Button>}
+                    {authUser && authUser.uid === game.authorID && <Button onClick={this.onEditToggle}>Edit</Button>}
+                  </ButtonGroup>
                 </>
               )}
-            </Container>
-          </div>
-        )}
-      </AuthUserContext.Consumer>
+              {edit && <p dangerouslySetInnerHTML={{__html: md.render(game.description_markdown)}}/>}
+              {edit && (
+                <Form onSubmit={(event) => event.preventDefault()}>
+                  <FormGroup>
+                    <Input type="text" value={game.name} onChange={this.onChange} name="name" placeholder="Name"/>
+                  </FormGroup>
+                  <FormGroup>
+                    <Input type="textarea" value={game.description_markdown} onChange={this.onChange}
+                           name="description_markdown"
+                           placeholder="description"/>
+                  </FormGroup>
+                  <FormGroup>
+                    <Label>Widget for result form</Label>
+                    <SelectList data={scoreWidgetForms} textField="label" valueField="id" value={game.scoreWidget} onChange={this.onChangeScoreWidget}/>
+                  </FormGroup>
+                  {error && <Alert color="danger">{error}</Alert>}
+                  <ButtonGroup>
+                    {authUser && game.id && authUser.uid === game.authorID &&
+                    <Button color="danger" type="submit" onClick={this.onDelete}>Delete</Button>}
+                    {authUser &&
+                    <Button color="primary" type="submit" onClick={() => this.onSave(authUser)}>Save</Button>}
+                  </ButtonGroup>
+                </Form>
+              )}
+              {game.id && (
+                <Row>
+                  <Col>
+                    <h2>Ranking</h2>
+                    <RankingTable filter={{game: game.id}} />
+                  </Col>
+                  <Col>
+                    <h2>Recent Results</h2>
+                    <RecentResults filter={{game: game.id}} />
+                  </Col>
+                </Row>
+              )}
+            </>
+          )}
+        </Container>
+      </div>
     )
   }
 
 }
 
 export default observer(compose(
-  withFirebase,
   withRouter,
 )(Game))

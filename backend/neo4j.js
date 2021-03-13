@@ -1,5 +1,5 @@
 const neo4j = require('neo4j-driver')
-const uri = "neo4j://localhost", user="neo4j", password="test";
+const uri = "neo4j://localhost", user = "neo4j", password = "test";
 const driver = neo4j.driver(uri, neo4j.auth.basic(user, password))
 
 function convertTypes(value) {
@@ -47,13 +47,13 @@ async function runQuery(response, query, parameter = {}) {
     })
   }, (err) => {
     console.log(err)
-    response.statusCode = 500;
-    response.send(err)
+    response.status(500);
+    response.send({error: err})
   })
     .catch((err) => {
       console.log(err)
-      response.statusCode = 500;
-      response.send(err)
+      response.status(500);
+      response.send({error: err})
     })
     .finally(() => {
       session.close();
@@ -61,3 +61,33 @@ async function runQuery(response, query, parameter = {}) {
 }
 
 module.exports.runQuery = runQuery
+
+function getResult(res, filter, parameters, limit) {
+  const query = 'MATCH (result:Result)--(tag:Tag), (result)-[:GAME]->(game:Game), (player:Player)--(team:Team)-[score:SCORED]-(result) ' +
+    'WITH result, game, collect(ID(tag)) AS tagIds, collect(player.nick) AS names, collect(ID(player)) AS playerIds, collect(team.hash) AS team, collect(score.score) AS score, collect(score.funkies) AS funkies ' +
+    (filter.length > 0 ? 'WHERE ' + filter.join(' AND ') + ' ' : '') +
+    'RETURN result, game.name AS game, ID(game) AS gameID, names, playerIds, team, score, funkies ORDER BY result.date DESC' + limit;
+  return runQuery(res, query, parameters).then((results) => {
+    return results.map((result) => {
+      const scores = {}
+      result.team.forEach((team, index) => {
+        if (!scores[team]) {
+          scores[team] = {players: []}
+        }
+        scores[team].score = result.score[index]
+        scores[team].funkies = result.funkies[index]
+        scores[team].players.push({nick: result.names[index], id: result.playerIds[index]})
+      })
+      return {
+        ...result.result,
+        game: {
+          id: result.gameID,
+          name: result.game
+        },
+        scores: Object.values(scores)
+      }
+    })
+  })
+}
+
+module.exports.getResult = getResult

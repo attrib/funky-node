@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom'
 import * as ROUTES from '../../constants/routes'
 import React, { Component } from 'react'
-import { withFirebase } from '../Firebase'
 import { Table } from 'reactstrap'
 
 class UserList extends Component {
@@ -83,4 +82,4 @@ const Roles = ({roles}) => (
 )
 
 
-export default withFirebase(UserList)
+export default UserList
