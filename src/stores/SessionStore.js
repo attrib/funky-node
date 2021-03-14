@@ -28,7 +28,6 @@ class SessionStore {
   }
 
   signOut = () => {
-    console.log(this)
     this.token = null
     this.user = null
     this.expired = null
@@ -41,10 +40,38 @@ class SessionStore {
   }
 
   get loggedIn() {
-    if (this.user && this.token && (new Date().getTime()) / 1000 < this.expired) {
+    if (this.user && this.token) {
       return true;
     }
     return false;
+  }
+
+  /**
+   * @param {import('../services/BackendService').authService} authService
+   * @returns {null}
+   */
+  getToken = async (authService) => {
+    if (this.token) {
+      if ((new Date().getTime()) / 1000 > this.expired) {
+        try {
+          const result = await authService.get('')
+          if (result) {
+            this.token = result.token
+            this.expired = result.exp
+            localStorage.setItem('session', JSON.stringify({token: this.token, user: this.user, exp: this.expired}))
+          }
+          else {
+            return ''
+          }
+        }
+        catch (err) {
+          console.log(err)
+          return ''
+        }
+      }
+      return this.token
+    }
+    return ''
   }
 
   get playerIds() {

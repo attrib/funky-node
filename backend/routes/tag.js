@@ -4,7 +4,7 @@ const express = require('express'),
   neo4j = require('neo4j-driver'),
   acl = require('./auth').acl
 
-router.get('/tag', (req, res) => {
+router.get('/', (req, res) => {
   const parameters = {}
   const query = "MATCH (tag:Tag) RETURN tag ORDER BY tag.name"
   runQuery(res, query, parameters)
