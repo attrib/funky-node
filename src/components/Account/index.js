@@ -4,6 +4,7 @@ import PasswordChangeForm from './PasswordChange'
 import { Container } from 'reactstrap'
 import LinkedPlayers from './LinkedPlayers'
 import SessionStore from "../../stores/SessionStore";
+import withAuthorization from "../Utils/withAuthorization";
 
 const AccountPage = () => (
     <div>
@@ -17,4 +18,4 @@ const AccountPage = () => (
 
 const condition = authUser => !!authUser
 
-export default AccountPage
+export default withAuthorization(condition)(AccountPage)

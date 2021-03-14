@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { Col, Container, Jumbotron, Row } from 'reactstrap'
 import UserRecentResults from './UserRecentResults'
 import SessionStore from "../../stores/SessionStore";
+import withAuthorization from "../Utils/withAuthorization";
 
 class HomePage extends Component {
   render () {
@@ -28,4 +29,4 @@ class HomePage extends Component {
 
 const condition = authUser => !!authUser
 
-export default HomePage
+export default withAuthorization(condition)(HomePage)

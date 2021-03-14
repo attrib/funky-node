@@ -10,10 +10,23 @@ You will find some information on how to perform common tasks [here](https://git
 
 ## todos
 
+* edit results
+* ranking widget create/edit bug
+* deploy neo4j live + add backup
+* import data (add author to results? add news)
+* news entry (rewrite with neo4j)  
+* more filters
+* scores by team  
 * (WiP) Live Games
+* delete result  
 * upload images / location
 * pagination
 * (WiP) Mobile support
+* multiple players per user  
+* better theming?
+* better access control (allow editing own results, delete own results)
+* delete games???
+* more tags?
 
 
 # local testing

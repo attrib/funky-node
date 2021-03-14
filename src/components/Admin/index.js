@@ -5,6 +5,7 @@ import UserList from './UserList'
 import * as ROLES from '../../constants/roles'
 import * as ROUTES from '../../constants/routes'
 import { Container } from 'reactstrap'
+import withAuthorization from "../Utils/withAuthorization";
 
 const AdminPage = () => (
   <div>
@@ -22,4 +23,5 @@ const AdminPage = () => (
 const condition = authUser =>
   authUser && !!authUser.roles[ROLES.ADMIN]
 
-export default AdminPage
+
+export default withAuthorization(condition)(AdminPage)

@@ -8,7 +8,7 @@ import SeasonSelector from '../Season/SeasonSelector'
 import SessionStore from "../../stores/SessionStore";
 import {observer} from "mobx-react";
 
-const NavigationAuth = ({authUser}) => (
+const NavigationAuth = () => (
   <>
     <NavItem>
       <NavLink tag={RRNavLink} to={ROUTES.GAMES} activeClassName="active">Games</NavLink>
@@ -86,7 +86,7 @@ export class Navigation extends Component {
           <Nav className="ml-auto" navbar>
             {
               SessionStore.loggedIn ? (
-                <NavigationAuth authUser={SessionStore.user}/>
+                <NavigationAuth />
               ) : <NavigationNonAuth/>
             }
           </Nav>
