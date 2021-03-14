@@ -18,9 +18,8 @@ class Result extends Component {
     let result = null, edit = false
     if (props.match.params.id === 'new') {
       result = {
-        authorID: null,
         id: false,
-        date: this.props.firebase.getCurrentDate(),
+        date: new Date(),
         gameID: null,
         image: null,
         location: null,
@@ -36,7 +35,6 @@ class Result extends Component {
     }
     if (props.location.state && props.location.state.result) {
       result = props.location.state.result
-      result.date = Object.assign(this.props.firebase.Timestamp.now(), result.date)
     }
     this.state = {
       loading: false,
@@ -85,7 +83,6 @@ class Result extends Component {
 
   render() {
     const { result, loading, edit } = this.state
-    const authUser = SessionStore.user
     if (loading || !result) return (<div><Container>Loading ...</Container></div>)
     return (
       <div>
@@ -124,11 +121,11 @@ class Result extends Component {
             </Row>}
             <Row>
               <Col sm={{size: 3, offset: 9}}>
-                {authUser && authUser.uid === result.authorID && <Button onClick={this.onEditToggle}>Edit</Button>}
+                {SessionStore.isAdmin && <Button onClick={this.onEditToggle}>Edit</Button>}
               </Col>
             </Row>
           </>)}
-          { edit && <ResultForm user={authUser} result={result} onSave={this.onSave} onDelete={this.onDelete} />}
+          { edit && <ResultForm result={result} onSave={this.onSave} onDelete={this.onDelete} />}
         </Container>
       </div>
     )

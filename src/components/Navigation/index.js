@@ -3,7 +3,6 @@ import { NavLink as RRNavLink } from 'react-router-dom'
 
 import SignOutButton from '../SignOut'
 import * as ROUTES from '../../constants/routes'
-import * as ROLES from '../../constants/roles'
 import { Collapse, Nav, Navbar, NavbarBrand, NavbarToggler, NavItem, NavLink } from 'reactstrap'
 import SeasonSelector from '../Season/SeasonSelector'
 import SessionStore from "../../stores/SessionStore";

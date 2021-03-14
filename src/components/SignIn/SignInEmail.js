@@ -3,7 +3,6 @@ import React, { Component } from 'react'
 import { compose } from 'recompose'
 import { withRouter } from 'react-router-dom'
 import { Form, Input, Button, FormGroup, Alert, Col, Row } from 'reactstrap'
-import { PasswordForgetLink } from '../Account/PasswordForget'
 import SignUpLink from '../SignUp/SignUpLink'
 import {authService} from "../../services/BackendService";
 

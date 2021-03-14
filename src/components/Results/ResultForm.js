@@ -6,6 +6,8 @@ import ScoreTeamForm from './ScoreTeamForm'
 import ScoreRankingForm from './ScoreRankingForm'
 import { Link } from 'react-router-dom'
 import * as ROUTES from '../../constants/routes'
+import BackendService from "../../services/BackendService";
+import SessionStore from "../../stores/SessionStore";
 
 class ResultForm extends Component {
 
@@ -13,9 +15,8 @@ class ResultForm extends Component {
     super(props)
 
     let state = {
-      authorID: null,
       id: false,
-      date: this.props.firebase.getCurrentDate(),
+      date: new Date(),
       gameID: null,
       image: null,
       location: null,
@@ -42,6 +43,9 @@ class ResultForm extends Component {
     }
 
     this.state = state
+    this.playerService = new BackendService('player')
+    this.gameService = new BackendService('game')
+    this.resultService = new BackendService('result')
   }
 
   componentDidMount() {
@@ -53,15 +57,8 @@ class ResultForm extends Component {
     if (this.state.gameList.length) {
       return
     }
-    this.props.firebase.games()
-      .then((snapshots) => {
-        let gameList = []
-        snapshots.forEach((snapshot) => {
-          gameList.push({
-            ...snapshot.data(),
-            id: snapshot.id,
-          })
-        })
+    this.gameService.get()
+      .then((gameList) => {
         this.setState({gameList})
       })
   }
@@ -70,15 +67,8 @@ class ResultForm extends Component {
     if (this.state.playerList.length) {
       return
     }
-    this.props.firebase.players()
-      .then((snapshots) => {
-        let playerList = []
-        snapshots.forEach((snapshot) => {
-          playerList.push({
-            ...snapshot.data(),
-            id: snapshot.id,
-          })
-        })
+    this.playerService.get()
+      .then((playerList) => {
         this.setState({playerList})
       })
   }
@@ -118,74 +108,39 @@ class ResultForm extends Component {
 
   onSave = () => {
     let result = {
-      authorID: this.state.authorID ? this.state.authorID : this.props.user.uid,
       date: this.state.date,
-      gameID: this.state.game.id,
+      game: {name: this.state.game.name},
       image: this.state.image,
       location: this.state.location,
       notes: this.state.notes,
       scores: this.state.scores,
+      tags: [{name: '' + this.state.date.getFullYear()}]
     }
-    let players = []
     result.scores = result.scores.filter((score) => !this.isScoreEmpty(score))
     result.scores = result.scores.map((score) => {
       score.score = Number(score.score)
       score.players = score.players.filter(player => player.nick !== '')
-      score.players.forEach((player) => {
-        players.push(this.props.firebase.playerByNameSnapshot(player.nick))
-      })
       return score
     })
 
-    Promise.all(players)
-      .then((playerSnapshots) => {
-        let players = {}
-        playerSnapshots.forEach((playerSnapshot) => {
-          let data = playerSnapshot.data()
-          players[data.nick] = playerSnapshot.ref
+    if (this.state.id) {
+      this.resultService.patch(this.state.id, result)
+        .then((result) => {
+          result.isNew = !this.state.id
+          this.props.onSave(result)
         })
-        result.scores = result.scores.map((score) => {
-          score.players = score.players.map((player) => players[player.nick])
-          return score
+    }
+    else {
+      this.resultService.post(result)
+        .then((result) => {
+          result.isNew = !this.state.id
+          this.props.onSave(result)
         })
-        // update
-        if (this.state.id) {
-          return this.props.firebase.result(this.state.id)
-            .set(result)
-            .then(() => {
-              return {
-                ...result,
-                id: this.state.id,
-              }
-            })
-        }
-        // create
-        else {
-          return this.props.firebase.resultAdd(result)
-            .then((ref) => ref.get())
-            .then((snapshot) => {
-              return {
-                ...snapshot.data(),
-                id: snapshot.id,
-              }
-            })
-        }
-      })
-      .then((result) => {
-        if (this.props.onSave) {
-          this.props.firebase.resultsResolvePlayers([result])
-            .then((results) => {
-              let result = results.pop()
-              result.isNew = !this.state.id
-              this.props.onSave(result)
-            })
-        }
-      })
+    }
   }
 
   onDelete = () => {
-    this.props.firebase.result(this.state.id)
-      .delete()
+    this.resultService.delete(this.state.id)
       .then(() => {
         if (this.props.onDelete) {
           this.props.onDelete(this.state.id)
@@ -197,9 +152,9 @@ class ResultForm extends Component {
     return (
       <Form onSubmit={(event) => event.preventDefault()}>
         <FormGroup row>
-          <Label for="dateJS" sm={2}>Date</Label>
+          <Label for="date" sm={2}>Date</Label>
           <Col sm={10}>
-            <DateTimePicker name="dateJS" placeholder="Date" value={this.state.date.toDate()} onChange={dateJS => this.onChange({date: this.props.firebase.Timestamp.fromDate(dateJS)})} />
+            <DateTimePicker name="date" placeholder="Date" value={this.state.date} onChange={date => this.onChange({date: date})} />
           </Col>
         </FormGroup>
         <FormGroup row>
@@ -226,9 +181,9 @@ class ResultForm extends Component {
         </FormGroup>
         <FormGroup row>
           <ButtonGroup className="col-sm-3 offset-sm-9">
-            {this.props.user && this.state.id && this.props.user.uid === this.state.authorID &&
+            {SessionStore.isAdmin &&
             <Button color="danger" type="submit" onClick={this.onDelete}>Delete</Button>}
-            {this.props.user &&
+            {SessionStore.isApproved &&
             <Button color="primary" type="submit" disabled={Object.keys(this.state.error).length > 0} onClick={this.onSave}>Save</Button>}
           </ButtonGroup>
         </FormGroup>

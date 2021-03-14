@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Button, Col, Row } from 'reactstrap'
+import { Col, Row } from 'reactstrap'
 import { Multiselect } from 'react-widgets'
 import * as ROLES from '../../constants/roles'
 import 'react-widgets/lib/scss/react-widgets.scss'

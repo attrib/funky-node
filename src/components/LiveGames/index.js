@@ -4,7 +4,6 @@ import GameLink from '../Games/GameLink'
 import { FormattedDateTime } from '../Utils/FormattedDate'
 import LiveGameLink from './LiveGameLink'
 import Score from '../Results/Score'
-import * as ROLES from '../../constants/roles'
 import * as ROUTES from '../../constants/routes'
 import { Link } from 'react-router-dom'
 import SessionStore from "../../stores/SessionStore";

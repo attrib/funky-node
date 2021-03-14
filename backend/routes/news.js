@@ -27,9 +27,10 @@ router.post('/', acl('admin'), (req, res) => {
       title: req.body.title,
       markdown: req.body.markdown,
       date: req.body.date,
-    }
+    },
+    username: req.user.username
   }
-  const query = 'CREATE (news:News $news) RETURN news'
+  const query = 'MATCH (user:User {username:$username}) CREATE (news:News $news), (news)<-[:AUTHOR]-(user) RETURN news'
   runQuery(res, query, parameters)
     .then((result) => {
       res.send(prepareNews(result.pop().news))

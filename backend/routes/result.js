@@ -2,7 +2,8 @@ const express = require('express'),
   router = express.Router(),
   runQuery = require('../neo4j').runQuery,
   neo4j = require('neo4j-driver'),
-  acl = require('./auth').acl
+  acl = require('./auth').acl,
+  crypto = require('crypto')
 
 function getResult(res, filter, parameters, limit) {
   const query = 'MATCH (result:Result)--(tag:Tag), (result)-[:GAME]->(game:Game), (player:Player)--(team:Team)-[score:SCORED]-(result) ' +
@@ -31,6 +32,51 @@ function getResult(res, filter, parameters, limit) {
     })
   })
 }
+
+const MIN_FUNKIES = 0.1
+
+function calcScore(result) {
+  const countPlayers = result.scores.reduce((acc, value) => acc + value.players.length, 0);
+  let minScore = result.scores.reduce((acc, value) => (acc.score > value.score) ? value : acc);
+  let origData = []
+  result.scores.forEach((score) => {
+    origData.push({...score})
+  })
+  let normalizedScore = [...result.scores];
+
+  // Increase score, so nobody has a negative value
+  if (minScore.score < 0) {
+    normalizedScore = result.scores.map((score) => {
+      score.score += 2 * Math.abs(minScore.score)
+      return score
+    })
+  }
+
+  // Increase score if min score is below < 0.1
+  minScore = normalizedScore.reduce((acc, value) => (acc.score > value.score) ? value : acc);
+  const sumScore = normalizedScore.reduce((acc, value) => acc + value.score, 0);
+  let minFunkies = countPlayers * minScore.score / minScore.players.length / sumScore;
+  if (minFunkies <= MIN_FUNKIES) {
+    let normalizeScore = ( (MIN_FUNKIES * minScore.players.length) * ( sumScore + result.scores.length * Math.abs(minScore.score)) ) / ( countPlayers - MIN_FUNKIES * minScore.players.length * result.scores.length)
+    normalizeScore -= minScore.score
+    normalizedScore = normalizedScore.map((score) => {
+      score.score += normalizeScore
+      return score
+    })
+  }
+
+  const sumScoreNormalized = normalizedScore.reduce((acc, value) => acc + value.score, 0);
+  const max = normalizedScore.reduce((max, value) => (value.score > max.score) ? value : max)
+  const scores = normalizedScore.map((score, index) => {
+    score.funkies = countPlayers * score.score / score.players.length / sumScoreNormalized;
+    score.score = origData[index].score
+    score.won = (max.score === score.score) ? 1 : 0;
+    return score
+  })
+
+  return scores
+}
+
 
 router.get('/', (req, res) => {
   const parameters = {}, filter = [];
@@ -71,4 +117,70 @@ router.get('/:id', (req, res) => {
     })
 })
 
+router.post('/', acl('auth'), (req, res) => {
+  const result = req.body
+
+  let parameter = {game: result.game.name, date: result.date, notes: result.notes};
+
+  let creates = ['(game)<-[rg:GAME]-(result:Result {date: datetime($date), notes: $notes})'],
+    merge = ['(game:Game {name: $game})'];
+
+  let tagIndex = 0;
+  result.tags.forEach((tag) => {
+    merge.push(`(tag${tagIndex}:Tag {name: $tag${tagIndex}})`);
+    creates.push(`(tag${tagIndex})<-[rt${tagIndex}:TAG]-(result)`);
+    parameter['tag' + tagIndex] = tag.name;
+    tagIndex++;
+  });
+
+  let scoreIndex = 0, playerIndex = 0;
+  calcScore(result).forEach((score) => {
+    parameter['score' + scoreIndex] = score.score;
+    parameter['funkies' + scoreIndex] = score.funkies;
+    parameter['won' + scoreIndex] = score.won;
+
+    let team = score.players.map((player) => player.nick),
+      hash = crypto.createHash('md5');
+    team.sort()
+    team.forEach(player => hash.update(player))
+    hash = hash.digest('hex');
+    merge.push(`(team${scoreIndex}:Team {hash: $teamHash${scoreIndex}})`)
+    parameter['teamHash' + scoreIndex] = hash;
+    team.forEach((player) => {
+      merge.push(`(player${playerIndex}:Player {nick: $player${playerIndex}})`)
+      parameter['player' + playerIndex] = player;
+      merge.push(`(player${playerIndex})-[:MEMBER]->(team${scoreIndex})`)
+      playerIndex++;
+    })
+
+    creates.push(`(team${scoreIndex})-[rs${scoreIndex}:SCORED {score: $score${scoreIndex}, funkies: $funkies${scoreIndex}, won: $won${scoreIndex}}]->(result)`);
+    scoreIndex++;
+  });
+  parameter.username = req.user.username
+  creates.push(`(result)<-[:AUTHOR]-(user)`)
+
+  let query = 'MATCH (user:User {username:$username}) MERGE ' + merge.join('\n MERGE ') +  '\n CREATE ' + creates.join(',\n') + ' RETURN ID(result) AS id';
+  runQuery(res, query, parameter)
+    .then((record) => {
+      const limit = ' LIMIT 1',
+        filter = ['ID(result) = $resId'],
+        parameters = {resId: record.pop().id}
+      return getResult(res, filter, parameters, limit)
+    })
+    .then((results) => {
+      res.send(results.pop())
+    })
+    .catch((error) => {
+      console.log(error)
+      res.status(400)
+      res.send({error})
+    })
+})
+
+router.patch('/:id', acl('admin'), (req, res) => {
+  res.status(400)
+  res.send({error: 'not yet implemented'})
+})
+
 module.exports = router
+module.exports.calcScore = calcScore

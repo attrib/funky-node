@@ -67,10 +67,10 @@ Promise.all(firestorePromises)
         let promises = [];
         Object.values(results).forEach((result) => {
             const resultDate = result.date.toDate();
-            let parameter = {game: games[result.gameID].name, date: resultDate.toISOString(), note: result.notes};
+            let parameter = {game: games[result.gameID].name, date: resultDate.toISOString(), notes: result.notes};
 
             let scoreIndex = 0, playerIndex = 0;
-            let creates = ['(game)<-[rg:GAME]-(result:Result {date: datetime($date), notes: $note})'],
+            let creates = ['(game)<-[rg:GAME]-(result:Result {date: datetime($date), notes: $notes})'],
                 merge = ['(game:Game {name: $game})'];
 
             let seasonIndex = 0;
@@ -78,7 +78,7 @@ Promise.all(firestorePromises)
                 if (resultDate > season.startDate.toDate() && season.endDate.toDate() > resultDate) {
                     merge.push(`(season${seasonIndex}:Tag {name: $season${seasonIndex}})`);
                     creates.push(`(season${seasonIndex})<-[rt${seasonIndex}:TAG]-(result)`);
-                    parameter['season' + seasonIndex] = 'Season ' + season.name;
+                    parameter['season' + seasonIndex] = season.name;
                     seasonIndex++;
                 }
             });

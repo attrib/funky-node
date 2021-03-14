@@ -2,6 +2,7 @@ import {makeAutoObservable} from "mobx";
 
 class SeasonStore {
 
+  defaultSeason = {id: 673, name: "2021"}
   selectedSeason = {id: 673, name: "2021"} // 2021
 
   constructor() {

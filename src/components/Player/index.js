@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Col, Container, Jumbotron, Row, Table } from 'reactstrap'
+import { Col, Container, Jumbotron, Row } from 'reactstrap'
 import RecentResults from '../Results/RecentResults'
 import Funkies from '../Results/Funkies'
 import { GiTwoCoins } from 'react-icons/gi'
