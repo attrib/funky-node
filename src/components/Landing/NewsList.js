@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import NewsItem from './NewsItem'
 import { Button } from 'reactstrap'
-import * as ROLES from '../../constants/roles'
 import SessionStore from "../../stores/SessionStore";
 import BackendService from "../../services/BackendService";
 
