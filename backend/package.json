@@ -3,7 +3,7 @@
   "description": "Backend using neo4j",
   "scripts": {
     "start": "node index.js",
-    "dev": "npx nodemon"
+    "dev": "npx nodemon -w routes"
   },
   "main": "index.js",
   "dependencies": {

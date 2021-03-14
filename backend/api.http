@@ -56,19 +56,9 @@ Accept: application/json
 Authorization: Bearer {{token}}
 
 ###
-# Get token
+# Register user
 ###
-POST {{host}}/auth
-Content-Type: application/x-www-form-urlencoded
-
-username=attrib&password=test
-
-> {% client.global.set('token', response.body.token); %}
-
-###
-#
-###
-POST {{host}}/register
+POST {{host}}/user
 Accept: application/json
 Content-Type: application/json
 
@@ -76,3 +66,27 @@ Content-Type: application/json
   "username": "attrib",
   "password": "test"
 }
+
+###
+# Get token
+###
+POST {{host}}/auth
+Content-Type: application/x-www-form-urlencoded
+
+username=attrib&password=test
+
+> {% if (response.status === 200) client.global.set('token', response.body.token); %}
+
+###
+# Refresh token
+###
+GET {{host}}/auth
+Authorization: Bearer {{token}}
+
+> {% if (response.status === 200) client.global.set('token', response.body.token); %}
+
+###
+# Get news
+###
+GET {{host}}/news
+Accept: application/json
