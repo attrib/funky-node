@@ -66,7 +66,11 @@ class Player extends Component {
 
   updateStats () {
     if (SeasonStore.selectedSeason.id) {
-      this.rankingService.get({player: this.state.player.id, tag: SeasonStore.selectedSeason.id})
+      let filter = {player: this.state.player.id}
+      if (SeasonStore.selectedSeason.id !== 'all') {
+        filter.tag = SeasonStore.selectedSeason.id
+      }
+      this.rankingService.get(filter)
         .then((stats) => {
           this.setState({
             stats: stats.pop()

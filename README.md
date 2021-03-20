@@ -10,11 +10,9 @@ You will find some information on how to perform common tasks [here](https://git
 
 ## todos
  
-* news entry (rewrite with neo4j)  
 * more filters
 * ranking by team  
 * (WiP) Live Games
-* delete result  
 * upload images / location
 * pagination
 * (WiP) Mobile support

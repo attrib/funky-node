@@ -9,7 +9,7 @@ const LandingPage = () => (
       <Container>
         <Row>
           <Col>
-            <h1>Welcome to funky-clan 2019 edition</h1>
+            <h1>Welcome to funky-clan neo4j edition</h1>
             <p>board and card game statistics for competitive gamers and statistic nerds</p>
           </Col>
         </Row>
