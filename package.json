@@ -1,24 +1,23 @@
 {
   "name": "funky-node",
   "homepage": "https://funky-clan.de/",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "dependencies": {
     "bootstrap": "^4.6.0",
-    "markdown-it": "^10.0.0",
+    "markdown-it": "^12.0.4",
     "mobx": "^6.1.8",
     "mobx-react": "^7.1.0",
     "moment": "^2.29.1",
     "react": "^16.14.0",
     "react-autosuggest": "^10.1.0",
     "react-dom": "^16.14.0",
-    "react-icons": "^3.11.0",
+    "react-icons": "^4.2.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "^3.4.4",
     "react-widgets": "^4.6.1",
     "react-widgets-moment": "^4.0.30",
-    "reactstrap": "^8.9.0",
-    "recompose": "^0.30.0"
+    "reactstrap": "^8.9.0"
   },
   "scripts": {
     "start": "react-scripts start",

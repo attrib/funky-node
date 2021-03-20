@@ -3,7 +3,6 @@ import { Button, Col, Container, Row } from 'reactstrap'
 import * as ROUTES from '../../constants/routes'
 import { withRouter } from 'react-router-dom'
 import ResultForm from './ResultForm'
-import { compose } from 'recompose'
 import Score from './Score'
 import GameLink from '../Games/GameLink'
 import { FormattedDateTime } from '../Utils/FormattedDate'
@@ -130,6 +129,4 @@ class Result extends Component {
 
 }
 
-export default compose(
-  withRouter,
-)(Result)
+export default withRouter(Result)

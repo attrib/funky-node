@@ -3,7 +3,6 @@ import { Alert, Button, ButtonGroup, Col, Container, Form, FormGroup, Input, Lab
 import MarkdownIt from 'markdown-it'
 import * as ROUTES from '../../constants/routes'
 import { withRouter } from 'react-router-dom'
-import { compose } from 'recompose'
 import RecentResults from '../Results/RecentResults'
 import { SelectList } from 'react-widgets'
 import RankingTable from '../Ranking/RankingTable'
@@ -178,6 +177,4 @@ class Game extends Component {
 
 }
 
-export default observer(compose(
-  withRouter,
-)(Game))
+export default observer(withRouter(Game))

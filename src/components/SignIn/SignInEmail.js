@@ -1,6 +1,5 @@
 import * as ROUTES from '../../constants/routes'
 import React, { Component } from 'react'
-import { compose } from 'recompose'
 import { withRouter } from 'react-router-dom'
 import { Form, Input, Button, FormGroup, Alert, Col, Row } from 'reactstrap'
 import SignUpLink from '../SignUp/SignUpLink'
@@ -79,6 +78,4 @@ class SignInEmail extends Component {
   }
 }
 
-export default compose(
-  withRouter,
-)(SignInEmail)
+export default withRouter(SignInEmail)

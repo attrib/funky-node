@@ -1,6 +1,5 @@
 import * as ROUTES from '../../constants/routes'
 import React, { Component } from 'react'
-import { compose } from 'recompose'
 import { withRouter } from 'react-router-dom'
 import { Button, Form, Input, Alert, FormGroup } from 'reactstrap'
 import BackendService, {authService} from "../../services/BackendService";
@@ -97,6 +96,4 @@ class SignUpForm extends Component {
   }
 }
 
-export default compose(
-  withRouter,
-)(SignUpForm)
+export default withRouter(SignUpForm)

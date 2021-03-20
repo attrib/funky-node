@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import * as ROUTES from '../../constants/routes'
-import { compose } from 'recompose'
 import { withRouter } from 'react-router-dom'
 import { Button, Col, Container, Row } from 'reactstrap'
 import { FormattedDateTime } from '../Utils/FormattedDate'
@@ -137,6 +136,4 @@ class LiveGame extends Component{
 
 }
 
-export default compose(
-  withRouter,
-)(LiveGame)
+export default withRouter(LiveGame)

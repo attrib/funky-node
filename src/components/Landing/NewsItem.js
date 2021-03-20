@@ -3,7 +3,6 @@ import { Row, Col, Button, Form, Input, FormGroup, Alert } from 'reactstrap'
 import MarkdownIt from 'markdown-it'
 import * as ROUTES from '../../constants/routes'
 import { withRouter } from 'react-router-dom'
-import { compose } from 'recompose'
 import { FormattedDate } from '../Utils/FormattedDate'
 import SessionStore from "../../stores/SessionStore";
 import BackendService from "../../services/BackendService";
@@ -112,6 +111,4 @@ class NewsItem extends Component {
 
 }
 
-export default compose(
-  withRouter
-)(NewsItem)
+export default withRouter(NewsItem)
