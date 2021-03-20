@@ -35,9 +35,11 @@ class RankingTable extends Component {
   }
 
   loadRankings = (sort) => {
-    this.rankingService.get({...this.props.filter, sort: sort, tag: SeasonStore.selectedSeason.id}).then((ranking) => {
-      this.setState({ranking, sort})
-    })
+    if (SeasonStore.selectedSeason.id) {
+      this.rankingService.get({...this.props.filter, sort: sort, tag: SeasonStore.selectedSeason.id}).then((ranking) => {
+        this.setState({ranking, sort})
+      })
+    }
   }
 
   sort = (ranking, field) => {

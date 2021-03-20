@@ -38,9 +38,11 @@ class RecentResults extends Component {
   }
 
   loadResults() {
-    this.resultService.get({...this.props.filter, tag: SeasonStore.selectedSeason.id}).then((results) => {
-      this.setState({results})
-    })
+    if (SeasonStore.selectedSeason.id) {
+      this.resultService.get({...this.props.filter, tag: SeasonStore.selectedSeason.id}).then((results) => {
+        this.setState({results})
+      })
+    }
   }
 
   render() {

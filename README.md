@@ -10,8 +10,6 @@ You will find some information on how to perform common tasks [here](https://git
 
 ## todos
  
-* deploy neo4j live + add backup (public backup)
-* import data (add author to results? add news)
 * news entry (rewrite with neo4j)  
 * more filters
 * ranking by team  

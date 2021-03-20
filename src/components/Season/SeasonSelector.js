@@ -23,6 +23,9 @@ class SeasonSelector extends Component {
         loading: false,
         seasons: seasons
       })
+      if (!SeasonStore.selectedSeason.id) {
+        SeasonStore.changeSeason(seasons[seasons.length - 1]);
+      }
     })
   }
 
