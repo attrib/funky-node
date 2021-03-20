@@ -38,34 +38,35 @@ class LiveGames extends Component{
     return (
       <div>
         <Container>
-          { !loading && (
-            (SessionStore.isAdmin) && <Link to={ROUTES.LIVE_GAME.replace(':id', 'new')}>Create live game</Link>
-          )}
-          { loading && <div>Loading..</div>}
-          { (!loading && (!liveGames || liveGames.length === 0)) && <div>No running live games</div> }
-          { (!loading && liveGames && liveGames.length > 0) && (
-            <Table>
-              <thead>
-                <tr>
-                  <th>Game</th>
-                  <th>Lead</th>
-                  <th>Score</th>
-                  <th colSpan={2}>Last Updated</th>
-                </tr>
-              </thead>
-              <tbody>
-              {liveGames.map((liveGame) => (
-                <tr key={liveGame.id}>
-                  <td><GameLink game={liveGame.game} /></td>
-                  <td><Score result={liveGame} winners/></td>
-                  <td><Score result={liveGame} losers/></td>
-                  <td><FormattedDateTime date={liveGame.lastUpdatedDate} /></td>
-                  <td><LiveGameLink liveGame={liveGame} linkName="Details" /></td>
-                </tr>
-              ))}
-              </tbody>
-            </Table>
-          )}
+          <div>Will come back at a later point</div>
+          {/*{ !loading && (*/}
+          {/*  (SessionStore.isAdmin) && <Link to={ROUTES.LIVE_GAME.replace(':id', 'new')}>Create live game</Link>*/}
+          {/*)}*/}
+          {/*{ loading && <div>Loading..</div>}*/}
+          {/*{ (!loading && (!liveGames || liveGames.length === 0)) && <div>No running live games</div> }*/}
+          {/*{ (!loading && liveGames && liveGames.length > 0) && (*/}
+          {/*  <Table>*/}
+          {/*    <thead>*/}
+          {/*      <tr>*/}
+          {/*        <th>Game</th>*/}
+          {/*        <th>Lead</th>*/}
+          {/*        <th>Score</th>*/}
+          {/*        <th colSpan={2}>Last Updated</th>*/}
+          {/*      </tr>*/}
+          {/*    </thead>*/}
+          {/*    <tbody>*/}
+          {/*    {liveGames.map((liveGame) => (*/}
+          {/*      <tr key={liveGame.id}>*/}
+          {/*        <td><GameLink game={liveGame.game} /></td>*/}
+          {/*        <td><Score result={liveGame} winners/></td>*/}
+          {/*        <td><Score result={liveGame} losers/></td>*/}
+          {/*        <td><FormattedDateTime date={liveGame.lastUpdatedDate} /></td>*/}
+          {/*        <td><LiveGameLink liveGame={liveGame} linkName="Details" /></td>*/}
+          {/*      </tr>*/}
+          {/*    ))}*/}
+          {/*    </tbody>*/}
+          {/*  </Table>*/}
+          {/*)}*/}
         </Container>
       </div>
     )
