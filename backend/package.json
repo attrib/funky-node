@@ -4,7 +4,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "npx nodemon -w routes",
-    "test": "mocha --reporter spec"
+    "test": "mocha --reporter spec",
+    "deploy": "npm run test && rsync -az --delete --exclude-from '.dockerignore' ./ funky-clan.de:~/funky-clan/backend && ssh funky-clan.de ~/funky-clan/backend/scripts/deploy.sh"
   },
   "main": "index.js",
   "dependencies": {

@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  neo4j:
+    image: neo4j:4.2
+    volumes:
+      - ./data/neo4j:/data
+      - ./data/logs:/logs
+    # exposed locally to use with ssh -L 7474:127.0.0.1:7474 -L 7687:127.0.0.1:7687 funky-clan.de
+    ports:
+      - 127.0.0.1:7474:7474
+      - 127.0.0.1:7687:7687
+    restart: on-failure
+
+  backend:
+    build: .
+    env_file:
+      - .env
+    ports:
+      - 127.0.0.1:3000:3000
+    restart: on-failure
