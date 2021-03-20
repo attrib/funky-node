@@ -7,11 +7,17 @@ class ScoreRankingForm extends Component {
   constructor (props) {
     super(props)
     let ranking = {}
-    props.scores.forEach((score) => {
-      if (!('rank' in score)) {
-        score.rank = 1
+    let lastScore = 9999, rank = 0
+    props.scores.sort((a, b) => b.score - a.score).forEach((score) => {
+      if (score.score < lastScore) {
+        lastScore = score.score
+        rank++
       }
+      score.rank = rank
       score.players = score.players.filter(player => player.nick !== '')
+      if (score.players.length === 0) {
+        return
+      }
       if (score.rank in ranking) {
         ranking[score.rank].players = ranking[score.rank].players.concat(score.players)
       }
@@ -24,7 +30,12 @@ class ScoreRankingForm extends Component {
       if (a.score < b.score) return 1
       return 0
     })
-    ranking.push({rank: ranking[ranking.length-1].rank + ranking[ranking.length-1].players.length, players: [{nick: ''}]})
+    if (ranking.length > 0) {
+      ranking.push({rank: ranking[ranking.length-1].rank + ranking[ranking.length-1].players.length, players: [{nick: ''}]})
+    }
+    else {
+      ranking.push({rank: 1, players: [{nick: ''}]})
+    }
     this.state = {ranking}
   }
 
