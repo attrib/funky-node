@@ -6,11 +6,11 @@ import SessionStore from "../../stores/SessionStore";
 const PlayerNames = ({players}) => {
   const authUserPlayerIds = SessionStore.playerIds
   return players.map((player, i) => (
-    <>
+    <span key={player.id}>
       { authUserPlayerIds.includes(player.id) && <strong><PlayerLink player={player}/></strong>}
       { !authUserPlayerIds.includes(player.id) && <PlayerLink player={player}/>}
       {i < players.length - 1 && ', '}
-    </>
+    </span>
   ))
 }
 

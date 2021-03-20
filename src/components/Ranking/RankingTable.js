@@ -23,6 +23,10 @@ class RankingTable extends Component {
       sort: 'funkyDiff',
     }
     this.rankingService = new BackendService('ranking')
+  }
+
+  componentDidMount() {
+    this.loadRankings(this.state.sort)
     reaction(
       () => SeasonStore.selectedSeason,
       () => {
@@ -30,11 +34,7 @@ class RankingTable extends Component {
       })
   }
 
-  componentDidMount() {
-    this.loadRankings(this.state.sort)
-  }
-
-  loadRankings(sort) {
+  loadRankings = (sort) => {
     this.rankingService.get({...this.props.filter, sort: sort, tag: SeasonStore.selectedSeason.id}).then((ranking) => {
       this.setState({ranking, sort})
     })

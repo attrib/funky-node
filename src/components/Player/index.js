@@ -111,7 +111,7 @@ class Player extends Component {
         }
         <Container>
           { loading && <div>Loading...</div> }
-          {(!loading && player) &&
+          {(player && player.id) &&
             <Row>
               <Col>
                 <h2>Ranking</h2>
