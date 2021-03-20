@@ -67,7 +67,7 @@ function acl(permission) {
         break;
 
       case 'self':
-        if (req.user.roles.includes('ADMIN') || req.user.id != req.params.id) {
+        if (req.user.roles.includes('ADMIN') || req.user.id == req.params.id) {
           access = true
         }
         break;
