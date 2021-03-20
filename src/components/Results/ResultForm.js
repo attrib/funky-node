@@ -159,7 +159,7 @@ class ResultForm extends Component {
 
   render() {
     const game = this.state.gameList.find(game => game.name.toLowerCase() === this.state.game.name.toLowerCase())
-    const scoreWidget = (game && game.scoreWidget) ? game.scoreWidget : 'ScoreTeamForm'
+    const scoreWidget = (game && game.score_widget) ? game.score_widget : 'ScoreTeamForm'
     return (
       <Form onSubmit={(event) => event.preventDefault()}>
         <FormGroup row>

@@ -268,7 +268,7 @@ class LiveGameForm extends Component {
             case 'SimpleTable':
               return <SimpleTableForm scores={this.state.scores} error={this.state.error} playerList={this.state.playerList} filterSelectablePlayers={this.filterSelectablePlayers} isScoreEmpty={this.isScoreEmpty} onChange={this.onChange} options={this.state.game.liveGameWidgetOptions} isNew={!this.state.id} scoreUpdate={this.scoreUpdate}/>;
             default:
-              if (this.state.game.scoreWidget === 'ScoreTeamForm') {
+              if (this.state.game.score_widget === 'ScoreTeamForm') {
                 return (
                   <>
                     <Alert color="warning">Missing live game widget for <GameLink game={this.state.game}/>, fallback selected.</Alert>

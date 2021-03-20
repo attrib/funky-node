@@ -36,7 +36,7 @@ class Game extends Component {
         description: '',
         description_markdown: '',
         image: null,
-        scoreWidget: 'ScoreTeamForm'
+        score_widget: 'ScoreTeamForm'
       }
       edit = true
     }
@@ -71,7 +71,7 @@ class Game extends Component {
 
   onChangeScoreWidget = (widget) => {
     let game = this.state.game
-    game.scoreWidget = widget.id
+    game.score_widget = widget.id
     this.setState({game})
   }
 
@@ -146,7 +146,7 @@ class Game extends Component {
                   </FormGroup>
                   <FormGroup>
                     <Label>Widget for result form</Label>
-                    <SelectList data={scoreWidgetForms} textField="label" valueField="id" value={game.scoreWidget} onChange={this.onChangeScoreWidget}/>
+                    <SelectList data={scoreWidgetForms} textField="label" valueField="id" value={game.score_widget} onChange={this.onChangeScoreWidget}/>
                   </FormGroup>
                   {error && <Alert color="danger">{error}</Alert>}
                   <ButtonGroup>
