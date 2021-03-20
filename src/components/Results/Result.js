@@ -20,17 +20,14 @@ class Result extends Component {
       result = {
         id: false,
         date: new Date(),
-        gameID: null,
         image: null,
         location: null,
         notes: "",
-        playerIDs: [],
         scores: [],
       }
       edit = true
       if (props.location.state && props.location.state.game) {
         result.game = props.location.state.game
-        result.gameID = props.location.state.game.id
       }
     }
     if (props.location.state && props.location.state.result) {

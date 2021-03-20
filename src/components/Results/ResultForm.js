@@ -17,11 +17,10 @@ class ResultForm extends Component {
     let state = {
       id: false,
       date: new Date(),
-      gameID: null,
+      game: null,
       image: null,
       location: null,
       notes: "",
-      playerIDs: [],
       playerNames: [],
       scores: [
         {score: 0, players: [{nick: ""}]}
@@ -34,6 +33,7 @@ class ResultForm extends Component {
       state = {
         ...state,
         ...this.props.result,
+        date: new Date(this.props.result.date)
       }
       state.scores = state.scores.map((score) => {
         score.players.push({nick: ""})
@@ -129,12 +129,18 @@ class ResultForm extends Component {
           result.isNew = !this.state.id
           this.props.onSave(result)
         })
+        .catch((error) => {
+          console.log(error)
+        })
     }
     else {
       this.resultService.post(result)
         .then((result) => {
           result.isNew = !this.state.id
           this.props.onSave(result)
+        })
+        .catch((error) => {
+          console.log(error)
         })
     }
   }
@@ -146,9 +152,14 @@ class ResultForm extends Component {
           this.props.onDelete(this.state.id)
         }
       })
+      .catch((error) => {
+        console.log(error)
+      })
   }
 
   render() {
+    const game = this.state.gameList.find(game => game.name.toLowerCase() === this.state.game.name.toLowerCase())
+    const scoreWidget = (game && game.scoreWidget) ? game.scoreWidget : 'ScoreTeamForm'
     return (
       <Form onSubmit={(event) => event.preventDefault()}>
         <FormGroup row>
@@ -164,7 +175,7 @@ class ResultForm extends Component {
           </Col>
         </FormGroup>
         {(() => {
-          switch(this.state.game.scoreWidget) {
+          switch(scoreWidget) {
             case 'ScoreTeamForm':
               return <ScoreTeamForm scores={this.state.scores} error={this.state.error} playerList={this.state.playerList} filterSelectablePlayers={this.filterSelectablePlayers} isScoreEmpty={this.isScoreEmpty} onChange={this.onChange}/>;
             case 'ScoreRankingForm':

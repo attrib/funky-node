@@ -178,8 +178,87 @@ router.post('/', acl('auth'), (req, res) => {
 })
 
 router.patch('/:id', acl('admin'), (req, res) => {
-  res.status(400)
-  res.send({error: 'not yet implemented'})
+  const parameter = {id: neo4j.types.Integer.fromString(req.params.id)}
+  const result = req.body
+  let query = 'MATCH (:Team)-[rs:SCORED]->(result:Result)-[rg:GAME]->(:Game), (result)-[rt:TAG]->(:Tag) WHERE ID(result)=$id DELETE rs, rg, rt RETURN result'
+  runQuery(res, query, parameter)
+    .then((records) => {
+      if (records.length === 0) {
+        throw new Error(`Result ${req.params.id} not found`)
+      }
+
+      parameter.game = result.game.name
+      parameter.date = result.date
+      parameter.notes = result.notes
+
+      let
+        set = ['SET result.date = datetime($date)', 'SET result.notes = $notes'],
+        creates = ['(game)<-[rg:GAME]-(result)'],
+        merge = ['(game:Game {name: $game})'];
+
+      let tagIndex = 0;
+      result.tags.forEach((tag) => {
+        merge.push(`(tag${tagIndex}:Tag {name: $tag${tagIndex}})`);
+        creates.push(`(tag${tagIndex})<-[rt${tagIndex}:TAG]-(result)`);
+        parameter['tag' + tagIndex] = tag.name;
+        tagIndex++;
+      });
+
+      let scoreIndex = 0, playerIndex = 0;
+      calcScore(result).forEach((score) => {
+        parameter['score' + scoreIndex] = score.score;
+        parameter['funkies' + scoreIndex] = score.funkies;
+        parameter['won' + scoreIndex] = score.won;
+
+        let team = score.players.map((player) => player.nick),
+          hash = crypto.createHash('md5');
+        team.sort()
+        team.forEach(player => hash.update(player))
+        hash = hash.digest('hex');
+        merge.push(`(team${scoreIndex}:Team {hash: $teamHash${scoreIndex}})`)
+        parameter['teamHash' + scoreIndex] = hash;
+        team.forEach((player) => {
+          merge.push(`(player${playerIndex}:Player {nick: $player${playerIndex}})`)
+          parameter['player' + playerIndex] = player;
+          merge.push(`(player${playerIndex})-[:MEMBER]->(team${scoreIndex})`)
+          playerIndex++;
+        })
+
+        creates.push(`(team${scoreIndex})-[rs${scoreIndex}:SCORED {score: $score${scoreIndex}, funkies: $funkies${scoreIndex}, won: $won${scoreIndex}}]->(result)`);
+        scoreIndex++;
+      });
+
+      let query = 'MATCH (result:Result) WHERE ID(result)=$id '+ set.join(' ') + ' MERGE ' + merge.join('\n MERGE ') +  '\n CREATE ' + creates.join(',\n') + ' RETURN ID(result) AS id';
+      return runQuery(res, query, parameter)
+    })
+    .then((record) => {
+      const limit = ' LIMIT 1',
+        filter = ['ID(result) = $resId'],
+        parameters = {resId: record.pop().id}
+      return getResult(res, filter, parameters, limit)
+    })
+    .then((results) => {
+      res.send(results.pop())
+    })
+    .catch((error) => {
+      console.log(error)
+      res.status(400)
+      res.send({error})
+    })
+})
+
+router.delete('/:id', acl('admin'), (req, res) => {
+  const parameter = {id: neo4j.types.Integer.fromString(req.params.id)}
+  let query = 'MATCH (result:Result) WHERE ID(result)=$id DETACH DELETE result'
+  runQuery(res, query, parameter)
+    .then(() => {
+      res.send({success: true})
+    })
+    .catch((error) => {
+      console.log(error)
+      res.status(400)
+      res.send({error})
+    })
 })
 
 module.exports = router

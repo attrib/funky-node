@@ -40,14 +40,12 @@ class ScoreTeamForm extends Component {
     scores[i].players.push({nick: ''})
     scores.push({score: 0, players: [{nick: ''}]})
 
-    let playerIDs = [], playerNames = []
+    let playerNames = []
     scores.forEach(score => score.players.forEach(player => {
-      playerIDs.push(player.id)
       playerNames.push(player.nick)
     }))
-    playerIDs = playerIDs.filter((value, index, self) => typeof value !== 'undefined' && value !== '' && self.indexOf(value) === index)
     playerNames = playerNames.filter((value, index, self) => typeof value !== 'undefined' && value !== '' && self.indexOf(value) === index)
-    this.onChange({ scores, playerIDs, playerNames })
+    this.onChange({ scores, playerNames })
   }
 
   render () {

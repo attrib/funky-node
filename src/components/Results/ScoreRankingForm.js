@@ -45,12 +45,11 @@ class ScoreRankingForm extends Component {
     ranking[i].players = ranking[i].players.filter(player => player.nick !== '')
     ranking = ranking.filter((score) => !(score.players.length === 0 || (score.players.length === 1 && score.players[0].nick === '')))
     // reindex rank after filter
-    let rank = 1, playerIDs = [], playerNames = []
+    let rank = 1, playerNames = []
     ranking = ranking.map((score) => {
       score.rank = rank
       rank += score.players.length
       score.players.forEach(player => {
-        playerIDs.push(player.id)
         playerNames.push(player.nick)
       })
       return score
@@ -77,9 +76,8 @@ class ScoreRankingForm extends Component {
     ranking.reverse()
     scores = scores.reverse()
     scores[0].score++
-    playerIDs = playerIDs.filter((value, index, self) => typeof value !== 'undefined' && value !== '' && self.indexOf(value) === index)
     playerNames = playerNames.filter((value, index, self) => typeof value !== 'undefined' && value !== '' && self.indexOf(value) === index)
-    this.onChange({ scores, playerIDs, playerNames })
+    this.onChange({ scores, playerNames })
   }
 
   onAddPlayerToRank = (i) => {
