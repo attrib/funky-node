@@ -1,10 +1,9 @@
 import React, { Component } from 'react'
 import GameList from './GameList'
 import { Container } from 'reactstrap'
-import { withFirebase } from '../Firebase'
-import { withRouter } from 'react-router-dom'
-import { compose } from 'recompose'
+import { observer } from 'mobx-react';
 import './games.scss'
+import BackendService from "../../services/BackendService";
 
 class Games extends Component {
 
@@ -14,45 +13,43 @@ class Games extends Component {
     this.state = {
       loading: false,
       games: [],
+      error: false
     }
+    this.gameService = new BackendService('game')
   }
 
   componentDidMount () {
     this.setState({loading: true})
-
-    this.props.firebase.games()
-      .then(snapshot => {
-        let games = []
-        snapshot.forEach(document => {
-          games.push({
-            ...document.data(),
-            id: document.id,
-          })
-        })
-
+    this.gameService.get()
+      .then((games) => {
         this.setState({
-          games: games,
+          games,
+          loading: false,
+          error: false
+        })
+      })
+      .catch((error) => {
+        console.log(error)
+        this.setState({
+          error: error,
           loading: false,
         })
       })
-      .catch(error => console.log(error))
+
   }
 
   render () {
-    const {games, loading} = this.state
-
+    const {loading, error, games} = this.state
     return (
       <div>
         <Container>
           {loading && <div>Loading ...</div>}
-          <GameList games={games}/>
+          {error && <div>Error requesting data</div>}
+          {games.length > 0 && <GameList games={games}/>}
         </Container>
       </div>
     )
   }
 }
 
-export default compose(
-  withFirebase,
-  withRouter
-)(Games)
+export default observer(Games)

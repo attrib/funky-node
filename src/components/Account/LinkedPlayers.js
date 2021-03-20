@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
-import { withFirebase } from '../Firebase'
 import { Button, Form } from 'reactstrap'
 import Autosuggest from 'react-autosuggest';
 import './LinkedPlayer.scss'
+import BackendService from "../../services/BackendService";
+import SessionStore from "../../stores/SessionStore";
 
 class LinkedPlayers extends Component {
 
@@ -11,10 +12,12 @@ class LinkedPlayers extends Component {
 
     this.state = {
       loading: false,
-      players: Object.values(this.props.user.players),
+      players: this.props.user.players,
       linkPlayer: '',
       suggestions: [],
     }
+    this.playerService = new BackendService('player')
+    this.userService = new BackendService('user')
   }
 
   componentDidMount () {
@@ -47,26 +50,12 @@ class LinkedPlayers extends Component {
       return
     }
 
-    this.props.firebase.playerSearch(inputValue)
-      .then((snapshots) => {
-        let suggestions = []
-        snapshots.forEach((snapshot) => {
-          suggestions.push({
-            ...snapshot.data(),
-            id: snapshot.id
-          })
-        })
-
-        if (suggestions.length === 0) {
-          suggestions = [
-            { isAddNew: true }
-          ];
-        }
-
+    this.playerService.get({search: inputValue})
+      .then((suggestions) => {
         this.setState({
           suggestions
         })
-      });
+      })
   };
 
   // Autosuggest will call this function every time you need to clear suggestions.
@@ -105,38 +94,30 @@ class LinkedPlayers extends Component {
   }
 
   linkPlayer = () => {
-    this.props.firebase.playerByName(this.state.linkPlayer)
-      .then((player) => {
-        this.props.firebase.player(player.id).set({
-          userID: this.props.user.uid
-        }, {merge: true})
-          .then(() => {
-            return this.props.firebase.user(this.props.user.uid).set({
-              playerIDs: this.props.firebase.FieldValue.arrayUnion(player.id)
-            }, {merge: true})
-          })
-          .then(() => {
-            player.userID = this.props.user.uid
-            const players = this.state.players
-            players.push(player)
-            this.setState({
-              players,
-              linkPlayer: ''
-            })
-          })
+    this.userService.patch(this.props.user.id, {players: [{nick: this.state.linkPlayer}]})
+      .then((user) => {
+        SessionStore.refreshUser(user)
+        this.setState({
+          players: user.players,
+          linkPlayer: ''
+        })
+      })
+      .catch((error) => {
+        console.log(error)
       })
   }
 
-  unlinkPlayer = (id) => {
-    this.props.firebase.player(id).set({
-      userID: ''
-    }, {merge: true})
-      .then(() => {
+  unlinkPlayer = (nick) => {
+    this.userService.patch(this.props.user.id, {deleteLinkedPlayer: nick})
+      .then((user) => {
+        SessionStore.refreshUser(user)
         this.setState({
-          players: this.state.players.filter((player) => player.id !== id)
+          players: user.players,
         })
       })
-
+      .catch((error) => {
+        console.log(error)
+      })
   }
 
   render () {
@@ -155,7 +136,7 @@ class LinkedPlayers extends Component {
       {  players && (
         <ul>
           { players.map((player) => (
-            <li key={player.id}>{ player.nick } <Button onClick={() => {this.unlinkPlayer(player.id)}}>Unlink</Button></li>
+            <li key={player.id}>{ player.nick } <Button onClick={() => {this.unlinkPlayer(player.nick)}}>Unlink</Button></li>
           ))}
         </ul>
       )}
@@ -176,4 +157,4 @@ class LinkedPlayers extends Component {
 
 }
 
-export default withFirebase(LinkedPlayers)
+export default LinkedPlayers

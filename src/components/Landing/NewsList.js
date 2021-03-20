@@ -1,9 +1,8 @@
 import React, { Component } from 'react'
-import { withFirebase } from '../Firebase'
-import AuthUserContext from '../Session/context'
 import NewsItem from './NewsItem'
 import { Button } from 'reactstrap'
-import * as ROLES from '../../constants/roles'
+import SessionStore from "../../stores/SessionStore";
+import BackendService from "../../services/BackendService";
 
 class NewsList extends Component {
   constructor (props) {
@@ -13,24 +12,14 @@ class NewsList extends Component {
       loading: false,
       news: [],
     }
+    this.newsService = new BackendService('news')
   }
 
   componentDidMount () {
     this.setState({loading: true})
 
-    this.props.firebase.news()
-      .then(snapshot => {
-        let news = []
-        snapshot.forEach(document => {
-          const data = document.data()
-          if (data.Content) {
-            news.push({
-              ...data,
-              id: document.id,
-            })
-          }
-        })
-
+    this.newsService.get()
+      .then((news) => {
         this.setState({
           news: news,
           loading: false,
@@ -51,15 +40,10 @@ class NewsList extends Component {
 
   render () {
     const {news, loading} = this.state
-
     return (
       <div>
         {loading && <div>Loading ...</div>}
-        <AuthUserContext.Consumer>
-          {authUser =>
-            (authUser && authUser.roles[ROLES.ADMIN] === ROLES.ADMIN) && <Button color="link" onClick={this.addEmptyNews}>Create News</Button>
-          }
-        </AuthUserContext.Consumer>
+        {SessionStore.isAdmin && <Button color="link" onClick={this.addEmptyNews}>Create News</Button>}
         {
           news.map(news => (
             <div key={news.id}>
@@ -73,4 +57,4 @@ class NewsList extends Component {
   }
 }
 
-export default withFirebase(NewsList)
+export default NewsList

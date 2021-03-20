@@ -5,11 +5,48 @@ import * as ROUTES from '../../constants/routes'
 import Score from './Score'
 import GameLink from '../Games/GameLink'
 import {FormattedDateTime} from '../Utils/FormattedDate'
+import BackendService from "../../services/BackendService";
+import {reaction} from "mobx";
+import SeasonStore from "../../stores/SeasonStore";
 
 class RecentResults extends Component {
 
+  static defaultProps = {
+    filter: {
+      limit: 100,
+    },
+    showGames: false,
+    showNotes: false,
+  }
+
+  constructor (props) {
+    super(props)
+
+    this.state = {
+      results: [],
+    }
+    this.resultService = new BackendService('result')
+  }
+
+  componentDidMount() {
+    this.loadResults()
+    reaction(
+      () => SeasonStore.selectedSeason,
+      () => {
+        this.loadResults()
+      })
+  }
+
+  loadResults() {
+    if (SeasonStore.selectedSeason.id) {
+      this.resultService.get({...this.props.filter, tag: SeasonStore.selectedSeason.id}).then((results) => {
+        this.setState({results})
+      })
+    }
+  }
+
   render() {
-    const { results } = this.props
+    const { results } = this.state
     if (results.length === 0) return (<p>No results yet</p>)
     return (
       <Table>

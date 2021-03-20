@@ -1,0 +1,92 @@
+###
+# Start
+###
+GET {{host}}/
+Accept: application/json
+
+###
+# Get Games
+###
+GET {{host}}/game?order=asc
+Accept: application/json
+
+###
+# Get Game
+###
+GET {{host}}/game/462
+Accept: application/json
+
+###
+# Get Players
+###
+GET {{host}}/player
+Accept: application/json
+
+###
+# Get Results
+###
+GET {{host}}/result?limit=10&game=462
+Accept: application/json
+
+###
+# Get Results by id
+###
+GET {{host}}/result/1233
+Accept: application/json
+
+
+###
+# Get Ranking
+###
+GET {{host}}/ranking
+Accept: application/json
+
+###
+# Get user list
+###
+GET {{host}}/user
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+# Get user
+###
+GET {{host}}/user/3
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+# Register user
+###
+POST {{host}}/user
+Accept: application/json
+Content-Type: application/json
+
+{
+  "username": "attrib",
+  "password": "test"
+}
+
+###
+# Get token
+###
+POST {{host}}/auth
+Content-Type: application/x-www-form-urlencoded
+
+username=attrib&password=test
+
+> {% if (response.status === 200) client.global.set('token', response.body.token); %}
+
+###
+# Refresh token
+###
+GET {{host}}/auth
+Authorization: Bearer {{token}}
+
+> {% if (response.status === 200) client.global.set('token', response.body.token); %}
+
+###
+# Get news
+###
+GET {{host}}/news
+Accept: application/json

@@ -1,0 +1,7 @@
+node_modules/
+.env
+data/
+http-client.env.json
+api.http
+.git
+test

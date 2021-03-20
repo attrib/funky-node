@@ -13,11 +13,17 @@ const DateFormat = new Intl.DateTimeFormat('de-DE', {
 })
 
 const FormattedDate = ({date}) => {
-  return DateFormat.format(date.toDate())
+  if (typeof date !== 'string') {
+    return DateFormat.format(date)
+  }
+  return DateFormat.format(new Date(date))
 }
 
 const FormattedDateTime = ({date}) => {
-  return DateTimeFormat.format(date.toDate())
+  if (typeof date !== 'string') {
+    return DateTimeFormat.format(date)
+  }
+  return DateTimeFormat.format(new Date(date))
 }
 
 

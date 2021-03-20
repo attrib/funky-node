@@ -110,7 +110,7 @@ class SimpleTableForm extends Component {
   }
 
   render () {
-    const { scores, error, options, isNew } = this.props
+    const { scores, error, isNew } = this.props
     return (
       <Table style={{textAlign: 'center'}}>
         <thead>

@@ -7,11 +7,17 @@ class ScoreRankingForm extends Component {
   constructor (props) {
     super(props)
     let ranking = {}
-    props.scores.forEach((score) => {
-      if (!('rank' in score)) {
-        score.rank = 1
+    let lastScore = 9999, rank = 0
+    props.scores.sort((a, b) => b.score - a.score).forEach((score) => {
+      if (score.score < lastScore) {
+        lastScore = score.score
+        rank++
       }
+      score.rank = rank
       score.players = score.players.filter(player => player.nick !== '')
+      if (score.players.length === 0) {
+        return
+      }
       if (score.rank in ranking) {
         ranking[score.rank].players = ranking[score.rank].players.concat(score.players)
       }
@@ -24,7 +30,12 @@ class ScoreRankingForm extends Component {
       if (a.score < b.score) return 1
       return 0
     })
-    ranking.push({rank: ranking[ranking.length-1].rank + ranking[ranking.length-1].players.length, players: [{nick: ''}]})
+    if (ranking.length > 0) {
+      ranking.push({rank: ranking[ranking.length-1].rank + ranking[ranking.length-1].players.length, players: [{nick: ''}]})
+    }
+    else {
+      ranking.push({rank: 1, players: [{nick: ''}]})
+    }
     this.state = {ranking}
   }
 
@@ -45,12 +56,11 @@ class ScoreRankingForm extends Component {
     ranking[i].players = ranking[i].players.filter(player => player.nick !== '')
     ranking = ranking.filter((score) => !(score.players.length === 0 || (score.players.length === 1 && score.players[0].nick === '')))
     // reindex rank after filter
-    let rank = 1, playerIDs = [], playerNames = []
+    let rank = 1, playerNames = []
     ranking = ranking.map((score) => {
       score.rank = rank
       rank += score.players.length
       score.players.forEach(player => {
-        playerIDs.push(player.id)
         playerNames.push(player.nick)
       })
       return score
@@ -77,9 +87,8 @@ class ScoreRankingForm extends Component {
     ranking.reverse()
     scores = scores.reverse()
     scores[0].score++
-    playerIDs = playerIDs.filter((value, index, self) => typeof value !== 'undefined' && value !== '' && self.indexOf(value) === index)
     playerNames = playerNames.filter((value, index, self) => typeof value !== 'undefined' && value !== '' && self.indexOf(value) === index)
-    this.onChange({ scores, playerIDs, playerNames })
+    this.onChange({ scores, playerNames })
   }
 
   onAddPlayerToRank = (i) => {

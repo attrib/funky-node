@@ -1,12 +1,12 @@
 import React, { Component } from 'react'
 import { Row, Col, Button, Form, Input, FormGroup, Alert } from 'reactstrap'
-import { withFirebase } from '../Firebase'
-import AuthUserContext from '../Session/context'
 import MarkdownIt from 'markdown-it'
 import * as ROUTES from '../../constants/routes'
 import { withRouter } from 'react-router-dom'
 import { compose } from 'recompose'
 import { FormattedDate } from '../Utils/FormattedDate'
+import SessionStore from "../../stores/SessionStore";
+import BackendService from "../../services/BackendService";
 const md = new MarkdownIt()
 
 class NewsItem extends Component {
@@ -17,12 +17,13 @@ class NewsItem extends Component {
       error: null,
       id: false,
       edit: false,
-      Title: '',
-      Date: props.firebase.getCurrentDate(),
-      Content: '',
-      Markdown: '',
+      title: '',
+      date: new Date(),
+      content: '',
+      markdown: '',
       ...this.props.news
     }
+    this.newsService = new BackendService('news')
   }
 
   onChange = (event) => {
@@ -38,88 +39,79 @@ class NewsItem extends Component {
   }
 
   onDelete = () => {
-    this.props.firebase.newsItem(this.state.id).delete()
+    this.newsService.delete(this.state.id)
       .then(() => this.props.history.push(`${ROUTES.LANDING}`))
       .catch((error) => this.setState({error: error.message}))
   }
 
-  onSave = (authUser) => {
+  onSave = () => {
+    const data = {
+      title: this.state.title,
+      markdown: this.state.markdown,
+    }
     if (this.state.id) {
-      this.props.firebase.newsItem(this.state.id).set({
-        Title: this.state.Title,
-        Markdown: this.state.Markdown,
-      }, { merge: true })
-        .then(() => this.successSave(authUser))
-        .catch((error) => this.setState({error: error.message}))
+      this.newsService.patch(this.state.id, data)
+        .then((news) => this.successSave(news))
+        .catch((error) => this.setState({error}))
     }
     else {
-      this.props.firebase.newsAdd({
-        Title: this.state.Title,
-        Markdown: this.state.Markdown,
-        Date: this.state.Date,
-        authorID: authUser.uid
-      })
-        .then(() => this.successSave(authUser))
-        .catch((error) => this.setState({error: error.message}))
+      data.date = this.state.date
+      this.newsService.post(data)
+        .then((news) => this.successSave(news))
+        .catch((error) => this.setState({error}))
     }
   }
 
-  successSave = (authUser) => {
+  successSave = (news) => {
     this.setState({
-      authorID: authUser.uid,
       edit: false,
-      Content: md.render(this.state.Markdown)
+      ...news
     })
   }
 
   render() {
-    const { Title, Date, Content, Markdown, edit, error, authorID } = this.state;
-    let rows = Markdown.split('\n').length + 2
+    const { title, date, content, markdown, edit, error } = this.state;
+    let rows = markdown.split('\n').length + 2
     return (
-      <AuthUserContext.Consumer>
-        {authUser => (
-          <Row className="news">
-            <Col className="news-entry">
-              <h2>{Title}</h2>
-              <div className="date"><FormattedDate date={Date} /></div>
-              {
-                !edit && (
-                  <>
-                    <div dangerouslySetInnerHTML={{__html: Content}}/>
-                    { authUser && authUser.uid === authorID && <Button onClick={this.onEditToggle}>Edit</Button>}
-                  </>
-                )
-              }
-              {
-                edit && (
-                  <>
-                    <div dangerouslySetInnerHTML={{__html: md.render(Markdown)}}/>
-                    <Form onSubmit={(event) => event.preventDefault()}>
-                      <FormGroup>
-                        <Input type="text" value={Title} onChange={this.onChange} name="Title" placeholder="Title"/>
-                      </FormGroup>
-                      <FormGroup>
-                        <Input type="textarea" value={Markdown} onChange={this.onChange} name="Markdown" placeholder="Markdown" rows={rows}/>
-                      </FormGroup>
-                      { error && <Alert color="danger">{error}</Alert>}
-                      <FormGroup>
-                        { authUser && this.state.id && authUser.uid === authorID && <Button color="danger" type="submit" onClick={this.onDelete}>Delete</Button> }
-                        { authUser && <Button color="primary" type="submit" onClick={() => this.onSave(authUser)}>Save</Button> }
-                      </FormGroup>
-                    </Form>
-                  </>
-                )
-              }
-            </Col>
-          </Row>
-        )}
-      </AuthUserContext.Consumer>
+      <Row className="news">
+        <Col className="news-entry">
+          <h2>{title}</h2>
+          <div className="date"><FormattedDate date={date} /></div>
+          {
+            !edit && (
+              <>
+                <div dangerouslySetInnerHTML={{__html: content}}/>
+                { SessionStore.isAdmin && <Button onClick={this.onEditToggle}>Edit</Button>}
+              </>
+            )
+          }
+          {
+            edit && (
+              <>
+                <div dangerouslySetInnerHTML={{__html: md.render(markdown)}}/>
+                <Form onSubmit={(event) => event.preventDefault()}>
+                  <FormGroup>
+                    <Input type="text" value={title} onChange={this.onChange} name="title" placeholder="Title"/>
+                  </FormGroup>
+                  <FormGroup>
+                    <Input type="textarea" value={markdown} onChange={this.onChange} name="markdown" placeholder="Markdown" rows={rows}/>
+                  </FormGroup>
+                  { error && <Alert color="danger">{error}</Alert>}
+                  <FormGroup>
+                    { SessionStore.isAdmin && <Button color="danger" type="submit" onClick={this.onDelete}>Delete</Button> }
+                    { SessionStore.isAdmin && <Button color="primary" type="submit" onClick={() => this.onSave()}>Save</Button> }
+                  </FormGroup>
+                </Form>
+              </>
+            )
+          }
+        </Col>
+      </Row>
     )
   }
 
 }
 
 export default compose(
-  withFirebase,
   withRouter
 )(NewsItem)

@@ -1,12 +1,24 @@
-import React from 'react'
+import React, {Component} from 'react'
 
-import { withFirebase } from '../Firebase'
 import { NavLink } from 'reactstrap'
+import SessionStore from "../../stores/SessionStore";
+import {withRouter} from "react-router-dom";
+import * as ROUTES from "../../constants/routes";
 
-const SignOutButton = ({firebase}) => (
-  <NavLink onClick={firebase.doSignOut}>
-    Sign Out
-  </NavLink>
-)
+class SignOutButton extends Component {
 
-export default withFirebase(SignOutButton)
+  onClick = () => {
+    SessionStore.signOut()
+    this.props.history.push(ROUTES.LANDING)
+  }
+
+  render() {
+    return <NavLink onClick={this.onClick}>
+      Sign Out
+    </NavLink>
+  }
+
+}
+
+
+export default withRouter(SignOutButton)

@@ -4,24 +4,40 @@ import { Table } from 'reactstrap'
 import { FaSortDown } from 'react-icons/fa'
 import { GiTwoCoins } from 'react-icons/gi'
 import PlayerNames from '../Player/PlayerNames'
+import BackendService from "../../services/BackendService";
+import GameLink from "../Games/GameLink";
+import {reaction} from "mobx";
+import SeasonStore from "../../stores/SeasonStore";
 
 class RankingTable extends Component {
+
+  static defaultProps = {
+    filter: {}
+  }
 
   constructor (props) {
     super(props)
 
-    this.sort(props.ranking, 'funkyDiff')
     this.state = {
-      ranking: props.ranking,
+      ranking: [],
       sort: 'funkyDiff',
     }
+    this.rankingService = new BackendService('ranking')
   }
 
-  componentDidUpdate (prevProps, prevState, snapshot) {
-    if (!prevState.ranking || prevState.ranking.loadedSeasonPrefix !== this.props.ranking.loadedSeasonPrefix) {
-      this.sort(this.props.ranking, 'funkyDiff')
-      this.setState({
-        ranking: this.props.ranking,
+  componentDidMount() {
+    this.loadRankings(this.state.sort)
+    reaction(
+      () => SeasonStore.selectedSeason,
+      () => {
+        this.loadRankings(this.state.sort)
+      })
+  }
+
+  loadRankings = (sort) => {
+    if (SeasonStore.selectedSeason.id) {
+      this.rankingService.get({...this.props.filter, sort: sort, tag: SeasonStore.selectedSeason.id}).then((ranking) => {
+        this.setState({ranking, sort})
       })
     }
   }
@@ -38,29 +54,28 @@ class RankingTable extends Component {
     if (this.state.sort === field) {
       return
     }
-    let ranking = this.state.ranking
-    this.sort(ranking, field)
-    this.setState({ranking, sort: field})
+    this.loadRankings(field)
   }
 
   render () {
     const {ranking, sort} = this.state
+    const rankByPlayer = (!(this.props.filter.by && this.props.filter.by === 'game'));
     return (
       <Table hover>
         <thead>
         <tr>
-          <th>#</th>
-          <th>Player</th>
+          {rankByPlayer && <th>#</th>}
+          <th>{rankByPlayer ? 'Player' : 'Game'}</th>
           <th onClick={() => this.onSort('funkies')}>Average{sort === 'funkies' && <FaSortDown />}</th>
           <th onClick={() => this.onSort('funkyDiff')}>Credit{sort === 'funkyDiff' && <FaSortDown />}</th>
           <th onClick={() => this.onSort('wonPercentage')}>Won{sort === 'wonPercentage' && <FaSortDown />}</th>
         </tr>
         </thead>
         <tbody>
-        {ranking.players.map((player, i) => (
+        {ranking.map((player, i) => (
           <tr key={player.id}>
-            <td>{i+1}</td>
-            <td><PlayerNames players={[player]}/></td>
+            {rankByPlayer && <td>{i+1}</td>}
+            <td>{rankByPlayer ? <PlayerNames players={[player]}/> : <GameLink game={player}/>}</td>
             <td>{player.funkies.toFixed(2).replace('.', ',')} <GiTwoCoins style={{color: 'yellowgreen'}}/></td>
             <td><Funkies funkies={player.funkyDiff} /></td>
             <td>{player.won} / {player.played} ({player.wonPercentage.toFixed(0)}%)</td>

@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from 'reactstrap'
-import { withFirebase } from '../Firebase'
-import withSeason from './withSeason'
+import BackendService from "../../services/BackendService";
+import SeasonStore from "../../stores/SeasonStore";
+import {observer} from "mobx-react";
 
 class SeasonSelector extends Component {
 
@@ -12,24 +13,25 @@ class SeasonSelector extends Component {
       loading: false,
       seasons: null,
     }
+    this.tagsService = new BackendService('tag');
   }
 
   componentDidMount () {
-    if (this.state.seasonPrefix) {
-      return
-    }
     this.setState({loading: true})
-    this.props.firebase.seasons().then((seasons) => {
+    this.tagsService.get().then((seasons) => {
       this.setState({
         loading: false,
         seasons: seasons
       })
+      if (!SeasonStore.selectedSeason.id) {
+        SeasonStore.changeSeason(seasons[seasons.length - 1]);
+      }
     })
   }
 
   render () {
     const {loading, seasons} = this.state
-    const {selectedSeason, changeSeason} = this.props
+    const selectedSeason = SeasonStore.selectedSeason
 
     return (
       <UncontrolledDropdown nav inNavbar>
@@ -40,12 +42,12 @@ class SeasonSelector extends Component {
           (!loading && seasons) &&
           <DropdownMenu right>
             { seasons.map((season) => (
-              <DropdownItem key={season.id} active={selectedSeason.id === season.id} onClick={() => changeSeason(season)}>
+              <DropdownItem key={season.id} active={selectedSeason.id === season.id} onClick={() => SeasonStore.changeSeason(season)}>
                 Season {season.name}
               </DropdownItem>
             )) }
             <DropdownItem divider />
-            <DropdownItem active={selectedSeason.id === 'all'} onClick={() => changeSeason({id: 'all', name: 'Overall', startDate: new Date('2000-01-01'), endDate: new Date('2040-01-01')})}>
+            <DropdownItem active={selectedSeason.id === 'all'} onClick={() => SeasonStore.changeSeason({id: 0, name: 'Overall'})}>
               Overall
             </DropdownItem>
           </DropdownMenu>
@@ -56,4 +58,4 @@ class SeasonSelector extends Component {
 
 }
 
-export default withFirebase(withSeason(SeasonSelector))
+export default observer(SeasonSelector)

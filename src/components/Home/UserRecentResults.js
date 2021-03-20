@@ -1,70 +1,12 @@
 import React, { Component } from 'react'
-import { compose } from 'recompose'
-import { withFirebase } from '../Firebase'
 import RecentResults from '../Results/RecentResults'
-import withSeason from '../Season/withSeason'
+import SessionStore from "../../stores/SessionStore";
 
 class UserRecentResults extends Component {
-
-  constructor (props) {
-    super(props)
-
-    this.state = {
-      loading: false,
-      results: null,
-    }
-  }
-
-  componentDidMount () {
-    this.updateResults()
-  }
-
-  componentDidUpdate () {
-    this.updateResults()
-  }
-
-  updateResults = () => {
-    if ((this.state.results && this.props.seasonPrefix === this.state.loadedSeasonPrefix) || this.state.loading) {
-      return
-    }
-
-    this.setState({loading: true})
-    let promises = [];
-    Object.keys(this.props.user.players).forEach((playerID) => promises.push(this.props.firebase.resultsByPlayerId(playerID, this.props.selectedSeason)))
-    Promise.all(promises)
-      .then((snapshotsList) => {
-        const results = []
-        snapshotsList.forEach((snapshots) => {
-          snapshots.forEach((snapshot) => {
-            results.push({
-              ...snapshot.data(),
-              id: snapshot.id
-            })
-          })
-        })
-        return this.props.firebase.resultsResolvePlayers(results)
-      })
-      .then((results) => {
-        this.setState({
-          results,
-          loadedSeasonPrefix: this.props.seasonPrefix,
-          loading: false
-        })
-      })
-  }
-
   render() {
-    const { results, loading } = this.state
-    const { user } = this.props
-    if (loading) return (<p>loading</p>)
-    else if (results && results.length > 0) return (<RecentResults showGames results={results}/>)
-    else if (Object.keys(user.players).length > 0) return (<p>No game results found. Play something!</p>)
-    else return (<p>No user linked to account</p>)
+    if (SessionStore.playerIds.length === 0) return (<p>No user linked to account</p>)
+    else return (<RecentResults showGames filter={{player: SessionStore.playerIds}}/>)
   }
-
 }
 
-export default compose(
-  withFirebase,
-  withSeason
-)(UserRecentResults)
+export default UserRecentResults

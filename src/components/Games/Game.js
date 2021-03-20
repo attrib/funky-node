@@ -1,16 +1,15 @@
 import React, { Component } from 'react'
 import { Alert, Button, ButtonGroup, Col, Container, Form, FormGroup, Input, Label, Row } from 'reactstrap'
 import MarkdownIt from 'markdown-it'
-import AuthUserContext from '../Session/context'
-import { withFirebase } from '../Firebase'
 import * as ROUTES from '../../constants/routes'
-import * as ROLES from '../../constants/roles'
 import { withRouter } from 'react-router-dom'
 import { compose } from 'recompose'
 import RecentResults from '../Results/RecentResults'
 import { SelectList } from 'react-widgets'
 import RankingTable from '../Ranking/RankingTable'
-import { withSeason } from '../Season/withSeason'
+import { observer } from "mobx-react";
+import SessionStore from "../../stores/SessionStore";
+import BackendService from "../../services/BackendService";
 
 const md = new MarkdownIt()
 const scoreWidgetForms = [
@@ -37,7 +36,7 @@ class Game extends Component {
         description: '',
         description_markdown: '',
         image: null,
-        scoreWidget: 'ScoreTeamForm'
+        score_widget: 'ScoreTeamForm'
       }
       edit = true
     }
@@ -47,12 +46,9 @@ class Game extends Component {
       edit: edit,
       game: game,
       error: null,
-      recentResults: [],
-      recentResultsSeasonPrefix: null,
       scores: [],
-      ranking: null,
-      rankingSeasonPrefix: null,
     }
+    this.gameService = new BackendService('game')
   }
 
   componentDidMount () {
@@ -62,96 +58,9 @@ class Game extends Component {
     const gameID = this.props.match.params.id
 
     this.setState({loading: true})
-    this.props.firebase
-      .game(gameID)
-      .get()
-      .then(doc => {
-        this.setState({
-          game: {
-            id: doc.id,
-            ...doc.data(),
-          },
-          loading: false,
-        })
-      })
-
-
-    this.updateRecentResults()
-
-    this.updateRankings()
-  }
-
-  componentDidUpdate (prevProps, prevState, snapshot) {
-    this.updateRecentResults()
-    this.updateRankings()
-  }
-
-  updateRecentResults = () => {
-    if (this.state.recentResultsSeasonPrefix === this.props.seasonPrefix) {
-      return
-    }
-
-    const gameID = this.props.match.params.id
-
-    this.props.firebase
-      .resultsByGameId(gameID, this.props.selectedSeason)
-      .then(snapshot => {
-        let results = []
-        snapshot.forEach(document => {
-          let data = document.data();
-          results.push({
-            ...data,
-            id: document.id,
-          })
-        })
-        return this.props.firebase.resultsResolvePlayers(results)
-      })
-      .then((results) => {
-        this.setState({
-          recentResults: results,
-          recentResultsSeasonPrefix: this.props.seasonPrefix,
-        })
-      })
-  }
-
-  updateRankings = () => {
-    if (this.state.loading || this.state.rankingSeasonPrefix === this.props.seasonPrefix) {
-      return
-    }
-
-    const gameID = this.props.match.params.id
-
-    this.props.firebase.ranking(gameID, this.props.seasonPrefix)
-      .then(ranking => {
-        let promises = []
-        ranking.players.forEach((player) => {
-          promises.push(this.props.firebase.stats(player.id, this.props.seasonPrefix))
-        })
-        return Promise.all(promises)
-          .then((stats) => {
-            ranking.players = ranking.players.map((player) => {
-              stats.forEach((stat) => {
-                if (stat.id === player.id) {
-                  player.stats = stat.games[gameID]
-                  player.funkyDiff = stat.games[gameID].sum - stat.games[gameID].played + 1
-                  player.won = stat.games[gameID].won
-                  player.played = stat.games[gameID].played
-                  player.wonPercentage = stat.games[gameID].won / stat.games[gameID].played * 100
-                }
-              })
-              return player
-            })
-            return ranking
-          })
-      })
-      .then((ranking) => {
-        ranking.loadedSeasonPrefix = this.props.seasonPrefix
-        this.setState({
-          ranking,
-          loading: false,
-          rankingSeasonPrefix: this.props.seasonPrefix,
-        })
-      })
+    this.gameService.getId(gameID)
+      .then(game => this.setState({game, loading: false}))
+      .catch(error => this.setState({error: error, loading: false}))
   }
 
   onChange = (event) => {
@@ -162,7 +71,7 @@ class Game extends Component {
 
   onChangeScoreWidget = (widget) => {
     let game = this.state.game
-    game.scoreWidget = widget.id
+    game.score_widget = widget.id
     this.setState({game})
   }
 
@@ -173,29 +82,20 @@ class Game extends Component {
   }
 
   onDelete = () => {
-    this.props.firebase.game(this.state.game.id).delete()
+    this.gameService.delete(this.state.game.id)
       .then(() => this.props.history.push(`${ROUTES.GAMES}`))
       .catch((error) => this.setState({error: error.message}))
   }
 
-  onSave = (authUser) => {
+  onSave = () => {
     const game = this.state.game
-    const id = game.id
-    if (id) {
-      this.props.firebase.game(id).set({
-        ...game,
-        description: md.render(game.description_markdown),
-      }, {merge: true})
-        .then(() => this.successSave(authUser))
+    if (game.id) {
+      this.gameService.patch(game.id, game)
+        .then((game) => this.successSave(game))
         .catch((error) => this.setState({error: error.message}))
     } else {
-      delete game.id
-      this.props.firebase.gameAdd({
-        ...game,
-        authorID: authUser.uid,
-        description: md.render(game.description_markdown),
-      })
-        .then((game) => {this.props.history.push(`${ROUTES.GAMES}/${game.id}`); this.successSave(authUser, game.id); })
+      this.gameService.post(game)
+        .then((game) => {this.props.history.push(`${ROUTES.GAMES}/${game.id}`); this.successSave(game); })
         .catch((error) => this.setState({error: error.message}))
     }
   }
@@ -206,89 +106,78 @@ class Game extends Component {
     })
   }
 
-  successSave = (authUser, id) => {
-    const game = this.state.game
-    if (id) {
-      game.id = id
-    }
-    game.authorID = authUser.uid
-    game.description = md.render(game.description_markdown)
+  successSave = (game) => {
     this.setState({
       edit: false,
+      error: null,
       game: game
     })
   }
 
   render () {
-    const {game, loading, edit, error, recentResults, ranking} = this.state
+    const {game, loading, edit, error} = this.state
     return (
-      <AuthUserContext.Consumer>
-        {authUser => (
-          <div>
-            <Container>
-              {loading && <div>Loading ...</div>}
-              {game && (
+      <div>
+        <Container>
+          {loading && <div>Loading ...</div>}
+          {game && (
+            <>
+              <h1>{game.name}</h1>
+              {game.image && <img src={game.image} alt={game.name}/>}
+              {!edit && (
                 <>
-                  <h1>{game.name}</h1>
-                  {game.image && <img src={game.image} alt={game.name}/>}
-                  {!edit && (
-                    <>
-                      <p dangerouslySetInnerHTML={{__html: game.description}}/>
-                      <ButtonGroup>
-                        {authUser && authUser.roles[ROLES.APPROVED] && <Button onClick={this.onAddResult}>Add Result</Button>}
-                        {authUser && authUser.uid === game.authorID && <Button onClick={this.onEditToggle}>Edit</Button>}
-                      </ButtonGroup>
-                    </>
-                  )}
-                  {edit && <p dangerouslySetInnerHTML={{__html: md.render(game.description_markdown)}}/>}
-                  {edit && (
-                    <Form onSubmit={(event) => event.preventDefault()}>
-                      <FormGroup>
-                        <Input type="text" value={game.name} onChange={this.onChange} name="name" placeholder="Name"/>
-                      </FormGroup>
-                      <FormGroup>
-                        <Input type="textarea" value={game.description_markdown} onChange={this.onChange}
-                               name="description_markdown"
-                               placeholder="description"/>
-                      </FormGroup>
-                      <FormGroup>
-                        <Label>Widget for result form</Label>
-                        <SelectList data={scoreWidgetForms} textField="label" valueField="id" value={game.scoreWidget} onChange={this.onChangeScoreWidget}/>
-                      </FormGroup>
-                      {error && <Alert color="danger">{error}</Alert>}
-                      <ButtonGroup>
-                        {authUser && game.id && authUser.uid === game.authorID &&
-                        <Button color="danger" type="submit" onClick={this.onDelete}>Delete</Button>}
-                        {authUser &&
-                        <Button color="primary" type="submit" onClick={() => this.onSave(authUser)}>Save</Button>}
-                      </ButtonGroup>
-                    </Form>
-                  )}
-                  {game.id && (
-                    <Row>
-                      <Col>
-                        <h2>Ranking</h2>
-                        { ranking && <RankingTable ranking={ranking} />}
-                      </Col>
-                      <Col>
-                        <h2>Recent Results</h2>
-                        { recentResults && <RecentResults results={recentResults} />}
-                      </Col>
-                    </Row>
-                  )}
+                  <p dangerouslySetInnerHTML={{__html: game.description}}/>
+                  <ButtonGroup>
+                    {SessionStore.isApproved && <Button onClick={this.onAddResult}>Add Result</Button>}
+                    {(SessionStore.isAdmin) && <Button onClick={this.onEditToggle}>Edit</Button>}
+                  </ButtonGroup>
                 </>
               )}
-            </Container>
-          </div>
-        )}
-      </AuthUserContext.Consumer>
+              {edit && <p dangerouslySetInnerHTML={{__html: md.render(game.description_markdown)}}/>}
+              {edit && (
+                <Form onSubmit={(event) => event.preventDefault()}>
+                  <FormGroup>
+                    <Input type="text" value={game.name} onChange={this.onChange} name="name" placeholder="Name"/>
+                  </FormGroup>
+                  <FormGroup>
+                    <Input type="textarea" value={game.description_markdown} onChange={this.onChange}
+                           name="description_markdown"
+                           placeholder="description"/>
+                  </FormGroup>
+                  <FormGroup>
+                    <Label>Widget for result form</Label>
+                    <SelectList data={scoreWidgetForms} textField="label" valueField="id" value={game.score_widget} onChange={this.onChangeScoreWidget}/>
+                  </FormGroup>
+                  {error && <Alert color="danger">{error}</Alert>}
+                  <ButtonGroup>
+                    {SessionStore.isAdmin &&
+                    <Button color="danger" type="submit" onClick={this.onDelete}>Delete</Button>}
+                    {SessionStore.isAdmin &&
+                    <Button color="primary" type="submit" onClick={() => this.onSave()}>Save</Button>}
+                  </ButtonGroup>
+                </Form>
+              )}
+              {game.id && (
+                <Row>
+                  <Col>
+                    <h2>Ranking</h2>
+                    <RankingTable filter={{game: game.id}} />
+                  </Col>
+                  <Col>
+                    <h2>Recent Results</h2>
+                    <RecentResults filter={{game: game.id}} />
+                  </Col>
+                </Row>
+              )}
+            </>
+          )}
+        </Container>
+      </div>
     )
   }
 
 }
 
-export default compose(
-  withFirebase,
+export default observer(compose(
   withRouter,
-  withSeason
-)(Game)
+)(Game))

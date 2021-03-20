@@ -14,14 +14,12 @@ import Game from '../Games/Game'
 import Results from '../Results'
 import Result from '../Results/Result'
 import * as ROUTES from '../../constants/routes'
-import { withAuthentication } from '../Session'
 import Moment from 'moment'
 import momentLocalizer from 'react-widgets-moment';
 import Ranking from '../Ranking'
 import Player from '../Player'
 import LiveGames from '../LiveGames'
 import LiveGame from '../LiveGames/LiveGame'
-import withSeasonProvider from '../Season/withSeasonProvider'
 
 Moment.locale('de')
 momentLocalizer()
@@ -51,4 +49,4 @@ const App = () => (
   </Router>
 )
 
-export default withAuthentication(withSeasonProvider(App))
+export default App

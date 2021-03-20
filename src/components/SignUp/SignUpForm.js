@@ -1,56 +1,42 @@
 import * as ROUTES from '../../constants/routes'
 import React, { Component } from 'react'
 import { compose } from 'recompose'
-import { withFirebase } from '../Firebase'
 import { withRouter } from 'react-router-dom'
 import { Button, Form, Input, Alert, FormGroup } from 'reactstrap'
+import BackendService, {authService} from "../../services/BackendService";
 
 const INITIAL_STATE = {
   username: '',
-  email: '',
   passwordOne: '',
   passwordTwo: '',
   error: null,
 }
-
-const ERROR_CODE_ACCOUNT_EXISTS = 'auth/email-already-in-use'
-const ERROR_MSG_ACCOUNT_EXISTS = `
-An account with this E-Mail address already exists.
-Try to login with this account instead. If you think the
-account is already used from one of the social logins, try
-to sign-in with one of them. Afterward, associate your accounts
-on your personal account page.`
 
 class SignUpForm extends Component {
   constructor (props) {
     super(props)
 
     this.state = {...INITIAL_STATE}
+    this.userService = new BackendService('user')
   }
 
   onSubmit = event => {
-    const {username, email, passwordOne} = this.state
-    this.props.firebase
-      .doCreateUserWithEmailAndPassword(email, passwordOne)
-      .then(authUser => {
-        // Create a user in your Firebase realtime database
-        return this.props.firebase
-          .user(authUser.user.uid)
-          .set({
-            username,
-            email,
-            roles: {}
-          })
+    const {username, passwordOne} = this.state
+    const user = {
+      username,
+      password: passwordOne
+    }
+    this.userService.post(user)
+      .then((authUser) => {
+        return authService.login(username, passwordOne)
       })
-      .then(authUser => {
+      .then(() => {
         this.setState({...INITIAL_STATE})
         this.props.history.push(ROUTES.HOME)
       })
-      .catch(error => {
-        if (error.code === ERROR_CODE_ACCOUNT_EXISTS) {
-          error.message = ERROR_MSG_ACCOUNT_EXISTS
-        }
-        this.setState({error})
+      .catch((error) => {
+        console.log(error)
+        this.setState({error: error.error})
       })
 
     event.preventDefault()
@@ -60,14 +46,9 @@ class SignUpForm extends Component {
     this.setState({[event.target.name]: event.target.value})
   }
 
-  onChangeCheckbox = event => {
-    this.setState({[event.target.name]: event.target.checked})
-  }
-
   render () {
     const {
       username,
-      email,
       passwordOne,
       passwordTwo,
       error,
@@ -76,7 +57,6 @@ class SignUpForm extends Component {
     const isInvalid =
       passwordOne !== passwordTwo ||
       passwordOne === '' ||
-      email === '' ||
       username === ''
 
     return (
@@ -88,16 +68,7 @@ class SignUpForm extends Component {
             value={username}
             onChange={this.onChange}
             type="text"
-            placeholder="Full Name"
-          />
-        </FormGroup>
-        <FormGroup>
-          <Input
-            name="email"
-            value={email}
-            onChange={this.onChange}
-            type="text"
-            placeholder="Email Address"
+            placeholder="User name"
           />
         </FormGroup>
         <FormGroup>
@@ -128,5 +99,4 @@ class SignUpForm extends Component {
 
 export default compose(
   withRouter,
-  withFirebase,
 )(SignUpForm)

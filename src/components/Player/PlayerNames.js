@@ -1,19 +1,16 @@
-import AuthUserContext from '../Session/context'
 import { Link } from 'react-router-dom'
 import * as ROUTES from '../../constants/routes'
 import React from 'react'
+import SessionStore from "../../stores/SessionStore";
 
 const PlayerNames = ({players}) => {
+  const authUserPlayerIds = SessionStore.playerIds
   return players.map((player, i) => (
-    <AuthUserContext.Consumer key={player.nick}>
-      {authUser => (
-        <>
-          { (authUser && player.id in authUser.players) && <strong><PlayerLink player={player}/></strong>}
-          { (!authUser || !(player.id in authUser.players)) && <PlayerLink player={player}/>}
-          {i < players.length - 1 && ', '}
-        </>
-      )}
-    </AuthUserContext.Consumer>
+    <span key={player.id}>
+      { authUserPlayerIds.includes(player.id) && <strong><PlayerLink player={player}/></strong>}
+      { !authUserPlayerIds.includes(player.id) && <PlayerLink player={player}/>}
+      {i < players.length - 1 && ', '}
+    </span>
   ))
 }
 

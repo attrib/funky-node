@@ -1,13 +1,11 @@
 import React  from 'react'
-import { compose } from 'recompose'
 import { Route, Switch } from 'react-router-dom'
 import UserItem from './UserItem'
 import UserList from './UserList'
-import { withFirebase } from '../Firebase'
-import { withAuthorization } from '../Session'
 import * as ROLES from '../../constants/roles'
 import * as ROUTES from '../../constants/routes'
 import { Container } from 'reactstrap'
+import withAuthorization from "../Utils/withAuthorization";
 
 const AdminPage = () => (
   <div>
@@ -23,9 +21,7 @@ const AdminPage = () => (
 )
 
 const condition = authUser =>
-  authUser && !!authUser.roles[ROLES.ADMIN]
+  authUser && authUser.roles.includes(ROLES.ADMIN)
 
-export default compose(
-  withAuthorization(condition),
-  withFirebase,
-)(AdminPage)
+
+export default withAuthorization(condition)(AdminPage)
