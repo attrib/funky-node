@@ -1,5 +1,6 @@
 const neo4j = require('neo4j-driver')
 const crypto = require('crypto');
+const bcrypt = require('bcrypt');
 process.env.GOOGLE_APPLICATION_CREDENTIALS = 'account.json'
 const admin = require('firebase-admin')
 admin.initializeApp()
@@ -44,25 +45,40 @@ firestorePromises.push(firestore.collection('season').get()
         });
         return seasons;
     }))
+firestorePromises.push(firestore.collection('News').get()
+  .then((documents) => {
+    let news = {}
+    documents.forEach((document) => {
+      news[document.id] = document.data();
+    });
+    return news;
+  }))
 
 const txc = session.beginTransaction();
 
 Promise.all(firestorePromises)
-    .then(([players, games, results, seasons]) => {
+    .then(([players, games, results, seasons, news]) => {
         let promises = [players, games, results, seasons];
 
         console.log('Fetched DB');
 
-        // delete all first
-        promises.push('MATCH (n) DETACH DELETE n');
+        // create admin user
+        promises.push(txc.run('CREATE (:User $user)-[:MEMBER]->(:Role $role)', { user: {username: 'attrib', password: bcrypt.hashSync('test', 10)}, role: {name: 'ADMIN'} }));
 
+        Object.values(news).forEach((news) => {
+          promises.push(txc.run('MATCH (user:User {username:$username}) CREATE (news:News $news), (news)<-[:AUTHOR]-(user)', { username: 'attrib', news: {
+              title: news.Title,
+              markdown: news.Markdown,
+              date: news.Date.toDate().toISOString(),
+            } }));
+        })
         Object.values(games).forEach((game) => {
-            promises.push(txc.run('CREATE (a:Game {name: $name, description: $description, description_markdown: $markdown})', { name: game.name, description: game.description, markdown: game.description_markdown}));
+            promises.push(txc.run('CREATE (a:Game {name: $name, description_markdown: $markdown, score_widget: $score_widget})', { name: game.name, markdown: game.description_markdown, score_widget: game.scoreWidget}));
         });
 
         return Promise.all(promises)
     })
-    .then(([players, games, results, seasons, ...data]) => {
+    .then(([players, games, results, seasons, users, news, ...data]) => {
         console.log('Start creating queries');
         let promises = [];
         Object.values(results).forEach((result) => {
