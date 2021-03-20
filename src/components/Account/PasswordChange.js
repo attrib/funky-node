@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 
 import { Form, FormGroup, Alert, Button, Input } from 'reactstrap'
+import BackendService from "../../services/BackendService";
+import SessionStore from "../../stores/SessionStore";
 
 const INITIAL_STATE = {
   passwordOne: '',
@@ -13,13 +15,13 @@ class PasswordChangeForm extends Component {
     super(props)
 
     this.state = {...INITIAL_STATE}
+    this.userService = new BackendService('user')
   }
 
   onSubmit = event => {
     const {passwordOne} = this.state
 
-    this.props.firebase
-      .doPasswordUpdate(passwordOne)
+    this.userService.patch(SessionStore.user.id, {password: passwordOne})
       .then(() => {
         this.setState({...INITIAL_STATE})
       })

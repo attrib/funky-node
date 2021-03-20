@@ -31,7 +31,7 @@ router.get('/:id', acl('self'), (req, res) => {
     .then((result) => {
       if (result.length === 1) {
         const record = result.pop()
-        return prepareUser(record)
+        res.send(prepareUser(record));
       } else {
         res.status(404);
         res.send({error: 'Not found'})
@@ -62,7 +62,7 @@ router.post('/', (req, res) => {
           .then((result) => {
             if (result.length > 0) {
               const record = result.pop()
-              return prepareUser(record)
+              res.send(prepareUser(record));
             } else {
               res.status(500)
               res.send({error: "Error while creating user"})
@@ -127,11 +127,16 @@ router.patch('/:id', acl('self'), (req, res) => {
     .then((result) => {
       if (result.length === 1) {
         const record = result.pop()
-        return prepareUser(record)
+        res.send(prepareUser(record));
       } else {
         res.status(404);
         res.send({error: 'Not found'})
       }
+    })
+    .catch((error) => {
+      console.log(error)
+      res.status(500)
+      res.send(error)
     })
 })
 
