@@ -65,15 +65,17 @@ class Player extends Component {
   }
 
   updateStats () {
-    this.rankingService.get({player: this.state.player.id, tag: SeasonStore.selectedSeason.id})
-      .then((stats) => {
-        this.setState({
-          stats: stats.pop()
+    if (SeasonStore.selectedSeason.id) {
+      this.rankingService.get({player: this.state.player.id, tag: SeasonStore.selectedSeason.id})
+        .then((stats) => {
+          this.setState({
+            stats: stats.pop()
+          })
         })
-      })
-      .catch((err) => {
-        console.log(err)
-      })
+        .catch((err) => {
+          console.log(err)
+        })
+    }
   }
 
   render () {
