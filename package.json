@@ -25,7 +25,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "deploy": "npm run build && rsync -az --delete build/ funky-clan.de:~/funky-clan/frontend"
+    "deploy": "REACT_APP_BACKEND_URL=https://funky-clan.de/api/ npm run build && rsync -az --delete build/ funky-clan.de:~/funky-clan/frontend"
   },
   "eslintConfig": {
     "extends": "react-app"
