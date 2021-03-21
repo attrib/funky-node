@@ -6,7 +6,7 @@ services:
     volumes:
       - ./data/neo4j:/data
       - ./data/logs:/logs
-    # exposed locally to use with ssh -L 7474:127.0.0.1:7474 -L 7687:127.0.0.1:7687 funky-clan.de
+    # exposed locally to use with ssh -L 7474:127.0.0.1:7474 -L 7687:127.0.0.1:7687 funky.wtf
     ports:
       - 127.0.0.1:7474:7474
       - 127.0.0.1:7687:7687

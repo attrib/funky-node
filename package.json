@@ -1,6 +1,6 @@
 {
   "name": "funky-node",
-  "homepage": "https://funky-clan.de/",
+  "homepage": "https://funky.wtf/",
   "version": "0.3.0",
   "private": true,
   "dependencies": {
@@ -24,7 +24,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "deploy": "REACT_APP_BACKEND_URL=https://funky-clan.de/api/ npm run build && rsync -az --delete build/ funky-clan.de:~/funky-clan/frontend"
+    "deploy": "REACT_APP_BACKEND_URL=https://funky.wtf/api/ npm run build && rsync -az --delete build/ funky-clan.de:~/funky-clan/frontend"
   },
   "eslintConfig": {
     "extends": "react-app"

@@ -1,6 +1,6 @@
-# funky-clan
+# funky
 
-Source code of http://www.funky-clan.de
+Source code of http://funky.wtf
 
 board and card game statistics for competitive gamers and statistic nerds.
 

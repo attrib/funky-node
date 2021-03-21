@@ -26,7 +26,7 @@ app.use(authenticationMiddleware)
 app.use(cors())
 
 app.get('/', (req, res) => {
-  res.redirect(301, 'https://funky-clan.de/');
+  res.redirect(301, 'https://funky.wtf/');
 })
 
 app.use('/game', game)

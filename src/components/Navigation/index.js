@@ -80,7 +80,7 @@ export class Navigation extends Component {
   render () {
     return (
       <Navbar color="inverse" light expand="md">
-        <NavbarBrand href={ROUTES.LANDING}>funky-clan</NavbarBrand>
+        <NavbarBrand href={ROUTES.LANDING}>funky.wtf</NavbarBrand>
         <NavbarToggler onClick={this.toggle}/>
         <Collapse isOpen={this.state.isOpen} navbar>
           <Nav className="ml-auto" navbar>
