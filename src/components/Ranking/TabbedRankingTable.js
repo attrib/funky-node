@@ -28,7 +28,7 @@ class TabbedRankingTable extends Component {
               className={classnames({ active: this.state.groupBy === 'player' })}
               onClick={() => { this.setState({groupBy: 'player'}) }}
             >
-              Player
+              Overall
             </NavLink>
           </NavItem>
           <NavItem>
@@ -37,6 +37,14 @@ class TabbedRankingTable extends Component {
               onClick={() => { this.setState({groupBy: 'team'}) }}
             >
               Teams
+            </NavLink>
+          </NavItem>
+          <NavItem>
+            <NavLink
+              className={classnames({ active: this.state.groupBy === 'single' })}
+              onClick={() => { this.setState({groupBy: 'single'}) }}
+            >
+              Single player
             </NavLink>
           </NavItem>
         </Nav>

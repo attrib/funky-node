@@ -35,6 +35,11 @@ router.get('/', (req, res) => {
       withQuery = 'with team, score, COLLECT(player) AS players WHERE size(players) > 1 '
       break;
 
+    case 'single':
+      rankBy = 'ID(team) AS id, players'
+      withQuery = 'with team, score, COLLECT(player) AS players WHERE size(players) = 1 '
+      break;
+
     case 'game':
       rankBy = 'ID(game) AS id, game.name AS name'
       break;

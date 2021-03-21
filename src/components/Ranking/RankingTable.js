@@ -80,12 +80,11 @@ class RankingTable extends Component {
           return <PlayerNames players={[player]}/>
 
         case 'team':
+        case 'team_game':
+        case 'single':
           return <TeamLink team={player}/>
 
         case 'game':
-          return <GameLink game={player}/>
-
-        case 'team_game':
           return <GameLink game={player}/>
       }
     }
