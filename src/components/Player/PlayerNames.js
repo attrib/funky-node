@@ -4,6 +4,9 @@ import React from 'react'
 import SessionStore from "../../stores/SessionStore";
 
 const PlayerNames = ({players}) => {
+  if (!players) {
+    return (<span/>)
+  }
   const authUserPlayerIds = SessionStore.playerIds
   return players.map((player, i) => (
     <span key={player.id}>

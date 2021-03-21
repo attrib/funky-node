@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Container } from 'reactstrap'
-import RankingTable from './RankingTable'
+import TabbedRankingTable from "./TabbedRankingTable";
 
 class Ranking extends Component {
 
@@ -8,7 +8,7 @@ class Ranking extends Component {
     return (
       <div>
         <Container>
-          <RankingTable/>
+          <TabbedRankingTable />
         </Container>
       </div>
     )

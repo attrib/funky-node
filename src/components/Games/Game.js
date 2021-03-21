@@ -5,10 +5,10 @@ import * as ROUTES from '../../constants/routes'
 import { withRouter } from 'react-router-dom'
 import RecentResults from '../Results/RecentResults'
 import { SelectList } from 'react-widgets'
-import RankingTable from '../Ranking/RankingTable'
 import { observer } from "mobx-react";
 import SessionStore from "../../stores/SessionStore";
 import BackendService from "../../services/BackendService";
+import TabbedRankingTable from "../Ranking/TabbedRankingTable";
 
 const md = new MarkdownIt()
 const scoreWidgetForms = [
@@ -160,7 +160,7 @@ class Game extends Component {
                 <Row>
                   <Col>
                     <h2>Ranking</h2>
-                    <RankingTable filter={{game: game.id}} />
+                    <TabbedRankingTable filter={{game: game.id}}/>
                   </Col>
                   <Col>
                     <h2>Recent Results</h2>

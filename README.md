@@ -11,8 +11,7 @@ You will find some information on how to perform common tasks [here](https://git
 ## todos
  
 * more filters
-* ranking by team  
-* (WiP) Live Games
+* Live Games
 * upload images / location
 * pagination
 * (WiP) Mobile support

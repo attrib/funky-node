@@ -34,6 +34,12 @@ class RankingTable extends Component {
       })
   }
 
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (this.props.filter.by !== prevProps.filter.by) {
+      this.loadRankings(this.state.sort)
+    }
+  }
+
   loadRankings = (sort) => {
     if (SeasonStore.selectedSeason.id) {
       let filter = {...this.props.filter, sort: sort}
@@ -64,6 +70,7 @@ class RankingTable extends Component {
   render () {
     const {ranking, sort} = this.state
     const rankByPlayer = (!(this.props.filter.by && this.props.filter.by === 'game'));
+    const rankBy = this.props.filter.by || 'player'
     return (
       <Table hover>
         <thead>
@@ -79,7 +86,7 @@ class RankingTable extends Component {
         {ranking.map((player, i) => (
           <tr key={player.id}>
             {rankByPlayer && <td>{i+1}</td>}
-            <td>{rankByPlayer ? <PlayerNames players={[player]}/> : <GameLink game={player}/>}</td>
+            <td>{rankByPlayer ? <PlayerNames players={rankBy === 'player' ? [player] : player.players}/> : <GameLink game={player}/>}</td>
             <td>{player.funkies.toFixed(2).replace('.', ',')} <GiTwoCoins style={{color: 'yellowgreen'}}/></td>
             <td><Funkies funkies={player.funkyDiff} /></td>
             <td>{player.won} / {player.played} ({player.wonPercentage.toFixed(0)}%)</td>
