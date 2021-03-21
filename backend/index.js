@@ -13,6 +13,7 @@ const
   authenticationMiddleware = require('./routes/auth').authenticationMiddleware,
   game = require('./routes/game'),
   player = require('./routes/player'),
+  team = require('./routes/team'),
   result = require('./routes/result'),
   ranking = require('./routes/ranking'),
   tag = require('./routes/tag'),
@@ -31,6 +32,7 @@ app.get('/', (req, res) => {
 
 app.use('/game', game)
 app.use('/player', player)
+app.use('/team', team)
 app.use('/result', result)
 app.use('/ranking', ranking)
 app.use('/tag', tag)

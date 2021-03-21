@@ -20,6 +20,7 @@ import Ranking from '../Ranking'
 import Player from '../Player'
 import LiveGames from '../LiveGames'
 import LiveGame from '../LiveGames/LiveGame'
+import Team from "../Team";
 
 Moment.locale('de')
 momentLocalizer()
@@ -45,6 +46,7 @@ const App = () => (
       <Route path={ROUTES.PLAYER} component={Player}/>
       <Route exact path={ROUTES.LIVE_GAMES} component={LiveGames}/>
       <Route path={ROUTES.LIVE_GAME} component={LiveGame}/>
+      <Route path={ROUTES.TEAM} component={Team}/>
     </div>
   </Router>
 )

@@ -7,7 +7,7 @@ const express = require('express'),
 
 function getResult(res, filter, parameters, limit) {
   const query = 'MATCH (result:Result)--(tag:Tag), (result)-[:GAME]->(game:Game), (player:Player)--(team:Team)-[score:SCORED]-(result) ' +
-    'WITH result, game, collect(ID(tag)) AS tagIds, collect(player.nick) AS names, collect(ID(player)) AS playerIds, collect(team.hash) AS team, collect(score.score) AS score, collect(score.funkies) AS funkies ' +
+    'WITH result, game, collect(ID(tag)) AS tagIds, collect(ID(team)) AS teamIds, collect(player.nick) AS names, collect(ID(player)) AS playerIds, collect(team.hash) AS team, collect(score.score) AS score, collect(score.funkies) AS funkies ' +
     (filter.length > 0 ? 'WHERE ' + filter.join(' AND ') + ' ' : '') +
     'RETURN result, game.name AS game, ID(game) AS gameID, names, playerIds, team, score, funkies ORDER BY result.date DESC' + limit;
   return runQuery(res, query, parameters).then((results) => {
@@ -93,6 +93,10 @@ router.get('/', (req, res) => {
   if (req.query.player) {
     filter.push('size([fPlayerId IN $playerID WHERE fPlayerId IN playerIds | 1]) > 0')
     parameters.playerID = req.query.player.split(',').map(id => parseInt(id));
+  }
+  if (req.query.team) {
+    filter.push('$teamID in teamIds')
+    parameters.teamID = parseInt(req.query.team);
   }
   if (req.query.tag && req.query.tag != 0) {
     filter.push('$tagID IN tagIds')

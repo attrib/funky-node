@@ -16,6 +16,10 @@ router.get('/', (req, res) => {
     filter.push('ID(player) = $playerID')
     parameters.playerID = parseInt(req.query.player);
   }
+  if (req.query.team) {
+    filter.push('ID(team) = $teamID')
+    parameters.teamID = parseInt(req.query.team);
+  }
   if (req.query.tag) {
     filter.push('ID(tag) = $tagID')
     parameters.tagID = parseInt(req.query.tag);
@@ -26,13 +30,18 @@ router.get('/', (req, res) => {
       rankBy = 'ID(player) AS id, player.nick AS nick'
       break;
 
+    case 'team':
+      rankBy = 'ID(team) AS id, players'
+      withQuery = 'with team, score, COLLECT(player) AS players WHERE size(players) > 1 '
+      break;
+
     case 'game':
       rankBy = 'ID(game) AS id, game.name AS name'
       break;
 
-    case 'team':
-      rankBy = 'ID(team) AS id, players'
-      withQuery = 'with team, score, COLLECT(player) AS players WHERE size(players) > 1 '
+    case 'team_game':
+      rankBy = 'ID(game) AS id, game.name AS name'
+      withQuery = 'with game, score, COLLECT(player) AS players WHERE size(players) > 1 '
       break;
   }
   const query = 'MATCH (team:Team)-[score:SCORED]-(result:Result)--(game:Game), (result)--(tag:Tag), (player:Player)--(team:Team) ' +

@@ -8,6 +8,7 @@ import BackendService from "../../services/BackendService";
 import GameLink from "../Games/GameLink";
 import {reaction} from "mobx";
 import SeasonStore from "../../stores/SeasonStore";
+import TeamLink from "../Team/TeamLink";
 
 class RankingTable extends Component {
 
@@ -41,6 +42,7 @@ class RankingTable extends Component {
   }
 
   loadRankings = (sort) => {
+    this.setState({ranking: []})
     if (SeasonStore.selectedSeason.id) {
       let filter = {...this.props.filter, sort: sort}
       if (SeasonStore.selectedSeason.id !== 'all') {
@@ -70,7 +72,24 @@ class RankingTable extends Component {
   render () {
     const {ranking, sort} = this.state
     const rankByPlayer = (!(this.props.filter.by && this.props.filter.by === 'game'));
-    const rankBy = this.props.filter.by || 'player'
+    const firstColumn = (player) => {
+      const rankBy = this.props.filter.by || 'player'
+      switch (rankBy) {
+        default:
+        case 'player':
+          return <PlayerNames players={[player]}/>
+
+        case 'team':
+          return <TeamLink team={player}/>
+
+        case 'game':
+          return <GameLink game={player}/>
+
+        case 'team_game':
+          return <GameLink game={player}/>
+      }
+    }
+
     return (
       <Table hover>
         <thead>
@@ -86,7 +105,7 @@ class RankingTable extends Component {
         {ranking.map((player, i) => (
           <tr key={player.id}>
             {rankByPlayer && <td>{i+1}</td>}
-            <td>{rankByPlayer ? <PlayerNames players={rankBy === 'player' ? [player] : player.players}/> : <GameLink game={player}/>}</td>
+            <td>{firstColumn(player)}</td>
             <td>{player.funkies.toFixed(2).replace('.', ',')} <GiTwoCoins style={{color: 'yellowgreen'}}/></td>
             <td><Funkies funkies={player.funkyDiff} /></td>
             <td>{player.won} / {player.played} ({player.wonPercentage.toFixed(0)}%)</td>
