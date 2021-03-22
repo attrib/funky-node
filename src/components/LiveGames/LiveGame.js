@@ -7,6 +7,7 @@ import GameLink from '../Games/GameLink'
 import Score from '../Results/Score'
 import LiveGameForm from './LiveGameForm'
 import SessionStore from "../../stores/SessionStore";
+import {io} from "socket.io-client";
 
 class LiveGame extends Component{
 
@@ -25,7 +26,6 @@ class LiveGame extends Component{
 
     if (props.location.state && props.location.state.result) {
       liveGame = props.location.state.result
-      liveGame.date = Object.assign(this.props.firebase.Timestamp.now(), liveGame.date)
     }
 
     this.state = {
@@ -40,24 +40,25 @@ class LiveGame extends Component{
       return
     }
     this.setState({loading: true})
-    this.props.firebase.liveGame(this.props.match.params.id)
-      .onSnapshot((snapshot) => {
-        if (snapshot.exists) {
-          let livegame = []
-          livegame.push({
-            ...snapshot.data(),
-            id: snapshot.id
-          })
-          return this.props.firebase.resultsResolvePlayers(livegame)
-            .then((liveGame) => {
-              console.log('update', liveGame[0])
-              this.setState({
-                loading: false,
-                liveGame: liveGame[0]
-              })
-            })
-        }
-      })
+    // todo move to a mobx store???
+    const url = new URL(process.env.REACT_APP_BACKEND_URL)
+    this.socket = io(`ws://${url.host}`);
+    this.socket.emit('load', this.props.match.params.id)
+    this.socket.on('load', (liveGame) => {
+      if (liveGame.error) {
+        this.setState({loading: false})
+        this.props.history.push(ROUTES.LIVE_GAMES)
+      }
+      else if (this.props.match.params.id == liveGame.id) {
+        this.setState({liveGame, loading: false})
+      }
+    })
+  }
+
+  componentWillUnmount() {
+    if (this.socket) {
+      this.socket.close()
+    }
   }
 
   onEditToggle = () => {
@@ -123,9 +124,7 @@ class LiveGame extends Component{
               <Col>{liveGame.notes}</Col>
             </Row>
             <Row>
-              <Col sm={{size: 3, offset: 9}}>
-                {(authUser && (authUser.uid === liveGame.authorID || authUser.playerIDs.filter((id) => liveGame.playerIDs.indexOf(id) !== -1))) && <Button onClick={this.onEditToggle}>Edit</Button>}
-              </Col>
+              <Col sm={{size: 3, offset: 9}}><Button onClick={this.onEditToggle}>Edit</Button></Col>
             </Row>
           </>)}
           { edit && <LiveGameForm user={authUser} liveGame={liveGame} onSave={this.onSave} onDelete={this.onDelete} onPublish={this.onPublish}/>}

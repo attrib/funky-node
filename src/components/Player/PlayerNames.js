@@ -18,9 +18,12 @@ const PlayerNames = ({players}) => {
 }
 
 const PlayerLink = ({player}) => {
-  return (
-    <Link to={{ pathname: ROUTES.PLAYER.replace(':id', player.id), state: {player}}}>{player.nick}</Link>
-  )
+  if (player.id) {
+    return (
+      <Link to={{ pathname: ROUTES.PLAYER.replace(':id', player.id), state: {player}}}>{player.nick}</Link>
+    )
+  }
+  return (<span>{player.nick}</span>)
 }
 
 export default PlayerNames

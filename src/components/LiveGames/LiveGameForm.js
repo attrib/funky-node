@@ -4,6 +4,8 @@ import { DateTimePicker, DropdownList } from 'react-widgets'
 import SimpleTableForm from './SimpleTableForm'
 import GameLink from '../Games/GameLink'
 import { FormattedDateTime } from '../Utils/FormattedDate'
+import BackendService from "../../services/BackendService"
+import {io} from "socket.io-client"
 
 class LiveGameForm extends Component {
 
@@ -11,10 +13,8 @@ class LiveGameForm extends Component {
     super(props)
 
     let state = {
-      authorID: null,
       id: false,
-      date: this.props.firebase.getCurrentDate(),
-      gameID: null,
+      date: new Date(),
       image: null,
       location: null,
       notes: "",
@@ -35,26 +35,31 @@ class LiveGameForm extends Component {
       }
     }
     this.state = state
+    this.playerService = new BackendService('player')
+    this.gameService = new BackendService('game')
+    this.resultService = new BackendService('result')
   }
 
   componentDidMount() {
     this.loadGames()
     this.loadPlayers()
+    // todo move to a mobx store???
+    const url = new URL(process.env.REACT_APP_BACKEND_URL)
+    this.socket = io(`ws://${url.host}`)
+  }
+
+  componentWillUnmount() {
+    if (this.socket) {
+      this.socket.close()
+    }
   }
 
   loadGames = () => {
     if (this.state.gameList.length) {
       return
     }
-    this.props.firebase.games()
-      .then((snapshots) => {
-        let gameList = []
-        snapshots.forEach((snapshot) => {
-          gameList.push({
-            ...snapshot.data(),
-            id: snapshot.id,
-          })
-        })
+    this.gameService.get()
+      .then((gameList) => {
         this.setState({gameList})
       })
   }
@@ -63,20 +68,14 @@ class LiveGameForm extends Component {
     if (this.state.playerList.length) {
       return
     }
-    this.props.firebase.players()
-      .then((snapshots) => {
-        let playerList = []
-        snapshots.forEach((snapshot) => {
-          playerList.push({
-            ...snapshot.data(),
-            id: snapshot.id,
-          })
-        })
+    this.playerService.get()
+      .then((playerList) => {
         this.setState({playerList})
       })
   }
 
   onChange = (data) => {
+    console.log(data)
     this.setState(data)
   }
 
@@ -111,123 +110,63 @@ class LiveGameForm extends Component {
 
   onSave = () => {
     let liveGame = {
-      authorID: this.state.authorID ? this.state.authorID : this.props.user.uid,
+      id: this.state.id,
       date: this.state.date,
-      gameID: this.state.game.id,
+      game: this.state.game,
       image: this.state.image,
       location: this.state.location,
       notes: this.state.notes,
       scores: this.state.scores,
     }
-    let players = []
     liveGame.scores = liveGame.scores.filter((score) => !this.isScoreEmpty(score))
     liveGame.scores = liveGame.scores.map((score) => {
       score.score = Number(score.score)
       score.players = score.players.filter(player => player.nick !== '')
-      score.players.forEach((player) => {
-        players.push(this.props.firebase.playerByNameSnapshot(player.nick))
-      })
       return score
     })
 
-    return Promise.all(players)
-      .then((playerSnapshots) => {
-        let players = {}
-        playerSnapshots.forEach((playerSnapshot) => {
-          let data = playerSnapshot.data()
-          players[data.nick] = playerSnapshot.ref
-        })
-        liveGame.scores = liveGame.scores.map((score) => {
-          score.players = score.players.map((player) => players[player.nick])
-          return score
-        })
-        // update
-        if (this.state.id) {
-          return this.props.firebase.liveGame(this.state.id)
-            .set(liveGame)
-            .then(() => {
-              return {
-                ...liveGame,
-                id: this.state.id,
-              }
-            })
-        }
-        // create
-        else {
-          return this.props.firebase.liveGameAdd(liveGame)
-            .then((ref) => ref.get())
-            .then((snapshot) => {
-              return {
-                ...snapshot.data(),
-                id: snapshot.id,
-              }
-            })
-        }
-      })
-      .then((liveGame) => {
-        if (this.props.onSave) {
-          this.props.firebase.resultsResolvePlayers([liveGame])
-            .then((liveGames) => {
-              let liveGame = liveGames.pop()
-              liveGame.isNew = !this.state.id
-              this.setState({...liveGame})
-              this.props.onSave(liveGame)
-            })
-        }
-      })
+    this.socket.emit('save', liveGame)
+
+    this.socket.once('created', (liveGame) => {
+      console.log('received', liveGame)
+      this.setState({...liveGame})
+      this.props.onSave({...liveGame, isNew: true})
+    })
   }
 
   onPublish = () => {
-    this.onSave()
-      .then(() => {
-        return this.props.firebase.liveGame(this.state.id).get()
+    let result = {
+      date: this.state.date,
+      game: {name: this.state.game.name},
+      image: this.state.image,
+      location: this.state.location,
+      notes: this.state.notes,
+      scores: this.state.scores,
+      tags: [{name: '' + (new Date(this.state.date)).getFullYear()}]
+    }
+    result.scores = result.scores.filter((score) => !this.isScoreEmpty(score))
+    result.scores = result.scores.map((score) => {
+      score.score = Number(score.score)
+      score.players = score.players.filter(player => player.nick !== '')
+      return score
+    })
+
+    this.resultService.post(result)
+      .then((result) => {
+        this.onDelete()
+        result.isNew = !this.state.id
+        this.props.onPublish(result.id)
       })
-      .then((liveGameSnapshot) => {
-        return this.props.firebase.resultAdd(liveGameSnapshot.data())
-      })
-      .then((ref) => {
-        this.props.onPublish(ref.id)
-        return this.props.firebase.liveGame(this.state.id).delete()
+      .catch((error) => {
+        console.log(error)
       })
   }
 
   onDelete = () => {
-    this.props.firebase.liveGame(this.state.id)
-      .delete()
-      .then(() => {
-        if (this.props.onDelete) {
-          this.props.onDelete(this.state.id)
-        }
-      })
-  }
-
-  scoreUpdate = () => {
-    this.setState({liveUpdate: true})
-    let promise = []
-    // hack to clone
-    let scores = JSON.parse(JSON.stringify(this.state.scores))
-    this.state.scores.forEach((score, index) => {
-      score.players.forEach((player) => {
-        promise.push(this.props.firebase.playerByNameSnapshot(player.nick))
-      })
-    })
-    Promise.all(promise)
-      .then((playerSnapshots) => {
-        let players = {}
-        playerSnapshots.forEach((playerSnapshot) => {
-          let data = playerSnapshot.data()
-          players[data.nick] = playerSnapshot.ref
-        })
-        scores = scores.map((score) => {
-          score.players = score.players.map((player) => players[player.nick])
-          return score
-        })
-        this.props.firebase.liveGame(this.state.id)
-          .set({scores, lastUpdatedDate: this.props.firebase.FieldValue.serverTimestamp(), notes: this.state.notes}, {merge: true})
-          .then(() => {
-            this.setState({liveUpdate: false})
-          })
-      })
+    this.socket.emit('delete', this.state.id)
+    if (this.props.onDelete) {
+      this.props.onDelete(this.state.id)
+    }
   }
 
   render() {
@@ -252,7 +191,7 @@ class LiveGameForm extends Component {
             <FormGroup row>
               <Label for="dateJS" sm={2}>Date</Label>
               <Col sm={10}>
-                <DateTimePicker name="dateJS" placeholder="Date" value={this.state.date.toDate()} onChange={dateJS => this.onChange({date: this.props.firebase.Timestamp.fromDate(dateJS)})} />
+                <DateTimePicker name="date" placeholder="Date" value={this.state.date} onChange={date => this.onChange({date})} />
               </Col>
             </FormGroup>
             <FormGroup row>
@@ -266,18 +205,18 @@ class LiveGameForm extends Component {
         {this.state.game && (() => {
           switch(this.state.game.liveGameWidget) {
             case 'SimpleTable':
-              return <SimpleTableForm scores={this.state.scores} error={this.state.error} playerList={this.state.playerList} filterSelectablePlayers={this.filterSelectablePlayers} isScoreEmpty={this.isScoreEmpty} onChange={this.onChange} options={this.state.game.liveGameWidgetOptions} isNew={!this.state.id} scoreUpdate={this.scoreUpdate}/>;
+              return <SimpleTableForm scores={this.state.scores} error={this.state.error} playerList={this.state.playerList} filterSelectablePlayers={this.filterSelectablePlayers} isScoreEmpty={this.isScoreEmpty} onChange={this.onChange} options={this.state.game.liveGameWidgetOptions} isNew={!this.state.id} scoreUpdate={this.onSave}/>
             default:
               if (this.state.game.score_widget === 'ScoreTeamForm') {
                 return (
                   <>
                     <Alert color="warning">Missing live game widget for <GameLink game={this.state.game}/>, fallback selected.</Alert>
-                    <SimpleTableForm scores={this.state.scores} error={this.state.error} playerList={this.state.playerList} filterSelectablePlayers={this.filterSelectablePlayers} isScoreEmpty={this.isScoreEmpty} onChange={this.onChange} options={this.state.game.liveGameWidgetOptions} isNew={!this.state.id} scoreUpdate={this.scoreUpdate}/>;
+                    <SimpleTableForm scores={this.state.scores} error={this.state.error} playerList={this.state.playerList} filterSelectablePlayers={this.filterSelectablePlayers} isScoreEmpty={this.isScoreEmpty} onChange={this.onChange} options={this.state.game.liveGameWidgetOptions} isNew={!this.state.id} scoreUpdate={this.onSave}/>
                   </>
                 )
               }
               else {
-                return <Alert color="danger">Missing live game widget for <GameLink game={this.state.game}/>, the score widget doesn't support live games.</Alert>;
+                return <Alert color="danger">Missing live game widget for <GameLink game={this.state.game}/>, the score widget doesn't support live games.</Alert>
               }
           }
         })()}
