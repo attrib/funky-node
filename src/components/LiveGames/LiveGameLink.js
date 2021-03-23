@@ -4,7 +4,7 @@ import React from 'react'
 
 const LiveGameLink = ({liveGame, linkName}) => {
   return (
-    <Link to={{ pathname: ROUTES.LIVE_GAME.replace(':id', liveGame.id), state: {liveGame}}}>{linkName}</Link>
+    <Link to={{ pathname: ROUTES.LIVE_GAME.replace(':id', liveGame.id)}}>{linkName}</Link>
   )
 }
 

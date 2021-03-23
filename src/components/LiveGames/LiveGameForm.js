@@ -5,7 +5,7 @@ import SimpleTableForm from './SimpleTableForm'
 import GameLink from '../Games/GameLink'
 import { FormattedDateTime } from '../Utils/FormattedDate'
 import BackendService from "../../services/BackendService"
-import {io} from "socket.io-client"
+import LiveGamesStore from "../../stores/LiveGamesStore";
 
 class LiveGameForm extends Component {
 
@@ -43,15 +43,6 @@ class LiveGameForm extends Component {
   componentDidMount() {
     this.loadGames()
     this.loadPlayers()
-    // todo move to a mobx store???
-    const url = new URL(process.env.REACT_APP_BACKEND_URL)
-    this.socket = io(`ws://${url.host}`)
-  }
-
-  componentWillUnmount() {
-    if (this.socket) {
-      this.socket.close()
-    }
   }
 
   loadGames = () => {
@@ -125,13 +116,19 @@ class LiveGameForm extends Component {
       return score
     })
 
-    this.socket.emit('save', liveGame)
-
-    this.socket.once('created', (liveGame) => {
-      console.log('received', liveGame)
-      this.setState({...liveGame})
-      this.props.onSave({...liveGame, isNew: true})
-    })
+    if (liveGame.id) {
+      LiveGamesStore
+        .save(liveGame)
+    }
+    else {
+      LiveGamesStore
+        .save(liveGame)
+        .then((liveGame) => {
+          console.log('received', liveGame)
+          this.setState({...liveGame})
+          this.props.onSave({...liveGame, isNew: true})
+        })
+    }
   }
 
   onPublish = () => {
@@ -163,7 +160,7 @@ class LiveGameForm extends Component {
   }
 
   onDelete = () => {
-    this.socket.emit('delete', this.state.id)
+    LiveGamesStore.delete(this.state.id)
     if (this.props.onDelete) {
       this.props.onDelete(this.state.id)
     }

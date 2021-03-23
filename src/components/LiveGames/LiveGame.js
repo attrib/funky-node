@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, {Component, useState} from 'react'
 import * as ROUTES from '../../constants/routes'
 import { withRouter } from 'react-router-dom'
 import { Button, Col, Container, Row } from 'reactstrap'
@@ -7,7 +7,9 @@ import GameLink from '../Games/GameLink'
 import Score from '../Results/Score'
 import LiveGameForm from './LiveGameForm'
 import SessionStore from "../../stores/SessionStore";
-import {io} from "socket.io-client";
+import LiveGamesStore from "../../stores/LiveGamesStore";
+import {observer} from "mobx-react";
+import {reaction} from "mobx";
 
 class LiveGame extends Component{
 
@@ -40,25 +42,20 @@ class LiveGame extends Component{
       return
     }
     this.setState({loading: true})
-    // todo move to a mobx store???
-    const url = new URL(process.env.REACT_APP_BACKEND_URL)
-    this.socket = io(`ws://${url.host}`);
-    this.socket.emit('load', this.props.match.params.id)
-    this.socket.on('load', (liveGame) => {
-      if (liveGame.error) {
+    LiveGamesStore.getLiveGame(this.props.match.params.id)
+      .then((liveGame) => {
+        this.liveGame = liveGame
+        this.setState({liveGame, loading: false})
+      })
+      .catch(() => {
         this.setState({loading: false})
         this.props.history.push(ROUTES.LIVE_GAMES)
-      }
-      else if (this.props.match.params.id == liveGame.id) {
-        this.setState({liveGame, loading: false})
-      }
-    })
-  }
-
-  componentWillUnmount() {
-    if (this.socket) {
-      this.socket.close()
-    }
+      })
+    reaction(
+      () => LiveGamesStore.liveGames[this.props.match.params.id],
+      (liveGame) => {
+        this.setState({liveGame})
+      })
   }
 
   onEditToggle = () => {
@@ -135,4 +132,4 @@ class LiveGame extends Component{
 
 }
 
-export default withRouter(LiveGame)
+export default withRouter(observer(LiveGame))

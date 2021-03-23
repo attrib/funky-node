@@ -47,10 +47,10 @@ const server = app.listen(port,() => {
 })
 
 const io = require('socket.io')(server, {cors: corsOptions});
-const liveGames = []
+const liveGames = {}
 
 io.on('connection', socket => {
-  socket.emit('livegames', Object.values(liveGames));
+  socket.emit('livegames', liveGames);
 
   socket.on('save', (livegame) => {
     console.log('received', livegame)
