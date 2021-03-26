@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom'
 import SessionStore from "../../stores/SessionStore";
 import LiveGamesStore from "../../stores/LiveGamesStore";
 import {observer} from "mobx-react";
+import {toJS} from "mobx";
 
 class LiveGames extends Component{
 
@@ -32,9 +33,9 @@ class LiveGames extends Component{
               <tbody>
               {liveGames.map((liveGame) => (
                 <tr key={liveGame.id}>
-                  <td><GameLink game={liveGame.game} /></td>
-                  <td><Score result={liveGame} winners/></td>
-                  <td><Score result={liveGame} losers/></td>
+                  <td><GameLink game={toJS(liveGame.game)} /></td>
+                  <td><Score result={toJS(liveGame)} winners/></td>
+                  <td><Score result={toJS(liveGame)} losers/></td>
                   <td><FormattedDateTime date={liveGame.lastUpdatedDate} /></td>
                   <td><LiveGameLink liveGame={liveGame} linkName="Details" /></td>
                 </tr>

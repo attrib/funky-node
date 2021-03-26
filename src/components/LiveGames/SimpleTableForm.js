@@ -2,26 +2,9 @@ import React, { Component } from 'react'
 import { FormFeedback, Input, Table } from 'reactstrap'
 import { Combobox } from 'react-widgets'
 import PlayerNames from '../Player/PlayerNames'
+import {toJS} from "mobx";
 
 class SimpleTableForm extends Component {
-
-  constructor (props) {
-    super(props)
-
-    let liveScore = []
-    props.scores.forEach((score, i) => {
-      if (!score.liveScore || score.liveScore.length === 0) {
-        score.liveScore = []
-      }
-      score.liveScore.forEach((point ,j) => {
-        if (!liveScore[j]) {
-          liveScore[j] = new Array(props.scores.length).fill("")
-        }
-        liveScore[j][i] = point
-      })
-    })
-    this.state = {liveScore}
-  }
 
   onChange = (data) => {
     this.props.onChange(data);
@@ -29,45 +12,38 @@ class SimpleTableForm extends Component {
 
   onChangeScore = (team, counter, score) => {
     let {scores, error} = this.props
-    let {liveScore} = this.state
     // populate liveScore
-    if (liveScore.length <= counter) {
-      liveScore = liveScore.concat(new Array(counter - liveScore.length + 1).fill(new Array(scores.length).fill("")))
+    if (scores[team].liveScore.length <= counter) {
+      scores[team].liveScore = scores[team].liveScore.concat(new Array(counter - scores[team].liveScore.length + 1).fill(''))
     }
     // for better typing allow -, 0 and empty string
     // otherwise you have to type 11 and then - (-11)
     if (score !== '-0' && score !== '' && score !== '-' && !isNaN(Number(score))) {
-      liveScore[counter][team] = Number(score)
+      scores[team].liveScore[counter] = Number(score)
       delete error[`scores[${team}][liveScore][${counter}]`]
     }
     else {
-      liveScore[counter][team] = score
+      scores[team].liveScore[counter] = score
       error[`scores[${team}][liveScore][${counter}]`] = 'Invalid number'
     }
 
     // filter out empty lines
-    liveScore = liveScore.filter((score, i) => {
-      const remove = score.filter((points) => !!points).length === 0
-      if (remove) {
-        for (let j=0; j<scores.length; j++) {
-          delete error[`scores[${j}][liveScore][${i}]`]
-        }
+    let deleteLine = true
+    scores.forEach((score, team) => {
+      if (score.liveScore[counter] && score.liveScore[counter] !== '') {
+        deleteLine = false
       }
-      return !remove
     })
+    if (deleteLine) {
+      scores.forEach((score, team) => {
+        delete error[`scores[${team}][liveScore][${counter}]`]
+        score.liveScore.splice(counter, 1)
+      })
+    }
 
-    // convert to score structure
-    scores = scores.map((score, i) => {
-      score.liveScore = liveScore.map((score) => score[i])
-      return score
-    })
+    // call total score
     scores[team].score = scores[team].liveScore.reduce((agg, point) => !isNaN(Number(point)) ? agg + Number(point): agg, 0)
 
-    // add new line at the end
-    liveScore.push(new Array(scores.length).fill(""))
-    this.setState({
-      liveScore
-    })
     this.onChange({scores})
 
     // start timer for scoreUpdate
@@ -96,7 +72,7 @@ class SimpleTableForm extends Component {
     scores[i].players[j] = player
     scores[i].players = scores[i].players.filter(player => player.nick !== '')
     scores = scores.filter((score) => !this.props.isScoreEmpty(score))
-    scores.push({score: 0, players: [{nick: ''}], liveScore: [""]})
+    scores.push({score: 0, players: [{nick: ''}], liveScore: []})
     scores[i].players.push({nick: ''})
 
     let playerIDs = [], playerNames = []
@@ -111,6 +87,26 @@ class SimpleTableForm extends Component {
 
   render () {
     const { scores, error, isNew } = this.props
+
+    let liveScore = []
+    scores.forEach((score, i) => {
+      if (!score.liveScore) {
+        score.liveScore = []
+      }
+      score.liveScore.forEach((point ,j) => {
+        if (!liveScore[j]) {
+          liveScore[j] = new Array(scores.length).fill('')
+        }
+        liveScore[j][i] = point
+      })
+    })
+    // add first player entry
+    if (scores.length === 0) {
+      scores.push({score: 0, players: [{nick: ''}], liveScore: []})
+    }
+    // add new line at the end
+    liveScore.push(new Array(scores.length).fill(''))
+
     return (
       <Table style={{textAlign: 'center'}}>
         <thead>
@@ -147,7 +143,7 @@ class SimpleTableForm extends Component {
           )}
           { !isNew && (
             <>
-            {this.state.liveScore.map((teams, i) => (
+            {liveScore.map((teams, i) => (
                 <tr key={`tbody-score-${i}`}>
                   {teams.map((points, j) => (
                     <td key={`tbody-score-${i}-${j}`}>

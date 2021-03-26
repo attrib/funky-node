@@ -3,7 +3,8 @@ const
   cors = require('cors'),
   dotenv = require("dotenv"),
   bodyParser = require('body-parser'),
-  crypto = require('crypto')
+  crypto = require('crypto'),
+  fs = require('fs')
 
 dotenv.config()
 
@@ -47,7 +48,19 @@ const server = app.listen(port,() => {
 })
 
 const io = require('socket.io')(server, {cors: corsOptions});
-const liveGames = {}
+const liveGames = {},
+  liveGamesFile = './data/liveGames.json'
+try {
+  if (fs.existsSync(liveGamesFile)) {
+    const data = fs.readFileSync(liveGamesFile)
+    const games = JSON.parse(data)
+    Object.keys(games).forEach((key) => {
+      liveGames[key] = games[key]
+    })
+  }
+} catch(err) {
+  console.error(err)
+}
 
 io.on('connection', socket => {
   socket.emit('livegames', liveGames);
@@ -87,3 +100,18 @@ io.on('connection', socket => {
     }
   })
 });
+
+let shutdownRunning = false;
+function stop() {
+  if (shutdownRunning) {
+    return
+  }
+  shutdownRunning = true
+  console.log('exit')
+  io.close()
+  server.close()
+  fs.writeFileSync(liveGamesFile, JSON.stringify(liveGames))
+}
+
+process.on('SIGINT', stop);
+process.on('SIGUSR2', stop);

@@ -1,4 +1,4 @@
-import React, {Component, useState} from 'react'
+import React, {Component} from 'react'
 import * as ROUTES from '../../constants/routes'
 import { withRouter } from 'react-router-dom'
 import { Button, Col, Container, Row } from 'reactstrap'

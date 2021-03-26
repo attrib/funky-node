@@ -6,6 +6,8 @@ import GameLink from '../Games/GameLink'
 import { FormattedDateTime } from '../Utils/FormattedDate'
 import BackendService from "../../services/BackendService"
 import LiveGamesStore from "../../stores/LiveGamesStore";
+import {observer} from "mobx-react";
+import {reaction} from "mobx";
 
 class LiveGameForm extends Component {
 
@@ -20,9 +22,7 @@ class LiveGameForm extends Component {
       notes: "",
       playerIDs: [],
       playerNames: [],
-      scores: [
-        {score: 0, players: [{nick: ""}]}
-      ],
+      scores: [],
       gameList: [],
       playerList: [],
       error: {},
@@ -43,6 +43,13 @@ class LiveGameForm extends Component {
   componentDidMount() {
     this.loadGames()
     this.loadPlayers()
+    if (this.state.id) {
+      reaction(
+        () => LiveGamesStore.liveGames[this.state.id],
+        (liveGame) => {
+          this.setState({...liveGame})
+        })
+    }
   }
 
   loadGames = () => {
@@ -207,7 +214,7 @@ class LiveGameForm extends Component {
               if (this.state.game.score_widget === 'ScoreTeamForm') {
                 return (
                   <>
-                    <Alert color="warning">Missing live game widget for <GameLink game={this.state.game}/>, fallback selected.</Alert>
+                    {/*<Alert color="warning">Missing live game widget for <GameLink game={this.state.game}/>, fallback selected.</Alert>*/}
                     <SimpleTableForm scores={this.state.scores} error={this.state.error} playerList={this.state.playerList} filterSelectablePlayers={this.filterSelectablePlayers} isScoreEmpty={this.isScoreEmpty} onChange={this.onChange} options={this.state.game.liveGameWidgetOptions} isNew={!this.state.id} scoreUpdate={this.onSave}/>
                   </>
                 )
@@ -240,4 +247,4 @@ class LiveGameForm extends Component {
 
 }
 
-export default LiveGameForm
+export default observer(LiveGameForm)
