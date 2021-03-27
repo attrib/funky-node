@@ -12,7 +12,10 @@ You will find some information on how to perform common tasks [here](https://git
  
 * more filters
 * Live Games
-  * on delete/publish other tab needs to redirect
+  * more widgets:
+    * Chimera
+    * Tichu  
+    * Wizard?
 * upload images / location
 * pagination
 * (WiP) Mobile support

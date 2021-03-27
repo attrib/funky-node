@@ -55,7 +55,12 @@ class LiveGame extends Component{
     reaction(
       () => LiveGamesStore.liveGames[this.props.match.params.id],
       (liveGame) => {
-        this.setState({liveGame})
+        if (liveGame) {
+          this.setState({liveGame})
+        }
+        else {
+          this.props.history.push(ROUTES.LIVE_GAMES)
+        }
       })
   }
 

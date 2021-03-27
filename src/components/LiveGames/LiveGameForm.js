@@ -140,7 +140,7 @@ class LiveGameForm extends Component {
 
   onPublish = () => {
     let result = {
-      date: this.state.date,
+      date: this.state.lastUpdatedDate,
       game: {name: this.state.game.name},
       image: this.state.image,
       location: this.state.location,
