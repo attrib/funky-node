@@ -1,5 +1,6 @@
 import {makeAutoObservable} from "mobx";
 import {io} from "socket.io-client";
+import SessionStore from "./SessionStore";
 
 class LiveGamesStore {
   liveGames = {}
@@ -36,9 +37,9 @@ class LiveGamesStore {
       console.log('load cached')
       return this.liveGames[id]
     }
+    console.log('load from server')
     return new Promise((resolve, reject) => {
-      this.socket.emit('load', id)
-      this.socket.once('load', (liveGame) => {
+      this.socket.emit('load', id, (liveGame) => {
         if (liveGame.error) {
           reject('Not found')
         }
@@ -63,13 +64,9 @@ class LiveGamesStore {
   }
 
   save = (liveGame) => {
-    this.socket.emit('save', liveGame)
-    if (liveGame.id) {
-      return liveGame.id
-    }
     return new Promise((resolve, reject) => {
-      this.socket.once('created', (liveGame) => {
-        resolve(liveGame)
+      this.socket.emit('save', {...liveGame, token: SessionStore.token}, (data) => {
+        resolve(data)
       })
     })
   }

@@ -123,19 +123,19 @@ class LiveGameForm extends Component {
       return score
     })
 
-    if (liveGame.id) {
-      LiveGamesStore
-        .save(liveGame)
-    }
-    else {
-      LiveGamesStore
-        .save(liveGame)
-        .then((liveGame) => {
-          console.log('received', liveGame)
+    const isNew = !liveGame.id
+    LiveGamesStore
+      .save(liveGame)
+      .then((liveGame) => {
+        if (liveGame.error) {
+          console.log(liveGame.error)
+        }
+        else if (isNew) {
+          console.log('saved is new')
           this.setState({...liveGame})
           this.props.onSave({...liveGame, isNew: true})
-        })
-    }
+        }
+      })
   }
 
   onPublish = () => {

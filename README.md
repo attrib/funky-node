@@ -12,7 +12,6 @@ You will find some information on how to perform common tasks [here](https://git
  
 * more filters
 * Live Games
-  * auth server side (only auth can create live game)
   * save live score?  
 * upload images / location
 * pagination

@@ -25,7 +25,7 @@ function authMiddleware(req, res, next) {
     next()
     return
   }
-  jwt.verify(token, access_token_secret, {ignoreExpiration: false, ...signingOptions}, (err, user) => {
+  verifyToken(token, {ignoreExpiration: false}, (err, user) => {
     if (err) {
       return next()
     }
@@ -34,6 +34,10 @@ function authMiddleware(req, res, next) {
       next()
     }
   })
+}
+
+function verifyToken(token, options, callback) {
+  jwt.verify(token, access_token_secret, {options, ...signingOptions}, callback)
 }
 
 /**
@@ -119,7 +123,7 @@ router.get('/', (req, res) => {
   if (token == null) {
     return res.redirect(401, '/auth')
   }
-  jwt.verify(token, access_token_secret, {ignoreExpiration: true, ...signingOptions}, (err, payload) => {
+  verifyToken(token, {ignoreExpiration: true}, (err, payload) => {
     if (err) {
       res.status(403)
       return res.send({error: err})
@@ -139,3 +143,4 @@ router.get('/', (req, res) => {
 module.exports = router
 module.exports.authenticationMiddleware = authMiddleware
 module.exports.acl = acl
+module.exports.verifyToken = verifyToken

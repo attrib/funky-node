@@ -14,6 +14,7 @@ const corsOptions = {}
 
 const
   authenticationMiddleware = require('./routes/auth').authenticationMiddleware,
+  verifyToken = require('./routes/auth').verifyToken,
   game = require('./routes/game'),
   player = require('./routes/player'),
   team = require('./routes/team'),
@@ -65,31 +66,38 @@ try {
 io.on('connection', socket => {
   socket.emit('livegames', liveGames);
 
-  socket.on('save', (livegame) => {
-    console.log('received', livegame)
+  socket.on('save', (livegame, callback) => {
+    const token = livegame.token
+    delete livegame.token
     livegame.lastUpdatedDate = new Date()
     if (!livegame.id) {
-      const hash = crypto.createHash('md5')
-      hash.update(livegame.date)
-      hash.update(livegame.game.name)
-      hash.update(livegame.lastUpdatedDate.getTime().toString())
-      livegame.id = hash.digest('hex')
-      liveGames[livegame.id] = livegame
-      socket.emit('created', livegame)
-      io.emit('new', livegame)
+      verifyToken(token, {ignoreExpiration: true}, (err, user) => {
+        if (err) {
+          callback({error: 'Auth required'})
+          return
+        }
+        const hash = crypto.createHash('md5')
+        hash.update(livegame.date)
+        hash.update(livegame.game.name)
+        hash.update(livegame.lastUpdatedDate.getTime().toString())
+        livegame.id = hash.digest('hex')
+        liveGames[livegame.id] = livegame
+        io.emit('new', livegame)
+      })
     }
     else {
       liveGames[livegame.id] = livegame
       io.emit('update', livegame)
     }
+    callback(livegame)
   })
 
-  socket.on('load', (id) => {
+  socket.on('load', (id, callback) => {
     if (liveGames[id]) {
-      socket.emit('load', liveGames[id])
+      callback(liveGames[id])
     }
     else {
-      socket.emit('load', {error: 'not found'})
+      callback({error: 'not found'})
     }
   })
 
@@ -114,4 +122,4 @@ function stop() {
 }
 
 process.on('SIGINT', stop);
-process.on('SIGUSR2', stop);
+// process.on('SIGUSR2', stop);
