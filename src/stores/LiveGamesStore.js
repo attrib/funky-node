@@ -9,7 +9,7 @@ class LiveGamesStore {
     makeAutoObservable(this)
 
     const url = new URL(process.env.REACT_APP_BACKEND_URL)
-    this.socket = io(`ws://${url.host}`);
+    this.socket = io(`${url.protocol}//${url.host}`);
 
     this.socket.on('livegames', (liveGames) => {
       this.setLiveGames(liveGames)

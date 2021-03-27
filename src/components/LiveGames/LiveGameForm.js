@@ -73,7 +73,6 @@ class LiveGameForm extends Component {
   }
 
   onChange = (data) => {
-    console.log(data)
     this.setState(data)
   }
 
