@@ -133,6 +133,11 @@ class LiveGameForm extends Component {
           console.log('saved is new')
           this.setState({...liveGame})
           this.props.onSave({...liveGame, isNew: true})
+          reaction(
+            () => LiveGamesStore.liveGames[liveGame.id],
+            (liveGame) => {
+              this.setState({...liveGame})
+            })
         }
       })
   }
