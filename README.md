@@ -12,7 +12,7 @@ You will find some information on how to perform common tasks [here](https://git
  
 * more filters
 * Live Games
-  * save live score?  
+  * on delete/publish other tab needs to redirect
 * upload images / location
 * pagination
 * (WiP) Mobile support

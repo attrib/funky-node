@@ -108,7 +108,7 @@ class SimpleTableForm extends Component {
     liveScore.push(new Array(scores.length).fill(''))
 
     return (
-      <Table style={{textAlign: 'center'}}>
+      <Table style={{textAlign: 'center'}} className="mt-4">
         <thead>
           <tr>
             {scores.map((score, i) => (

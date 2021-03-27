@@ -37,7 +37,7 @@ function authMiddleware(req, res, next) {
 }
 
 function verifyToken(token, options, callback) {
-  jwt.verify(token, access_token_secret, {options, ...signingOptions}, callback)
+  jwt.verify(token, access_token_secret, {...options, ...signingOptions}, callback)
 }
 
 /**

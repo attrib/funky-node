@@ -146,7 +146,8 @@ class LiveGameForm extends Component {
       location: this.state.location,
       notes: this.state.notes,
       scores: this.state.scores,
-      tags: [{name: '' + (new Date(this.state.date)).getFullYear()}]
+      tags: [{name: '' + (new Date(this.state.date)).getFullYear()}],
+      livescore_widget: 'SimpleTableForm'
     }
     result.scores = result.scores.filter((score) => !this.isScoreEmpty(score))
     result.scores = result.scores.map((score) => {

@@ -8,6 +8,7 @@ import GameLink from '../Games/GameLink'
 import { FormattedDateTime } from '../Utils/FormattedDate'
 import BackendService from "../../services/BackendService";
 import SessionStore from "../../stores/SessionStore";
+import LiveScoreDisplay from "../LiveGames/LiveScoreDisplay";
 
 class Result extends Component {
 
@@ -103,10 +104,10 @@ class Result extends Component {
               <Col sm={2}>Score</Col>
               <Col><Score losers result={result} funkies={true}/></Col>
             </Row>
-            <Row>
+            {result.notes && <Row>
               <Col sm={2}>Notes</Col>
               <Col>{result.notes}</Col>
-            </Row>
+            </Row>}
             {result.image && <Row>
               <Col sm={2}>Image</Col>
               <Col>{result.image}</Col>
@@ -114,6 +115,9 @@ class Result extends Component {
             {result.location && <Row>
               <Col sm={2}>Location</Col>
               <Col>{result.location}</Col>
+            </Row>}
+            {result.livescore_widget && <Row className="mt-4">
+              <LiveScoreDisplay result={result} />
             </Row>}
             <Row>
               <Col sm={{size: 3, offset: 9}}>
