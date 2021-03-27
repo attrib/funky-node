@@ -53,7 +53,7 @@ class RecentResults extends Component {
     const { results } = this.state
     if (results.length === 0) return (<p>No results yet</p>)
     return (
-      <Table>
+      <Table hover>
         <thead>
           <tr>
             <th>Date</th>

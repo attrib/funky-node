@@ -21,7 +21,7 @@ class LiveGames extends Component{
           { (SessionStore.isApproved) && <Link to={ROUTES.LIVE_GAME.replace(':id', 'new')}>Create live game</Link> }
           { (!liveGames || liveGames.length === 0) && <div>No running live games</div> }
           { (liveGames && liveGames.length > 0) && (
-            <Table>
+            <Table hover>
               <thead>
                 <tr>
                   <th>Game</th>

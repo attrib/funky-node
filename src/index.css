@@ -13,10 +13,6 @@ code {
   monospace;
 }
 
-table {
-  overflow-y: auto; height: 100px;
-}
-
 table thead th {
   position: sticky;
   top: 0;
