@@ -123,7 +123,7 @@ class SimpleTableForm extends Component {
                     ))}
                   </>
                 )}
-                {!isNew && <PlayerNames players={score.players} />}
+                {!isNew && <PlayerNames players={toJS(score.players)} />}
               </th>
             ))}
           </tr>

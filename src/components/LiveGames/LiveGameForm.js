@@ -7,7 +7,7 @@ import { FormattedDateTime } from '../Utils/FormattedDate'
 import BackendService from "../../services/BackendService"
 import LiveGamesStore from "../../stores/LiveGamesStore";
 import {observer} from "mobx-react";
-import {reaction} from "mobx";
+import {reaction, toJS} from "mobx";
 
 class LiveGameForm extends Component {
 
@@ -186,7 +186,7 @@ class LiveGameForm extends Component {
             </Row>
             <Row>
               <Col sm={2}>Game</Col>
-              <Col><GameLink game={this.state.game}/></Col>
+              <Col><GameLink game={toJS(this.state.game)}/></Col>
             </Row>
           </>
         )}

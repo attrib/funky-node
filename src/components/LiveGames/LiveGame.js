@@ -9,7 +9,7 @@ import LiveGameForm from './LiveGameForm'
 import SessionStore from "../../stores/SessionStore";
 import LiveGamesStore from "../../stores/LiveGamesStore";
 import {observer} from "mobx-react";
-import {reaction} from "mobx";
+import {reaction, toJS} from "mobx";
 import LiveScoreDisplay from "./LiveScoreDisplay";
 
 class LiveGame extends Component{
@@ -39,7 +39,7 @@ class LiveGame extends Component{
   }
 
   componentDidMount () {
-    if (this.state.liveGame) {
+    if (this.state.liveGame || this.props.match.params.id === 'new') {
       return
     }
     this.setState({loading: true})
@@ -74,6 +74,16 @@ class LiveGame extends Component{
     if (liveGame.isNew) {
       this.props.history.push(ROUTES.LIVE_GAME.replace(':id', liveGame.id))
       delete liveGame.isNew
+      reaction(
+        () => LiveGamesStore.liveGames[liveGame.id],
+        (liveGame) => {
+          if (liveGame) {
+            this.setState({liveGame})
+          }
+          else {
+            this.props.history.push(ROUTES.LIVE_GAMES)
+          }
+        })
     }
     this.setState({
       liveGame,
@@ -112,22 +122,22 @@ class LiveGame extends Component{
             </Row>
             <Row>
               <Col sm={2}>Game</Col>
-              <Col><GameLink game={liveGame.game}/></Col>
+              <Col><GameLink game={toJS(liveGame.game)}/></Col>
             </Row>
             <Row>
               <Col sm={2}>Winner</Col>
-              <Col><Score winners result={liveGame} funkies={true} /></Col>
+              <Col><Score winners result={toJS(liveGame)} funkies={true} /></Col>
             </Row>
             <Row>
               <Col sm={2}>Score</Col>
-              <Col><Score losers result={liveGame} funkies={true}/></Col>
+              <Col><Score losers result={toJS(liveGame)} funkies={true}/></Col>
             </Row>
             {liveGame.notes && <Row>
               <Col sm={2}>Notes</Col>
               <Col>{liveGame.notes}</Col>
             </Row>}
             <Row className="mt-4">
-              <LiveScoreDisplay result={{...liveGame, livescore_widget: 'SimpleTableForm'}} />
+              <LiveScoreDisplay result={{...toJS(liveGame), livescore_widget: 'SimpleTableForm'}} />
             </Row>
             <Row>
               <Col sm={{size: 3, offset: 9}}><Button onClick={this.onEditToggle}>Edit</Button></Col>
