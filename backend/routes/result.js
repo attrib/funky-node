@@ -7,9 +7,9 @@ const express = require('express'),
 
 function getResult(res, filter, parameters, limit) {
   const query = 'MATCH (result:Result)--(tag:Tag), (result)-[:GAME]->(game:Game), (player:Player)--(team:Team)-[score:SCORED]-(result) ' +
-    'WITH result, game, collect(ID(tag)) AS tagIds, collect(ID(team)) AS teamIds, collect(player.nick) AS names, collect(ID(player)) AS playerIds, collect(team.hash) AS team, collect(score.score) AS score, collect(score.funkies) AS funkies ' +
+    'WITH result, game, collect(ID(tag)) AS tagIds, collect(ID(team)) AS teamIds, collect(player.nick) AS names, collect(ID(player)) AS playerIds, collect(team.hash) AS team, collect(score.score) AS score, collect(score.funkies) AS funkies, collect(score.livescore) AS livescore ' +
     (filter.length > 0 ? 'WHERE ' + filter.join(' AND ') + ' ' : '') +
-    'RETURN result, game.name AS game, ID(game) AS gameID, names, playerIds, team, score, funkies ORDER BY result.date DESC' + limit;
+    'RETURN result, game.name AS game, ID(game) AS gameID, names, playerIds, team, score, funkies, livescore ORDER BY result.date DESC' + limit;
   return runQuery(res, query, parameters).then((results) => {
     return results.map((result) => {
       const scores = {}
@@ -20,6 +20,9 @@ function getResult(res, filter, parameters, limit) {
         scores[team].score = result.score[index]
         scores[team].funkies = result.funkies[index]
         scores[team].players.push({nick: result.names[index], id: result.playerIds[index]})
+        if (result.livescore && result.livescore[index]) {
+          scores[team].liveScore = result.livescore[index]
+        }
       })
       return {
         ...result.result,
@@ -35,7 +38,18 @@ function getResult(res, filter, parameters, limit) {
 
 const MIN_FUNKIES = 0.1
 
+function isScoreEmpty(score) {
+  return !score.score && (score.players.length === 0 || (score.players.length === 1 && score.players[0].nick === ''))
+}
+
 function calcScore(result) {
+  result.scores = result.scores.filter((score) => !isScoreEmpty(score))
+  result.scores = result.scores.map((score) => {
+    score.score = Number(score.score)
+    score.players = score.players.filter(player => player.nick !== '')
+    return score
+  })
+
   const countPlayers = result.scores.reduce((acc, value) => acc + value.players.length, 0);
   let minScore = result.scores.reduce((acc, value) => (acc.score > value.score) ? value : acc);
   let origData = []
@@ -71,6 +85,9 @@ function calcScore(result) {
     score.funkies = countPlayers * score.score / score.players.length / sumScoreNormalized;
     score.score = origData[index].score
     score.won = (max.score === score.score) ? 1 : 0;
+    if (origData[index].liveScore) {
+      score.livescore = origData[index].liveScore
+    }
     return score
   })
 
@@ -125,8 +142,13 @@ router.post('/', acl('auth'), (req, res) => {
   const result = req.body
 
   let parameter = {game: result.game.name, date: result.date, notes: result.notes};
+  let additionalResultData = ''
+  if (result.livescore_widget) {
+    additionalResultData = ', livescore_widget: $livescore_widget'
+    parameter.livescore_widget = result.livescore_widget
+  }
 
-  let creates = ['(game)<-[rg:GAME]-(result:Result {date: datetime($date), notes: $notes})'],
+  let creates = ['(game)<-[rg:GAME]-(result:Result {date: datetime($date), notes: $notes'+ additionalResultData +'})'],
     merge = ['(game:Game {name: $game})'];
 
   let tagIndex = 0;
@@ -139,9 +161,14 @@ router.post('/', acl('auth'), (req, res) => {
 
   let scoreIndex = 0, playerIndex = 0;
   calcScore(result).forEach((score) => {
-    parameter['score' + scoreIndex] = score.score;
-    parameter['funkies' + scoreIndex] = score.funkies;
-    parameter['won' + scoreIndex] = score.won;
+    parameter['score' + scoreIndex] = {
+      score: score.score,
+      funkies: score.funkies,
+      won: score.won,
+    };
+    if (score.livescore) {
+      parameter['score' + scoreIndex].livescore = score.livescore
+    }
 
     let team = score.players.map((player) => player.nick),
       hash = crypto.createHash('md5');
@@ -157,7 +184,7 @@ router.post('/', acl('auth'), (req, res) => {
       playerIndex++;
     })
 
-    creates.push(`(team${scoreIndex})-[rs${scoreIndex}:SCORED {score: $score${scoreIndex}, funkies: $funkies${scoreIndex}, won: $won${scoreIndex}}]->(result)`);
+    creates.push(`(team${scoreIndex})-[rs${scoreIndex}:SCORED $score${scoreIndex}]->(result)`);
     scoreIndex++;
   });
   parameter.username = req.user.username
@@ -200,6 +227,11 @@ router.patch('/:id', acl('admin'), (req, res) => {
         creates = ['(game)<-[rg:GAME]-(result)'],
         merge = ['(game:Game {name: $game})'];
 
+      if (result.livescore_widget) {
+        set.push('SET result.livescore_widget = $livescore_widget')
+        parameter.livescore_widget = result.livescore_widget
+      }
+
       let tagIndex = 0;
       result.tags.forEach((tag) => {
         merge.push(`(tag${tagIndex}:Tag {name: $tag${tagIndex}})`);
@@ -210,9 +242,14 @@ router.patch('/:id', acl('admin'), (req, res) => {
 
       let scoreIndex = 0, playerIndex = 0;
       calcScore(result).forEach((score) => {
-        parameter['score' + scoreIndex] = score.score;
-        parameter['funkies' + scoreIndex] = score.funkies;
-        parameter['won' + scoreIndex] = score.won;
+        parameter['score' + scoreIndex] = {
+          score: score.score,
+          funkies: score.funkies,
+          won: score.won,
+        };
+        if (score.livescore) {
+          parameter['score' + scoreIndex].livescore = score.livescore
+        }
 
         let team = score.players.map((player) => player.nick),
           hash = crypto.createHash('md5');
@@ -228,7 +265,7 @@ router.patch('/:id', acl('admin'), (req, res) => {
           playerIndex++;
         })
 
-        creates.push(`(team${scoreIndex})-[rs${scoreIndex}:SCORED {score: $score${scoreIndex}, funkies: $funkies${scoreIndex}, won: $won${scoreIndex}}]->(result)`);
+        creates.push(`(team${scoreIndex})-[rs${scoreIndex}:SCORED $score${scoreIndex}]->(result)`);
         scoreIndex++;
       });
 

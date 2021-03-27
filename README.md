@@ -12,6 +12,10 @@ You will find some information on how to perform common tasks [here](https://git
  
 * more filters
 * Live Games
+  * more widgets:
+    * Chimera
+    * Tichu  
+    * Wizard?
 * upload images / location
 * pagination
 * (WiP) Mobile support

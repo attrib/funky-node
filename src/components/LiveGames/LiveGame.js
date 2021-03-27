@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, {Component} from 'react'
 import * as ROUTES from '../../constants/routes'
 import { withRouter } from 'react-router-dom'
 import { Button, Col, Container, Row } from 'reactstrap'
@@ -7,6 +7,10 @@ import GameLink from '../Games/GameLink'
 import Score from '../Results/Score'
 import LiveGameForm from './LiveGameForm'
 import SessionStore from "../../stores/SessionStore";
+import LiveGamesStore from "../../stores/LiveGamesStore";
+import {observer} from "mobx-react";
+import {reaction} from "mobx";
+import LiveScoreDisplay from "./LiveScoreDisplay";
 
 class LiveGame extends Component{
 
@@ -25,7 +29,6 @@ class LiveGame extends Component{
 
     if (props.location.state && props.location.state.result) {
       liveGame = props.location.state.result
-      liveGame.date = Object.assign(this.props.firebase.Timestamp.now(), liveGame.date)
     }
 
     this.state = {
@@ -40,22 +43,23 @@ class LiveGame extends Component{
       return
     }
     this.setState({loading: true})
-    this.props.firebase.liveGame(this.props.match.params.id)
-      .onSnapshot((snapshot) => {
-        if (snapshot.exists) {
-          let livegame = []
-          livegame.push({
-            ...snapshot.data(),
-            id: snapshot.id
-          })
-          return this.props.firebase.resultsResolvePlayers(livegame)
-            .then((liveGame) => {
-              console.log('update', liveGame[0])
-              this.setState({
-                loading: false,
-                liveGame: liveGame[0]
-              })
-            })
+    LiveGamesStore.getLiveGame(this.props.match.params.id)
+      .then((liveGame) => {
+        this.liveGame = liveGame
+        this.setState({liveGame, loading: false})
+      })
+      .catch(() => {
+        this.setState({loading: false})
+        this.props.history.push(ROUTES.LIVE_GAMES)
+      })
+    reaction(
+      () => LiveGamesStore.liveGames[this.props.match.params.id],
+      (liveGame) => {
+        if (liveGame) {
+          this.setState({liveGame})
+        }
+        else {
+          this.props.history.push(ROUTES.LIVE_GAMES)
         }
       })
   }
@@ -118,14 +122,15 @@ class LiveGame extends Component{
               <Col sm={2}>Score</Col>
               <Col><Score losers result={liveGame} funkies={true}/></Col>
             </Row>
-            <Row>
+            {liveGame.notes && <Row>
               <Col sm={2}>Notes</Col>
               <Col>{liveGame.notes}</Col>
+            </Row>}
+            <Row className="mt-4">
+              <LiveScoreDisplay result={{...liveGame, livescore_widget: 'SimpleTableForm'}} />
             </Row>
             <Row>
-              <Col sm={{size: 3, offset: 9}}>
-                {(authUser && (authUser.uid === liveGame.authorID || authUser.playerIDs.filter((id) => liveGame.playerIDs.indexOf(id) !== -1))) && <Button onClick={this.onEditToggle}>Edit</Button>}
-              </Col>
+              <Col sm={{size: 3, offset: 9}}><Button onClick={this.onEditToggle}>Edit</Button></Col>
             </Row>
           </>)}
           { edit && <LiveGameForm user={authUser} liveGame={liveGame} onSave={this.onSave} onDelete={this.onDelete} onPublish={this.onPublish}/>}
@@ -136,4 +141,4 @@ class LiveGame extends Component{
 
 }
 
-export default withRouter(LiveGame)
+export default withRouter(observer(LiveGame))

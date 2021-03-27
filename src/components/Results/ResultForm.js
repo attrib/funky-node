@@ -116,6 +116,9 @@ class ResultForm extends Component {
       scores: this.state.scores,
       tags: [{name: '' + this.state.date.getFullYear()}]
     }
+    if (this.state.livescore_widget) {
+      result.livescore_widget = this.state.livescore_widget
+    }
     result.scores = result.scores.filter((score) => !this.isScoreEmpty(score))
     result.scores = result.scores.map((score) => {
       score.score = Number(score.score)

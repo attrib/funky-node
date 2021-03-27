@@ -7,66 +7,42 @@ import Score from '../Results/Score'
 import * as ROUTES from '../../constants/routes'
 import { Link } from 'react-router-dom'
 import SessionStore from "../../stores/SessionStore";
+import LiveGamesStore from "../../stores/LiveGamesStore";
+import {observer} from "mobx-react";
+import {toJS} from "mobx";
 
 class LiveGames extends Component{
 
-  constructor (props) {
-    super(props)
-
-    this.state = {
-      loading: false,
-      liveGames: null,
-    }
-  }
-
-  componentDidMount () {
-    if (!this.state.liveGames) {
-      this.setState({loading: true})
-      // this.unsubscribe = this.props.firebase
-      //   .liveGames((liveGames) => {
-      //     this.setState({liveGames, loading: false})
-      //   })
-    }
-  }
-
-  componentWillUnmount () {
-    // this.unsubscribe()
-  }
-
   render () {
-    const { loading, liveGames } = this.state
+    const liveGames = LiveGamesStore.liveGamesArray
     return (
       <div>
         <Container>
-          <div>Will come back at a later point</div>
-          {/*{ !loading && (*/}
-          {/*  (SessionStore.isAdmin) && <Link to={ROUTES.LIVE_GAME.replace(':id', 'new')}>Create live game</Link>*/}
-          {/*)}*/}
-          {/*{ loading && <div>Loading..</div>}*/}
-          {/*{ (!loading && (!liveGames || liveGames.length === 0)) && <div>No running live games</div> }*/}
-          {/*{ (!loading && liveGames && liveGames.length > 0) && (*/}
-          {/*  <Table>*/}
-          {/*    <thead>*/}
-          {/*      <tr>*/}
-          {/*        <th>Game</th>*/}
-          {/*        <th>Lead</th>*/}
-          {/*        <th>Score</th>*/}
-          {/*        <th colSpan={2}>Last Updated</th>*/}
-          {/*      </tr>*/}
-          {/*    </thead>*/}
-          {/*    <tbody>*/}
-          {/*    {liveGames.map((liveGame) => (*/}
-          {/*      <tr key={liveGame.id}>*/}
-          {/*        <td><GameLink game={liveGame.game} /></td>*/}
-          {/*        <td><Score result={liveGame} winners/></td>*/}
-          {/*        <td><Score result={liveGame} losers/></td>*/}
-          {/*        <td><FormattedDateTime date={liveGame.lastUpdatedDate} /></td>*/}
-          {/*        <td><LiveGameLink liveGame={liveGame} linkName="Details" /></td>*/}
-          {/*      </tr>*/}
-          {/*    ))}*/}
-          {/*    </tbody>*/}
-          {/*  </Table>*/}
-          {/*)}*/}
+          { (SessionStore.isApproved) && <Link to={ROUTES.LIVE_GAME.replace(':id', 'new')}>Create live game</Link> }
+          { (!liveGames || liveGames.length === 0) && <div>No running live games</div> }
+          { (liveGames && liveGames.length > 0) && (
+            <Table>
+              <thead>
+                <tr>
+                  <th>Game</th>
+                  <th>Lead</th>
+                  <th>Score</th>
+                  <th colSpan={2}>Last Updated</th>
+                </tr>
+              </thead>
+              <tbody>
+              {liveGames.map((liveGame) => (
+                <tr key={liveGame.id}>
+                  <td><GameLink game={toJS(liveGame.game)} /></td>
+                  <td><Score result={toJS(liveGame)} winners/></td>
+                  <td><Score result={toJS(liveGame)} losers/></td>
+                  <td><FormattedDateTime date={liveGame.lastUpdatedDate} /></td>
+                  <td><LiveGameLink liveGame={liveGame} linkName="Details" /></td>
+                </tr>
+              ))}
+              </tbody>
+            </Table>
+          )}
         </Container>
       </div>
     )
@@ -74,4 +50,4 @@ class LiveGames extends Component{
 
 }
 
-export default LiveGames
+export default observer(LiveGames)
