@@ -38,7 +38,7 @@ You will find some information on how to perform common tasks [here](https://git
     // import database backup
     docker run --rm --volume=$HOME/neo4j/data:/data --volume=$HOME/neo4j/backup:/backup neo4j neo4j-admin load --from=/backup/backup-neo4j.dump --database=neo4j --force
     // start neo4j
-    docker run --rm --publish=7474:7474 --publish=7687:7687 --volume=$HOME/neo4j/data:/data neo4j
+    docker run --rm --publish=7474:7474 --publish=7687:7687 --volume=$HOME/neo4j/data:/data neo4j:4.4
     // start backend
     cd backend; npm run dev
     // start frontend
