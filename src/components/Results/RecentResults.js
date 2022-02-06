@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, {PureComponent} from 'react'
 import { Table } from 'reactstrap'
 import { Link } from 'react-router-dom'
 import * as ROUTES from '../../constants/routes'
@@ -9,7 +9,7 @@ import BackendService from "../../services/BackendService";
 import {reaction} from "mobx";
 import SeasonStore from "../../stores/SeasonStore";
 
-class RecentResults extends Component {
+class RecentResults extends PureComponent {
 
   static defaultProps = {
     filter: {
@@ -38,7 +38,7 @@ class RecentResults extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (prevProps.filter !== this.props.filter) {
+    if (JSON.stringify(prevProps.filter) !== JSON.stringify(this.props.filter)) {
       this.loadResults()
     }
   }

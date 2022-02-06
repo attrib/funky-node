@@ -9,7 +9,7 @@ class ScoreTeamForm extends Component {
   }
 
   onChangeScore = (i, score) => {
-    let {scores, error} = this.props
+    let {scores, error, game} = this.props
     // for better typing allow -, 0 and empty string
     // otherwise you have to type 11 and then - (-11)
     if (score !== '-0' && score !== '' && score !== '-' && !isNaN(Number(score))) {
@@ -18,10 +18,14 @@ class ScoreTeamForm extends Component {
     }
     else {
       scores[i].score = score
-      error[`scores[${i}][score]`] = 'Invalid number'
+      if (score !== '-0' && score !== '' && score !== '-') {
+        error[`scores[${i}][score]`] = 'Invalid number'
+      }
     }
     scores = scores.filter((score) => !this.props.isScoreEmpty(score))
-    scores.push({score: 0, players: [{nick: ''}]})
+    if (!game.playerCount || !game.playerCount.teamMax || scores.length < game.playerCount.teamMax) {
+      scores.push({score: 0, players: [{nick: ''}]})
+    }
     this.onChange({ scores })
   }
 
@@ -33,12 +37,16 @@ class ScoreTeamForm extends Component {
     else {
       player = playerName
     }
-    let scores = this.props.scores
+    let {scores, game} = this.props
     scores[i].players[j] = player
     scores[i].players = scores[i].players.filter(player => player.nick !== '')
     scores = scores.filter((score) => !this.props.isScoreEmpty(score))
-    scores[i].players.push({nick: ''})
-    scores.push({score: 0, players: [{nick: ''}]})
+    if (!game.playerCount || !game.playerCount.perTeamMax || scores[i].players.length < game.playerCount.perTeamMax) {
+      scores[i].players.push({nick: ''})
+    }
+    if (!game.playerCount || !game.playerCount.teamMax || scores.length < game.playerCount.teamMax) {
+      scores.push({score: 0, players: [{nick: ''}]})
+    }
 
     let playerNames = []
     scores.forEach(score => score.players.forEach(player => {

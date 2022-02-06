@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { PureComponent } from 'react'
 import Funkies from '../Results/Funkies'
 import { Table } from 'reactstrap'
 import { FaSortDown } from 'react-icons/fa'
@@ -10,7 +10,7 @@ import {reaction} from "mobx";
 import SeasonStore from "../../stores/SeasonStore";
 import TeamLink from "../Team/TeamLink";
 
-class RankingTable extends Component {
+class RankingTable extends PureComponent {
 
   static defaultProps = {
     filter: {}
@@ -36,7 +36,7 @@ class RankingTable extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (prevProps.filter !== this.props.filter) {
+    if (JSON.stringify(prevProps.filter) !== JSON.stringify(this.props.filter)) {
       this.loadRankings(this.state.sort)
     }
   }

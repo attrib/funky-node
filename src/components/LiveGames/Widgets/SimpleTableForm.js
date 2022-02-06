@@ -6,9 +6,6 @@ import {toJS} from "mobx";
 
 class SimpleTableForm extends Component {
 
-  maxPlayer = false
-  maxPlayerPerTeam = false
-
   onChange = (data) => {
     this.props.onChange(data);
   }
@@ -66,6 +63,13 @@ class SimpleTableForm extends Component {
     }
   }
 
+  emptyPlayerList = (game) => {
+    if (!game.playerCount || !game.playerCount.perTeamMin) {
+      return [{nick: ''}];
+    }
+    return new Array(game.playerCount.perTeamMin).fill({nick: ''})
+  }
+
   onChangePlayer = (i, j, playerName) => {
     let player
     if (typeof playerName === 'string') {
@@ -74,15 +78,15 @@ class SimpleTableForm extends Component {
     else {
       player = playerName
     }
-    let scores = this.props.scores
+    let {scores, game} = this.props
     scores[i].players[j] = player
     scores[i].players = scores[i].players.filter(player => player.nick !== '')
     scores = scores.filter((score) => !this.props.isScoreEmpty(score))
-    if (!this.maxPlayer || this.maxPlayer > scores.length) {
-      scores.push({score: 0, players: [{nick: ''}], liveScore: []})
-    }
-    if (!this.maxPlayerPerTeam || this.maxPlayerPerTeam > scores[i].players.length) {
+    if (!game.playerCount || !game.playerCount.perTeamMax || scores[i].players.length < game.playerCount.perTeamMax) {
       scores[i].players.push({nick: ''})
+    }
+    if (!game.playerCount || !game.playerCount.teamMax || scores.length < game.playerCount.teamMax) {
+      scores.push({score: 0, players: this.emptyPlayerList(game)})
     }
 
     let playerIDs = [], playerNames = []
@@ -96,7 +100,7 @@ class SimpleTableForm extends Component {
   }
 
   render () {
-    const { scores, error, isNew } = this.props
+    const { scores, error, isNew, game } = this.props
 
     let liveScore = []
     scores.forEach((score, i) => {
@@ -110,10 +114,21 @@ class SimpleTableForm extends Component {
         liveScore[j][i] = point
       })
     })
-    // add first player entry
+    // add first team entry
     if (scores.length === 0) {
-      scores.push({score: 0, players: [{nick: ''}], liveScore: []})
+      scores.push({score: 0, players: this.emptyPlayerList(game), liveScore: []})
     }
+    if (game.playerCount && game.playerCount.teamMin) {
+      while (scores.length < game.playerCount.teamMin) {
+        scores.push({score: 0, players: this.emptyPlayerList(game), liveScore: []})
+      }
+    }
+    if (game.playerCount && game.playerCount.teamMax) {
+      while (scores.length > game.playerCount.teamMax) {
+        scores.pop()
+      }
+    }
+
     // add new line at the end
     liveScore.push(new Array(scores.length).fill(''))
 

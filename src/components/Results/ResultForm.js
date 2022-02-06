@@ -180,7 +180,7 @@ class ResultForm extends Component {
         {(() => {
           switch(scoreWidget) {
             case 'ScoreTeamForm':
-              return <ScoreTeamForm scores={this.state.scores} error={this.state.error} playerList={this.state.playerList} filterSelectablePlayers={this.filterSelectablePlayers} isScoreEmpty={this.isScoreEmpty} onChange={this.onChange}/>;
+              return <ScoreTeamForm game={this.state.game} scores={this.state.scores} error={this.state.error} playerList={this.state.playerList} filterSelectablePlayers={this.filterSelectablePlayers} isScoreEmpty={this.isScoreEmpty} onChange={this.onChange}/>;
             case 'ScoreRankingForm':
               return <ScoreRankingForm scores={this.state.scores} error={this.state.error} playerList={this.state.playerList} filterSelectablePlayers={this.filterSelectablePlayers} isScoreEmpty={this.isScoreEmpty} onChange={this.onChange} />
             default:

@@ -69,6 +69,12 @@ class Game extends Component {
     this.setState({game})
   }
 
+  onChangePlayerCount = (event) => {
+    let game = this.state.game
+    game.playerCount[event.target.name] = event.target.value
+    this.setState({game})
+  }
+
   onChangeScoreWidget = (widget) => {
     let game = this.state.game
     game.score_widget = widget.id
@@ -122,6 +128,9 @@ class Game extends Component {
 
   render () {
     const {game, loading, edit, error} = this.state
+    if (game && !game.playerCount) {
+      game.playerCount = {}
+    }
     return (
       <div>
         <Container>
@@ -157,6 +166,40 @@ class Game extends Component {
                   <FormGroup>
                     <Label>Widget for live game</Label>
                     <SelectList data={Object.keys(liveGameWidgets).map((i) => {return  {id:i, label:i}})} textField="label" valueField="id" value={game.livegame_widget} onChange={this.onChangeLiveWidget}/>
+                  </FormGroup>
+                  <FormGroup row>
+                    <Col md={6}>
+                      <Row>
+                        <Label md={4}>Min Teams</Label>
+                        <Col md={8}>
+                          <Input type="number" value={game.playerCount.teamMin} onChange={this.onChangePlayerCount} name="teamMin" placeholder="Min Teams" />
+                        </Col>
+                      </Row>
+                    </Col>
+                    <Col md={6}>
+                      <Row>
+                        <Label md={4}>Max Teams</Label>
+                        <Col md={8}>
+                          <Input type="number" value={game.playerCount.teamMax} onChange={this.onChangePlayerCount} name="teamMax" placeholder="Max Teams" />
+                        </Col>
+                      </Row>
+                    </Col>
+                    <Col md={6}>
+                      <Row>
+                        <Label md={4}>Min Players per Team</Label>
+                        <Col md={8}>
+                          <Input type="number" value={game.playerCount.perTeamMin} onChange={this.onChangePlayerCount} name="perTeamMin" placeholder="Min Player per Team" />
+                        </Col>
+                      </Row>
+                    </Col>
+                    <Col md={6}>
+                      <Row>
+                        <Label md={4}>Max Players per Team</Label>
+                        <Col md={8}>
+                          <Input type="number" value={game.playerCount.perTeamMax} onChange={this.onChangePlayerCount} name="perTeamMax" placeholder="Max Player per Team" />
+                        </Col>
+                      </Row>
+                    </Col>
                   </FormGroup>
                   {error && <Alert color="danger">{error}</Alert>}
                   <ButtonGroup>

@@ -14,9 +14,6 @@ function emptyScore() {
 
 class ChimeraForm extends SimpleTableForm {
 
-  maxPlayer = 3
-  maxPlayerPerTeam = 1
-
   constructor(props) {
     super(props);
     this.state = {
@@ -51,7 +48,6 @@ class ChimeraForm extends SimpleTableForm {
     let deleteLine = true
     scores.forEach((score, team) => {
       if (score.liveScore[counter] && (score.liveScore[counter].point !== '' || score.liveScore[counter].bet !== 0)) {
-        console.log(score.liveScore[counter])
         deleteLine = false
       }
     })
@@ -142,7 +138,7 @@ class ChimeraForm extends SimpleTableForm {
   }
 
   render () {
-    const { scores, error, isNew } = this.props
+    const { scores, error, isNew, game } = this.props
 
     let liveScore = []
     scores.forEach((score, i) => {
@@ -156,13 +152,21 @@ class ChimeraForm extends SimpleTableForm {
         liveScore[j][i] = point
       })
     })
-    // fix to 3 players
-    while (scores.length < this.maxPlayer) {
-      scores.push({score: 0, players: [{nick: ''}], liveScore: []})
+    // add first team entry
+    if (scores.length === 0) {
+      scores.push({score: 0, players: this.emptyPlayerList(game), liveScore: []})
     }
-    while (scores.length > this.maxPlayer) {
-      scores.pop()
+    if (game.playerCount && game.playerCount.teamMin) {
+      while (scores.length < game.playerCount.teamMin) {
+        scores.push({score: 0, players: this.emptyPlayerList(game), liveScore: []})
+      }
     }
+    if (game.playerCount && game.playerCount.teamMax) {
+      while (scores.length > game.playerCount.teamMax) {
+        scores.pop()
+      }
+    }
+
     // add new line at the end
     liveScore.push(new Array(scores.length).fill(emptyScore()))
 
