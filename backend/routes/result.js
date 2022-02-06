@@ -21,7 +21,11 @@ function getResult(res, filter, parameters, limit) {
         scores[team].funkies = result.funkies[index]
         scores[team].players.push({nick: result.names[index], id: result.playerIds[index]})
         if (result.livescore && result.livescore[index]) {
-          scores[team].liveScore = result.livescore[index]
+          try {
+            scores[team].liveScore = JSON.parse(result.livescore[index])
+          } catch (error) {
+            scores[team].liveScore = result.livescore[index]
+          }
         }
       })
       return {
@@ -167,7 +171,7 @@ router.post('/', acl('auth'), (req, res) => {
       won: score.won,
     };
     if (score.livescore) {
-      parameter['score' + scoreIndex].livescore = score.livescore
+      parameter['score' + scoreIndex].livescore = JSON.stringify(score.livescore)
     }
 
     let team = score.players.map((player) => player.nick),
@@ -248,7 +252,7 @@ router.patch('/:id', acl('admin'), (req, res) => {
           won: score.won,
         };
         if (score.livescore) {
-          parameter['score' + scoreIndex].livescore = score.livescore
+          parameter['score' + scoreIndex].livescore = JSON.stringify(score.livescore)
         }
 
         let team = score.players.map((player) => player.nick),

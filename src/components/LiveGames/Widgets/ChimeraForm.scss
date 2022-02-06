@@ -1,0 +1,29 @@
+.chimera-form {
+
+  .active {
+    font-weight: bold;
+  }
+
+  tr td:nth-child(7), tr td:nth-child(8), tr td:nth-child(2n) {
+    width: 6em;
+  }
+
+  tr td {
+    vertical-align: middle;
+  }
+
+  tbody tr td:nth-child(2n):not(:last-child) {
+    border-right: 2px solid #dee2e6;
+  }
+
+  .bet span:nth-child(1) {
+    color: #aaaaaa;
+  }
+  .bet span:nth-child(2) {
+    color: #777777;
+  }
+  .bet span:nth-child(3) {
+    color: #333333;
+  }
+
+}

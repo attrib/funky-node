@@ -8,7 +8,7 @@ import GameLink from '../Games/GameLink'
 import { FormattedDateTime } from '../Utils/FormattedDate'
 import BackendService from "../../services/BackendService";
 import SessionStore from "../../stores/SessionStore";
-import LiveScoreDisplay from "../LiveGames/LiveScoreDisplay";
+import Widget from "../LiveGames/Widgets";
 
 class Result extends Component {
 
@@ -117,7 +117,7 @@ class Result extends Component {
               <Col>{result.location}</Col>
             </Row>}
             {result.livescore_widget && <Row className="mt-4">
-              <LiveScoreDisplay result={result} />
+              <Widget type="display" widget={result.livescore_widget} result={result} />
             </Row>}
             <Row>
               <Col sm={{size: 3, offset: 9}}>

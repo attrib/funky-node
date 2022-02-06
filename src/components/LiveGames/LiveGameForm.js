@@ -1,13 +1,13 @@
 import React, { Component } from 'react'
-import { Alert, Button, ButtonGroup, Col, Form, FormGroup, Input, Label, Row, Spinner } from 'reactstrap'
+import { Button, ButtonGroup, Col, Form, FormGroup, Input, Label, Row, Spinner } from 'reactstrap'
 import { DateTimePicker, DropdownList } from 'react-widgets'
-import SimpleTableForm from './SimpleTableForm'
 import GameLink from '../Games/GameLink'
 import { FormattedDateTime } from '../Utils/FormattedDate'
 import BackendService from "../../services/BackendService"
 import LiveGamesStore from "../../stores/LiveGamesStore";
 import {observer} from "mobx-react";
 import {reaction, toJS} from "mobx";
+import Widget from "./Widgets";
 
 class LiveGameForm extends Component {
 
@@ -151,7 +151,7 @@ class LiveGameForm extends Component {
       notes: this.state.notes,
       scores: this.state.scores,
       tags: [{name: '' + (new Date(this.state.date)).getFullYear()}],
-      livescore_widget: 'SimpleTableForm'
+      livescore_widget: Widget.getWidgetId(this.state.game)
     }
     result.scores = result.scores.filter((score) => !this.isScoreEmpty(score))
     result.scores = result.scores.map((score) => {
@@ -178,9 +178,13 @@ class LiveGameForm extends Component {
     }
   }
 
+  onSubmit = event => {
+    event.preventDefault()
+  }
+
   render() {
     return (
-      <Form onSubmit={(event) => event.preventDefault()}>
+      <Form onSubmit={this.onSubmit}>
         {this.state.id && (
           <>
             <Row>
@@ -211,39 +215,24 @@ class LiveGameForm extends Component {
             </FormGroup>
           </>
         )}
-        {this.state.game && (() => {
-          switch(this.state.game.liveGameWidget) {
-            case 'SimpleTable':
-              return <SimpleTableForm scores={this.state.scores} error={this.state.error} playerList={this.state.playerList} filterSelectablePlayers={this.filterSelectablePlayers} isScoreEmpty={this.isScoreEmpty} onChange={this.onChange} options={this.state.game.liveGameWidgetOptions} isNew={!this.state.id} scoreUpdate={this.onSave}/>
-            default:
-              if (this.state.game.score_widget === 'ScoreTeamForm') {
-                return (
-                  <>
-                    {/*<Alert color="warning">Missing live game widget for <GameLink game={this.state.game}/>, fallback selected.</Alert>*/}
-                    <SimpleTableForm scores={this.state.scores} error={this.state.error} playerList={this.state.playerList} filterSelectablePlayers={this.filterSelectablePlayers} isScoreEmpty={this.isScoreEmpty} onChange={this.onChange} options={this.state.game.liveGameWidgetOptions} isNew={!this.state.id} scoreUpdate={this.onSave}/>
-                  </>
-                )
-              }
-              else {
-                return <Alert color="danger">Missing live game widget for <GameLink game={this.state.game}/>, the score widget doesn't support live games.</Alert>
-              }
-          }
-        })()}
+        <Widget type="form" game={this.state.game} scores={this.state.scores} error={this.state.error} playerList={this.state.playerList} filterSelectablePlayers={this.filterSelectablePlayers} isScoreEmpty={this.isScoreEmpty} onChange={this.onChange} isNew={!this.state.id} scoreUpdate={this.onSave} />
+        {this.state.id && (
         <FormGroup row>
           <Label for="notes" sm={2}>Note</Label>
           <Col sm={10}>
             <Input type="textarea" placeholder="Notes" value={this.state.notes} rows={5} onChange={event => this.onChange({notes: event.target.value})}/>
           </Col>
         </FormGroup>
+        )}
         <FormGroup row>
           <ButtonGroup className="col-sm-3 offset-sm-9">
             {this.state.liveUpdate && <Spinner color="success" />}
             {this.props.user && this.state.id && this.props.user.uid === this.state.authorID &&
-            <Button color="danger" type="submit" onClick={this.onDelete}>Delete</Button>}
+            <Button color="danger" type="button" onClick={this.onDelete}>Delete</Button>}
             {this.props.user &&
             <Button color="primary" type="submit" disabled={Object.keys(this.state.error).length > 0} onClick={this.onSave}>Save</Button>}
             {this.props.user && this.state.id &&
-            <Button color="success" type="submit" disabled={Object.keys(this.state.error).length > 0} onClick={this.onPublish}>Publish</Button>}
+            <Button color="success" type="button" disabled={Object.keys(this.state.error).length > 0} onClick={this.onPublish}>Publish</Button>}
           </ButtonGroup>
         </FormGroup>
       </Form>

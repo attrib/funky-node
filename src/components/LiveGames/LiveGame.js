@@ -10,7 +10,7 @@ import SessionStore from "../../stores/SessionStore";
 import LiveGamesStore from "../../stores/LiveGamesStore";
 import {observer} from "mobx-react";
 import {reaction, toJS} from "mobx";
-import LiveScoreDisplay from "./LiveScoreDisplay";
+import Widget from "./Widgets";
 
 class LiveGame extends Component{
 
@@ -137,7 +137,7 @@ class LiveGame extends Component{
               <Col>{liveGame.notes}</Col>
             </Row>}
             <Row className="mt-4">
-              <LiveScoreDisplay result={{...toJS(liveGame), livescore_widget: 'SimpleTableForm'}} />
+              <Widget type="display" game={liveGame.game} result={liveGame} />
             </Row>
             <Row>
               <Col sm={{size: 3, offset: 9}}><Button onClick={this.onEditToggle}>Edit</Button></Col>

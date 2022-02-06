@@ -109,6 +109,14 @@ io.on('connection', socket => {
   })
 });
 
+function saveLiveGames() {
+  console.log('save live games')
+  fs.writeFileSync(liveGamesFile, JSON.stringify(liveGames))
+  setTimeout(saveLiveGames, 3600000)
+}
+
+saveLiveGames()
+
 let shutdownRunning = false;
 function stop() {
   if (shutdownRunning) {

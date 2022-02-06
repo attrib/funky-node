@@ -36,8 +36,9 @@ router.post('/', acl('admin'), (req, res) => {
     name: req.body.name,
     description_markdown: req.body.description_markdown,
     score_widget: req.body.score_widget,
+    livegame_widget: req.body.livegame_widget,
   }
-  const query = 'MERGE (g:Game {name: $name, description_markdown: $description_markdown, score_widget: $score_widget}) RETURN g'
+  const query = 'MERGE (g:Game {name: $name, description_markdown: $description_markdown, score_widget: $score_widget, livegame_widget: $livegame_widget}) RETURN g'
   runQuery(res, query, parameters)
     .then((result) => {
       res.send(prepareGame(result.pop().g))
@@ -49,7 +50,7 @@ router.patch('/:id', acl('admin'), (req, res) => {
     set = [],
     parameters = {id}
   Object.keys(req.body).forEach((key) => {
-    if (['name', 'description_markdown', 'score_widget'].includes(key)) {
+    if (['name', 'description_markdown', 'score_widget', 'livegame_widget'].includes(key)) {
       set.push(`SET g.${key} = $${key}`)
       parameters[key] = req.body[key]
     }

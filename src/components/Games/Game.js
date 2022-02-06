@@ -9,6 +9,7 @@ import { observer } from "mobx-react";
 import SessionStore from "../../stores/SessionStore";
 import BackendService from "../../services/BackendService";
 import TabbedRankingTable from "../Ranking/TabbedRankingTable";
+import {liveGameWidgets} from "../LiveGames/Widgets";
 
 const md = new MarkdownIt()
 const scoreWidgetForms = [
@@ -71,6 +72,12 @@ class Game extends Component {
   onChangeScoreWidget = (widget) => {
     let game = this.state.game
     game.score_widget = widget.id
+    this.setState({game})
+  }
+
+  onChangeLiveWidget = (widget) => {
+    let game = this.state.game
+    game.livegame_widget = widget.id
     this.setState({game})
   }
 
@@ -146,6 +153,10 @@ class Game extends Component {
                   <FormGroup>
                     <Label>Widget for result form</Label>
                     <SelectList data={scoreWidgetForms} textField="label" valueField="id" value={game.score_widget} onChange={this.onChangeScoreWidget}/>
+                  </FormGroup>
+                  <FormGroup>
+                    <Label>Widget for live game</Label>
+                    <SelectList data={Object.keys(liveGameWidgets).map((i) => {return  {id:i, label:i}})} textField="label" valueField="id" value={game.livegame_widget} onChange={this.onChangeLiveWidget}/>
                   </FormGroup>
                   {error && <Alert color="danger">{error}</Alert>}
                   <ButtonGroup>

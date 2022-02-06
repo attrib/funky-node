@@ -1,6 +1,6 @@
 import {Component} from "react";
 import {Table} from "reactstrap";
-import PlayerNames from "../Player/PlayerNames";
+import PlayerNames from "../../Player/PlayerNames";
 
 class SimpleTable extends Component {
 
@@ -19,7 +19,7 @@ class SimpleTable extends Component {
     })
 
     return (
-      <Table>
+      <Table className="scores">
         <thead>
           <tr>
             {this.props.result.scores.map((score, i) => <th key={i}><PlayerNames players={score.players}/></th>)}

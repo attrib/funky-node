@@ -1,10 +1,13 @@
 import React, { Component } from 'react'
 import { FormFeedback, Input, Table } from 'reactstrap'
 import { Combobox } from 'react-widgets'
-import PlayerNames from '../Player/PlayerNames'
+import PlayerNames from '../../Player/PlayerNames'
 import {toJS} from "mobx";
 
 class SimpleTableForm extends Component {
+
+  maxPlayer = false
+  maxPlayerPerTeam = false
 
   onChange = (data) => {
     this.props.onChange(data);
@@ -24,13 +27,16 @@ class SimpleTableForm extends Component {
     }
     else {
       scores[team].liveScore[counter] = score
-      error[`scores[${team}][liveScore][${counter}]`] = 'Invalid number'
+      if (score !== '-0' && score !== '' && score !== '-') {
+        error[`scores[${team}][liveScore][${counter}]`] = 'Invalid number'
+      }
     }
+
 
     // filter out empty lines
     let deleteLine = true
     scores.forEach((score, team) => {
-      if (score.liveScore[counter] && score.liveScore[counter] !== '') {
+      if (score.liveScore[counter] !== '') {
         deleteLine = false
       }
     })
@@ -61,7 +67,7 @@ class SimpleTableForm extends Component {
   }
 
   onChangePlayer = (i, j, playerName) => {
-    let player = {}
+    let player
     if (typeof playerName === 'string') {
       player = { nick: playerName }
     }
@@ -72,8 +78,12 @@ class SimpleTableForm extends Component {
     scores[i].players[j] = player
     scores[i].players = scores[i].players.filter(player => player.nick !== '')
     scores = scores.filter((score) => !this.props.isScoreEmpty(score))
-    scores.push({score: 0, players: [{nick: ''}], liveScore: []})
-    scores[i].players.push({nick: ''})
+    if (!this.maxPlayer || this.maxPlayer > scores.length) {
+      scores.push({score: 0, players: [{nick: ''}], liveScore: []})
+    }
+    if (!this.maxPlayerPerTeam || this.maxPlayerPerTeam > scores[i].players.length) {
+      scores[i].players.push({nick: ''})
+    }
 
     let playerIDs = [], playerNames = []
     scores.forEach(score => score.players.forEach(player => {
