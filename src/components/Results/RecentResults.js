@@ -37,6 +37,12 @@ class RecentResults extends Component {
       })
   }
 
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (prevProps.filter !== this.props.filter) {
+      this.loadResults()
+    }
+  }
+
   loadResults() {
     if (SeasonStore.selectedSeason.id) {
       let filter = {...this.props.filter}

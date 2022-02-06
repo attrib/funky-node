@@ -8,10 +8,6 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 You will find some information on how to perform common tasks [here](https://github.com/facebook/create-react-app/blob/master/packages/react-scripts/template/README.md).
 
-## bugs
-
-* selecting new player on player view, doesn't reload ranking/recent games
-
 ## todos
  
 * more filters

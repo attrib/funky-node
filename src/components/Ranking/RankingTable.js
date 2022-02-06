@@ -36,7 +36,7 @@ class RankingTable extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (this.props.filter.by !== prevProps.filter.by) {
+    if (prevProps.filter !== this.props.filter) {
       this.loadRankings(this.state.sort)
     }
   }
