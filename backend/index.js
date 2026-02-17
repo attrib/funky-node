@@ -30,19 +30,19 @@ app.use(bodyParser.json());
 app.use(authenticationMiddleware)
 app.use(cors(corsOptions))
 
-app.get('/', (req, res) => {
+app.get('/api/', (req, res) => {
   res.redirect(301, 'https://funky.wtf/');
 })
 
-app.use('/game', game)
-app.use('/player', player)
-app.use('/team', team)
-app.use('/result', result)
-app.use('/ranking', ranking)
-app.use('/tag', tag)
-app.use('/user', user)
-app.use('/auth', auth)
-app.use('/news', news)
+app.use('/api/game', game)
+app.use('/api/player', player)
+app.use('/api/team', team)
+app.use('/api/result', result)
+app.use('/api/ranking', ranking)
+app.use('/api/tag', tag)
+app.use('/api/user', user)
+app.use('/api/auth', auth)
+app.use('/api/news', news)
 
 const server = app.listen(port,() => {
   console.log(`Funky backend listening at port ${port}`)
